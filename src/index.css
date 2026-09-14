@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-urdu: "Noto Nastaliq Urdu", serif;
+
+  /* Three Distinct Gold Tones */
+  --color-gold-deep: #8A6D1F;        /* Deep/matte gold for badges, subtle accents, dark backgrounds */
+  --color-gold-matte: #9C7A28;       /* Medium antique gold for borders, labels, and icons */
+  --color-gold: #F2B705;             /* Reserved for primary CTAs and active states */
+  --color-gold-hover: #D9A404;       /* Primary CTA hover */
+  --color-gold-hairline: rgba(184, 134, 11, 0.22); /* Hairline 1px borders & dividers */
+
+  --color-rich-black: #141414;
+  --color-soft-cream: #F9F6F0;
+  --color-linen: #F3EFE6;
+  --color-charcoal: #2A2A2A;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #FFFFFF;
+  color: #141414;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, .font-serif, .font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Subtle luxury grain / noise overlay */
+.bg-grain {
+  background-image: radial-gradient(rgba(20, 20, 20, 0.04) 1px, transparent 0), radial-gradient(rgba(20, 20, 20, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.bg-grain-dark {
+  background-image: radial-gradient(rgba(242, 183, 5, 0.07) 1px, transparent 0), radial-gradient(rgba(242, 183, 5, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+/* Hairline luxury borders */
+.border-gold-hairline {
+  border-color: rgba(184, 134, 11, 0.22);
+}
+
+.border-gold-subtle {
+  border-color: rgba(184, 134, 11, 0.35);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F9F6F0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1C7B7;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9C7A28;
+}
+
