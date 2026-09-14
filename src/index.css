@@ -19,13 +19,32 @@
   --color-charcoal: #2A2A2A;
 }
 
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #FFFFFF;
   color: #141414;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+  width: 100%;
+  max-width: 100vw;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Belt-and-suspenders: nothing on the page should ever force horizontal scroll */
+img, video, svg, table {
+  max-width: 100%;
 }
 
 h1, h2, h3, .font-serif, .font-display {
