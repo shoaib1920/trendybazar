@@ -364,7 +364,7 @@ export const HomePage: React.FC = () => {
             className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
           >
             <img
-              src="https://i.pinimg.com/236x/44/25/31/442531331c19e2fc8cb2f40a9cb0160b.jpgw=1000&auto=format&fit=crop&q=80"
+              src="https://assets2.andaazfashion.com/media/catalog/product/n/a/navy-blue-raw-silk-embroidered-mens-kurta-pajama-mkpa08448-1.jpg"
               alt="Men's Boski Silk, Kurtas & Sherwani"
               className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
             />
