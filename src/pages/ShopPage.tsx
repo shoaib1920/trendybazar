@@ -21,8 +21,7 @@ import {
   Link2,
   SprayCan,
   Gem,
-  ShoppingBag as BagIcon,
-  Crown
+  ShoppingBag as BagIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductGender, StitchType } from '../types';
@@ -35,8 +34,7 @@ const SUB_CATEGORY_META: Record<string, { label: string; icon: any }> = {
   cufflinks: { label: 'Cufflinks', icon: Link2 },
   cologne: { label: 'Fragrance', icon: SprayCan },
   jewelry: { label: 'Jewelry', icon: Gem },
-  bags: { label: 'Bags', icon: BagIcon },
-  caps: { label: 'Caps', icon: Crown }
+  bags: { label: 'Bags', icon: BagIcon }
 };
 
 export const ShopPage: React.FC = () => {
@@ -70,10 +68,6 @@ export const ShopPage: React.FC = () => {
         // Gender filter
         if (shopGenderFilter !== 'all') {
           if (product.gender !== shopGenderFilter && product.gender !== 'unisex') {
-            return false;
-          }
-          // Gifting is its own department — never show it inside a gender-specific wear tab
-          if (shopCategoryFilter === 'all' && product.category === 'gifting') {
             return false;
           }
         }

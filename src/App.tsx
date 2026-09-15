@@ -35,7 +35,7 @@ const AppContent: React.FC = () => {
         return <HomePage />;
       case 'shop':
         return <ShopPage />;
-      case 'product':
+      case 'product-detail':
         return <ProductDetailPage />;
       case 'wishlist':
         return <WishlistPage />;
