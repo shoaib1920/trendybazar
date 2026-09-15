@@ -70,7 +70,7 @@ export const STORE_REVIEWS: ProductReview[] = [
     userCity: 'Karachi (Gulshan)',
     rating: 5,
     date: 'Yesterday',
-    comment: 'Honestly, I was skeptical about ordering clothes from an Instagram ad, but Trendy Bazaar is 100% legit. The kurti fabric is pure slub silk and the COD delivery was super fast (3 days). Subscribed to their WhatsApp group!',
+    comment: 'Honestly, I was skeptical about ordering clothes from an Instagram ad, but Trandy Libas is 100% legit. The kurti fabric is pure slub silk and the COD delivery was super fast (3 days). Subscribed to their WhatsApp group!',
     verified: true
   },
   {

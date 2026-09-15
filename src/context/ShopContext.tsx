@@ -40,6 +40,8 @@ interface ShopContextType {
   setShopGenderFilter: (gender: 'all' | 'ladies' | 'mens' | 'kids' | 'unisex') => void;
   shopStitchFilter: 'all' | 'stitched' | 'unstitched';
   setShopStitchFilter: (type: 'all' | 'stitched' | 'unstitched') => void;
+  shopSubCategoryFilter: string;
+  setShopSubCategoryFilter: (sub: string) => void;
 
   // Catalog
   products: Product[];
@@ -160,8 +162,8 @@ const DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     home: "Home",
     shop: "Shop",
     wishlist: "Wishlist",
-    ladiesPret: "Ladies Pret",
-    mensKurta: "Men's Kurta",
+    ladiesPret: "Women's Wardrobe",
+    mensKurta: "Men's Wardrobe",
     kidsPunjabi: "Kids Punjabi"
   },
   ur: {
@@ -188,8 +190,8 @@ const DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     home: "ہوم",
     shop: "شاپ",
     wishlist: "پسندیدہ اشیاء",
-    ladiesPret: "خواتین پریٹ",
-    mensKurta: "مردانہ کرتا",
+    ladiesPret: "خواتین کی الماری",
+    mensKurta: "مردانہ الماری",
     kidsPunjabi: "بچوں کا پنجابی لباس"
   }
 };
@@ -216,6 +218,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [shopCategoryFilter, setShopCategoryFilter] = useState<string>('all');
   const [shopGenderFilter, setShopGenderFilter] = useState<'all' | 'ladies' | 'mens' | 'kids' | 'unisex'>('all');
   const [shopStitchFilter, setShopStitchFilter] = useState<'all' | 'stitched' | 'unstitched'>('all');
+  const [shopSubCategoryFilter, setShopSubCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Catalog
@@ -575,11 +578,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const s = size ? `Size: ${size}` : '';
     const c = color ? `Color: ${color}` : '';
     const details = [s, c].filter(Boolean).join(', ');
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
+    const msg = `Assalam-o-Alaikum Trandy Libas! 👋
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${product.price}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trendybazaar.pk/product/${product.slug}
+${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trandylibas.pk/product/${product.slug}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
@@ -587,7 +590,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
 
   const getWhatsAppCartLink = (customNote?: string) => {
     if (cart.length === 0) {
-      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Assalam-o-Alaikum Trendy Bazaar! I have a question about your products.')}`;
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Assalam-o-Alaikum Trandy Libas! I have a question about your products.')}`;
     }
 
     let itemsList = cart
@@ -599,7 +602,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
       })
       .join('\n');
 
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 🛍️
+    const msg = `Assalam-o-Alaikum Trandy Libas! 🛍️
 I want to place an order directly via WhatsApp:
 
 📦 *ORDER ITEMS:*
@@ -616,7 +619,7 @@ Please send me the order confirmation and COD dispatch details!`;
   };
 
   const openWhatsAppGeneral = (msg?: string) => {
-    const defaultMsg = msg || 'Assalam-o-Alaikum Trendy Bazaar! Need assistance with sizing and current stock.';
+    const defaultMsg = msg || 'Assalam-o-Alaikum Trandy Libas! Need assistance with sizing and current stock.';
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(defaultMsg)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -684,6 +687,8 @@ Please send me the order confirmation and COD dispatch details!`;
         setShopGenderFilter,
         shopStitchFilter,
         setShopStitchFilter,
+        shopSubCategoryFilter,
+        setShopSubCategoryFilter,
         products,
         setProducts,
         cart,

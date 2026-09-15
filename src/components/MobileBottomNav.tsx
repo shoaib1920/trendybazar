@@ -73,7 +73,7 @@ export const MobileBottomNav: React.FC = () => {
 
         {/* 3. WhatsApp Direct Order Channel */}
         <a
-          href="https://wa.me/923364300592?text=Assalam-o-Alaikum%20Trendy%20Bazaar!%20I%20would%20like%20to%20place%20an%20order."
+          href="https://wa.me/923364300592?text=Assalam-o-Alaikum%20Trandy%20Libas!%20I%20would%20like%20to%20place%20an%20order."
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center justify-center py-1 px-1 text-emerald-600 transition-transform active:scale-95"

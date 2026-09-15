@@ -22,7 +22,7 @@ export const UgcWall: React.FC = () => {
     addCustomerLook({
       authorName,
       city,
-      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=800&auto=format&fit=crop&q=80',
+      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1708534246051-7f47b279e94b?w=800&auto=format&fit=crop&q=80',
       productSlug: matchedProduct.slug,
       productName: matchedProduct.name,
       caption,
@@ -213,7 +213,7 @@ export const UgcWall: React.FC = () => {
                     className="w-full bg-[#F9F6F0] border border-gray-200 rounded-xl p-2.5 outline-none focus:border-[#9C7A28] text-xs"
                   />
                   <span className="text-[10px] text-gray-400 block mt-1">
-                    Tip: You can also tag @trendy_bazaar_pk on Instagram!
+                    Tip: You can also tag @trandy_libas_pk on Instagram!
                   </span>
                 </div>
 

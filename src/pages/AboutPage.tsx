@@ -28,7 +28,7 @@ export const AboutPage: React.FC = () => {
         </h1>
 
         <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-sans">
-          Trendy Bazaar began as an artisan-led initiative connecting heritage Chiniot Boski silk weavers and Lahore master darzis directly with modern shoppers across Karachi, Islamabad, Peshawar, and Quetta.
+          Trandy Libas began as an artisan-led initiative connecting heritage Chiniot Boski silk weavers and Lahore master darzis directly with modern shoppers across Karachi, Islamabad, Peshawar, and Quetta.
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export const AboutPage: React.FC = () => {
             Pure 80/80 Lawn & 6-Pound Chiniot Boski
           </h2>
           <p>
-            Too many online stores sell mixed-polyester synthetics masquerading as luxury lawn. At Trendy Bazaar, we source 100% long-staple combed cotton spun to high reed-pick density, authentic Chinioti mulberry silk woven on traditional shuttle looms, and hypoallergenic 18K PVD coated jewelry that withstands humid Karachi coastal weather.
+            Too many online stores sell mixed-polyester synthetics masquerading as luxury lawn. At Trandy Libas, we source 100% long-staple combed cotton spun to high reed-pick density, authentic Chinioti mulberry silk woven on traditional shuttle looms, and hypoallergenic 18K PVD coated jewelry that withstands humid Karachi coastal weather.
           </p>
           <p>
             Whether you choose unstitched cloth or rely on our bespoke Lahore tailoring guild, your garment is handcrafted with fine overlocking, organza finishing, and custom threadwork.
@@ -71,8 +71,8 @@ export const AboutPage: React.FC = () => {
 
         <div className="relative rounded-3xl overflow-hidden shadow-xl aspect-4/3 border border-gold-hairline">
           <img
-            src="https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=900&auto=format&fit=crop&q=80"
-            alt="Hand-embroidered Lawn at Trendy Bazaar"
+            src="https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=900&auto=format&fit=crop&q=80"
+            alt="Hand-embroidered Lawn at Trandy Libas"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6">
@@ -151,7 +151,7 @@ export const AboutPage: React.FC = () => {
             Explore Catalog
           </button>
           <button
-            onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar! I would like to consult your stylist.')}
+            onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trandy Libas! I would like to consult your stylist.')}
             className="py-3 px-6 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center gap-2 shadow-xs transition-all active:scale-95"
           >
             <MessageCircle className="w-4 h-4 fill-white" />

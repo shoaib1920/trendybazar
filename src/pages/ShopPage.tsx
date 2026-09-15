@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
-import { 
-  SlidersHorizontal, 
-  X, 
-  Sparkles, 
+import {
+  SlidersHorizontal,
+  X,
+  Sparkles,
   RotateCcw,
   Scissors,
   Check,
@@ -14,26 +14,46 @@ import {
   Baby,
   Zap,
   Ribbon,
-  Layers
+  Layers,
+  Watch,
+  Footprints,
+  Glasses,
+  Link2,
+  SprayCan,
+  Gem,
+  ShoppingBag as BagIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductGender, StitchType } from '../types';
 
+const SUB_CATEGORY_META: Record<string, { label: string; icon: any }> = {
+  watches: { label: 'Watches', icon: Watch },
+  shoes: { label: 'Shoes', icon: Footprints },
+  sandals: { label: 'Sandals', icon: Footprints },
+  sunglasses: { label: 'Sunglasses', icon: Glasses },
+  cufflinks: { label: 'Cufflinks', icon: Link2 },
+  cologne: { label: 'Fragrance', icon: SprayCan },
+  jewelry: { label: 'Jewelry', icon: Gem },
+  bags: { label: 'Bags', icon: BagIcon }
+};
+
 export const ShopPage: React.FC = () => {
-  const { 
-    products, 
-    shopCategoryFilter, 
+  const {
+    products,
+    shopCategoryFilter,
     setShopCategoryFilter,
     shopGenderFilter,
     setShopGenderFilter,
     shopStitchFilter,
     setShopStitchFilter,
+    shopSubCategoryFilter,
+    setShopSubCategoryFilter,
     searchQuery,
     setSearchQuery
   } = useShop();
 
   const [selectedSort, setSelectedSort] = useState<'popularity' | 'newest' | 'price-asc' | 'price-desc'>('popularity');
-  const [maxPrice, setMaxPrice] = useState<number>(8500);
+  const [maxPrice, setMaxPrice] = useState<number>(13000);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [selectedSize, setSelectedSize] = useState<string>('all');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -60,6 +80,18 @@ export const ShopPage: React.FC = () => {
         // Category filter
         if (shopCategoryFilter !== 'all' && product.category !== shopCategoryFilter) {
           return false;
+        }
+        // Sub-category filter (e.g. watches, shoes, sunglasses within Accessories)
+        if (shopSubCategoryFilter !== 'all') {
+          if (product.subCategory !== shopSubCategoryFilter) {
+            return false;
+          }
+        } else if (shopCategoryFilter === 'all' && !searchQuery.trim()) {
+          // Default browse mode: keep Accessories out of the main clothing grid —
+          // they're surfaced as suggestion chips below instead.
+          if (product.category === 'accessories') {
+            return false;
+          }
         }
         // Search query
         if (searchQuery.trim()) {
@@ -94,14 +126,36 @@ export const ShopPage: React.FC = () => {
         // popularity
         return b.reviewCount * b.rating - a.reviewCount * a.rating;
       });
-  }, [products, shopGenderFilter, shopStitchFilter, shopCategoryFilter, searchQuery, maxPrice, inStockOnly, selectedSize, selectedSort]);
+  }, [products, shopGenderFilter, shopStitchFilter, shopCategoryFilter, shopSubCategoryFilter, searchQuery, maxPrice, inStockOnly, selectedSize, selectedSort]);
+
+  // Accessory sub-categories available for the current gender, shown as suggestion
+  // chips below the main grid when browsing without an explicit category/sub-category.
+  const accessorySuggestions = useMemo(() => {
+    const seen = new Map<string, number>();
+    products.forEach((product) => {
+      if (product.category !== 'accessories' || !product.subCategory) return;
+      if (shopGenderFilter !== 'all' && product.gender !== shopGenderFilter && product.gender !== 'unisex') return;
+      seen.set(product.subCategory, (seen.get(product.subCategory) || 0) + 1);
+    });
+    return Array.from(seen.entries()).map(([key, count]) => ({ key, count }));
+  }, [products, shopGenderFilter]);
+
+  const showAccessorySuggestions =
+    shopCategoryFilter === 'all' && shopSubCategoryFilter === 'all' && !searchQuery.trim() && accessorySuggestions.length > 0;
+
+  const handleAccessorySuggestionClick = (subCategory: string) => {
+    setShopCategoryFilter('accessories');
+    setShopSubCategoryFilter(subCategory);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleResetFilters = () => {
     setShopCategoryFilter('all');
+    setShopSubCategoryFilter('all');
     setShopGenderFilter('all');
     setShopStitchFilter('all');
     setSearchQuery('');
-    setMaxPrice(8500);
+    setMaxPrice(13000);
     setInStockOnly(false);
     setSelectedSize('all');
     setSelectedSort('popularity');
@@ -118,14 +172,18 @@ export const ShopPage: React.FC = () => {
         <div className="max-w-2xl">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#1A1A1A] bg-[#F2B705] px-2.5 py-0.5 rounded-full">
-              Trendy Bazaar Collection
+              Trandy Libas Collection
             </span>
             <span className="text-[11px] text-emerald-700 font-semibold hidden sm:inline">
               • COD Nationwide Available
             </span>
           </div>
           <h1 className="font-heading font-black text-2xl sm:text-4xl text-[#1A1A1A] mt-1 mb-2">
-            {shopGenderFilter === 'ladies'
+            {shopSubCategoryFilter !== 'all'
+              ? `${shopGenderFilter === 'ladies' ? "Women's" : shopGenderFilter === 'mens' ? "Men's" : ''} ${SUB_CATEGORY_META[shopSubCategoryFilter]?.label || ''}`.trim()
+              : shopCategoryFilter === 'accessories'
+              ? `${shopGenderFilter === 'ladies' ? "Women's" : shopGenderFilter === 'mens' ? "Men's" : ''} Accessories`.trim()
+              : shopGenderFilter === 'ladies'
               ? 'Ladies Pakistani Punjabi Collection'
               : shopGenderFilter === 'mens'
               ? "Men's Kurta & Shalwar Kameez"
@@ -138,7 +196,9 @@ export const ShopPage: React.FC = () => {
               : 'Pakistani Fashion & Lifestyle Collection'}
           </h1>
           <p className="text-xs sm:text-sm text-gray-600">
-            Discover authentic Lawn, Boski Silk, Chiffon, Latha and Chikankari. Choose stitched ready-to-wear or get unstitched suits custom tailored by Lahore master darzis!
+            {shopSubCategoryFilter !== 'all'
+              ? `Showing only ${SUB_CATEGORY_META[shopSubCategoryFilter]?.label.toLowerCase() || 'items'} — nothing else.`
+              : 'Discover authentic Lawn, Boski Silk, Chiffon, Latha and Chikankari. Choose stitched ready-to-wear or get unstitched suits custom tailored by Lahore master darzis!'}
           </p>
         </div>
       </motion.div>
@@ -156,7 +216,11 @@ export const ShopPage: React.FC = () => {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setShopGenderFilter(tab.id as any)}
+              onClick={() => {
+                setShopGenderFilter(tab.id as any);
+                setShopCategoryFilter('all');
+                setShopSubCategoryFilter('all');
+              }}
               className={`flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                 shopGenderFilter === tab.id
                   ? 'bg-[#1A1A1A] text-white shadow-sm ring-2 ring-[#1A1A1A]'
@@ -248,7 +312,7 @@ export const ShopPage: React.FC = () => {
             <input
               type="range"
               min="1000"
-              max="8500"
+              max="13000"
               step="200"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -256,7 +320,7 @@ export const ShopPage: React.FC = () => {
             />
             <div className="flex justify-between text-[10px] text-gray-400 mt-1">
               <span>Rs. 1,000</span>
-              <span>Rs. 8,500</span>
+              <span>Rs. 13,000</span>
             </div>
           </div>
 
@@ -343,7 +407,11 @@ export const ShopPage: React.FC = () => {
                       ].map((g) => (
                         <button
                           key={g.id}
-                          onClick={() => setShopGenderFilter(g.id as any)}
+                          onClick={() => {
+                            setShopGenderFilter(g.id as any);
+                            setShopCategoryFilter('all');
+                            setShopSubCategoryFilter('all');
+                          }}
                           className={`py-2 px-3 rounded-xl text-xs font-bold border text-center ${
                             shopGenderFilter === g.id
                               ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
@@ -390,7 +458,7 @@ export const ShopPage: React.FC = () => {
                     <input
                       type="range"
                       min="1000"
-                      max="8500"
+                      max="13000"
                       step="200"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -453,13 +521,31 @@ export const ShopPage: React.FC = () => {
         {/* Product Grid Area (3 Cols Desktop, 2 Cols Mobile) */}
         <div className="lg:col-span-3">
           {/* Active Filter Badges */}
-          {(shopGenderFilter !== 'all' || shopStitchFilter !== 'all' || searchQuery || maxPrice < 8500 || inStockOnly || selectedSize !== 'all') && (
+          {(shopGenderFilter !== 'all' || shopStitchFilter !== 'all' || shopCategoryFilter !== 'all' || shopSubCategoryFilter !== 'all' || searchQuery || maxPrice < 13000 || inStockOnly || selectedSize !== 'all') && (
             <div className="flex flex-wrap items-center gap-1.5 mb-4">
               <span className="text-xs text-gray-500">Active:</span>
               {shopGenderFilter !== 'all' && (
                 <span className="inline-flex items-center gap-1 bg-[#F7F3EC] text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
                   {shopGenderFilter}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setShopGenderFilter('all')} />
+                </span>
+              )}
+              {shopSubCategoryFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 bg-[#1A1A1A] text-white text-xs px-2.5 py-1 rounded-full font-semibold">
+                  {SUB_CATEGORY_META[shopSubCategoryFilter]?.label || shopSubCategoryFilter}
+                  <X
+                    className="w-3 h-3 cursor-pointer"
+                    onClick={() => {
+                      setShopSubCategoryFilter('all');
+                      setShopCategoryFilter('all');
+                    }}
+                  />
+                </span>
+              )}
+              {shopCategoryFilter !== 'all' && shopSubCategoryFilter === 'all' && (
+                <span className="inline-flex items-center gap-1 bg-amber-100 text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
+                  {shopCategoryFilter}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setShopCategoryFilter('all')} />
                 </span>
               )}
               {shopStitchFilter !== 'all' && (
@@ -474,10 +560,10 @@ export const ShopPage: React.FC = () => {
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchQuery('')} />
                 </span>
               )}
-              {maxPrice < 8500 && (
+              {maxPrice < 13000 && (
                 <span className="inline-flex items-center gap-1 bg-[#F7F3EC] text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
                   Under Rs. {maxPrice.toLocaleString()}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(8500)} />
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(13000)} />
                 </span>
               )}
               {selectedSize !== 'all' && (
@@ -535,6 +621,39 @@ export const ShopPage: React.FC = () => {
                 </motion.div>
               ))}
             </motion.div>
+          )}
+
+          {/* Accessories Suggestions — shown below clothing, each chip opens ONLY that category */}
+          {showAccessorySuggestions && (
+            <div className="mt-10 pt-6 border-t border-gray-200/80">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#F2B705]" />
+                <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">
+                  Complete the Look: Accessories
+                </h3>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                Finish the outfit — tap a category to see only those items.
+              </p>
+              <div className="flex flex-wrap gap-2.5">
+                {accessorySuggestions.map(({ key, count }) => {
+                  const meta = SUB_CATEGORY_META[key];
+                  if (!meta) return null;
+                  const Icon = meta.icon;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleAccessorySuggestionClick(key)}
+                      className="flex items-center gap-2 py-2.5 px-4 bg-white border border-gray-200 rounded-2xl text-xs font-bold text-[#1A1A1A] hover:border-[#F2B705] hover:bg-[#F7F3EC] transition-all shadow-xs"
+                    >
+                      <Icon className="w-4 h-4 text-[#8A6D1F]" />
+                      <span>{meta.label}</span>
+                      <span className="text-gray-400 font-semibold">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>

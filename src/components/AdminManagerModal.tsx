@@ -34,8 +34,8 @@ export const AdminManagerModal: React.FC = () => {
     price: 1999,
     originalPrice: 2500,
     stockCount: 15,
-    imageUrl: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
-    description: 'Fresh viral collection piece added by Trendy Bazaar manager.',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNQymJdrM9t_5WqKcUnisdV6jhBYDEyV3O9YfXq2pZaA&s=10',
+    description: 'Fresh viral collection piece added by Trandy Libas manager.',
     tagline: 'Quality cotton & premium Pakistani stitching'
   });
 
@@ -72,7 +72,7 @@ export const AdminManagerModal: React.FC = () => {
       price: 1999,
       originalPrice: 2500,
       stockCount: 15,
-      imageUrl: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNQymJdrM9t_5WqKcUnisdV6jhBYDEyV3O9YfXq2pZaA&s=10',
       description: '',
       tagline: ''
     });
@@ -112,7 +112,7 @@ export const AdminManagerModal: React.FC = () => {
             <span>Store Operations Panel</span>
           </div>
           <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
-            Trendy Bazaar Admin Manager
+            Trandy Libas Admin Manager
           </h1>
           <p className="text-xs text-gray-500">
             Easily manage live inventory, price updates, discounts, and courier booking manifests.
@@ -220,7 +220,7 @@ export const AdminManagerModal: React.FC = () => {
                   </div>
                   <span className="text-[11px] text-gray-500 block">{o.paymentMethod}</span>
                   <a
-                    href={`https://wa.me/${o.customer.phone.replace(/[^0-9]/g, '')}?text=Assalam-o-Alaikum%20${encodeURIComponent(o.customer.fullName)}!%20Trendy%20Bazaar%20here%20regarding%20your%20order%20${o.orderId}`}
+                    href={`https://wa.me/${o.customer.phone.replace(/[^0-9]/g, '')}?text=Assalam-o-Alaikum%20${encodeURIComponent(o.customer.fullName)}!%20Trandy%20Libas%20here%20regarding%20your%20order%20${o.orderId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-[#25D366] hover:underline mt-1"

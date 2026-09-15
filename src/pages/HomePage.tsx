@@ -31,9 +31,10 @@ export const HomePage: React.FC = () => {
   const { 
     products, 
     setActiveView, 
-    setShopCategoryFilter, 
+    setShopCategoryFilter,
     setShopGenderFilter,
     setShopStitchFilter,
+    setShopSubCategoryFilter,
     openWhatsAppGeneral,
     showToast,
     navigateToProduct,
@@ -65,6 +66,8 @@ export const HomePage: React.FC = () => {
     if (category) setShopCategoryFilter(category);
     else setShopCategoryFilter('all');
 
+    setShopSubCategoryFilter('all');
+
     setActiveView('shop');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -78,7 +81,7 @@ export const HomePage: React.FC = () => {
     e.preventDefault();
     if (newsletterPhone.trim()) {
       setNewsletterSuccess(true);
-      showToast('🎉 Welcome to Trendy Bazaar Club! Use code TREND10 at checkout', 'success');
+      showToast('🎉 Welcome to Trandy Libas Club! Use code TREND10 at checkout', 'success');
     }
   };
 
@@ -87,31 +90,31 @@ export const HomePage: React.FC = () => {
     {
       id: 'ladies-pret',
       title: 'Ladies Pret',
-      image: 'https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=300&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=300&auto=format&fit=crop&q=80',
       action: () => handleShopCategory('ladies', 'stitched')
     },
     {
       id: 'ladies-unstitched',
       title: 'Swiss Lawn 3-Pc',
-      image: 'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=300&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1708534246051-7f47b279e94b?w=300&auto=format&fit=crop&q=80',
       action: () => handleShopCategory('ladies', 'unstitched')
     },
     {
       id: 'mens-boski',
       title: '6-Pound Boski',
-      image: 'https://images.unsplash.com/photo-1619043518800-7f14be467dca?w=300&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=300&auto=format&fit=crop&q=80',
       action: () => handleShopCategory('mens', 'unstitched')
     },
     {
       id: 'mens-kurta',
       title: "Men's Kurta",
-      image: 'https://images.unsplash.com/photo-1723051948247-01e16b6a1481?w=300&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1734418042215-a1b79c18698f?w=300&auto=format&fit=crop&q=80',
       action: () => handleShopCategory('mens', 'stitched')
     },
     {
       id: 'kids-punjabi',
       title: 'Kids Punjabi',
-      image: 'https://images.unsplash.com/photo-1639563853019-779fb4e41844?w=300&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1654363761792-5a9e1a562104?w=300&auto=format&fit=crop&q=80',
       action: () => handleShopCategory('kids')
     },
     {
@@ -202,7 +205,7 @@ export const HomePage: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar! I would like to see the current lawn & boski stock.')}
+                  onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trandy Libas! I would like to see the current lawn & boski stock.')}
                   id="hero-whatsapp-btn"
                   className="w-full sm:w-auto px-7 py-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-[1.02] active:scale-95"
                 >
@@ -244,8 +247,8 @@ export const HomePage: React.FC = () => {
                 {/* Main Visual */}
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white">
                   <img
-                    src="https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=900&auto=format&fit=crop&q=80"
-                    alt="Pakistani Lawn Pret by Trendy Bazaar"
+                    src="https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=900&auto=format&fit=crop&q=80"
+                    alt="Pakistani Lawn Pret by Trandy Libas"
                     className="w-full h-[400px] sm:h-[480px] object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex flex-col justify-end p-6 text-white">
@@ -274,11 +277,11 @@ export const HomePage: React.FC = () => {
 
                 {/* Floating Badge: Boski Silk */}
                 <div 
-                  onClick={() => navigateToProduct('mens-pure-royal-boski-silk-unstitched-suit')}
+                  onClick={() => navigateToProduct('mens-unstitched-royal-boski-silk-fabric-natural-ivory')}
                   className="absolute -top-3 -left-3 sm:-left-6 bg-white p-3 rounded-2xl shadow-xl border border-gold-hairline flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform"
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1619043518800-7f14be467dca?w=200&auto=format&fit=crop&q=80"
+                    src="https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=200&auto=format&fit=crop&q=80"
                     alt="Royal Boski Silk"
                     className="w-12 h-12 rounded-xl object-cover"
                   />
@@ -296,7 +299,7 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-xs font-serif font-bold text-white">Patrons Nationwide</div>
-                    <div className="text-[10px] text-gray-400">@trendybazaar</div>
+                    <div className="text-[10px] text-gray-400">@trandylibas</div>
                   </div>
                 </div>
               </div>
@@ -326,15 +329,15 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
 
-        {/* Asymmetric Bento Grid */}
+        {/* Balanced Bento Grid: Ladies & Men's get equal billing */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
-          {/* Main Feature: Ladies Pret & Unstitched (Span 7 cols) */}
+          {/* Main Feature: Ladies Pret & Unstitched (Span 6 cols) */}
           <div
             onClick={() => handleShopCategory('ladies')}
-            className="md:col-span-7 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[440px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
+            className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
           >
             <img
-              src="https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=1000&auto=format&fit=crop&q=80"
+              src="https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=1000&auto=format&fit=crop&q=80"
               alt="Ladies Pakistani Lawn & Pret"
               className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
             />
@@ -355,70 +358,108 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column Stack (Span 5 cols) */}
-          <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 sm:gap-6">
-            {/* Tile 2: Men's Pure Boski & Kurta */}
+          {/* Main Feature: Men's Kurta, Boski & Sherwani (Span 6 cols) */}
+          <div
+            onClick={() => handleShopCategory('mens')}
+            className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1785612826246-d1b19dabe6f6?w=1000&auto=format&fit=crop&q=80"
+              alt="Men's Boski Silk, Kurtas & Sherwani"
+              className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent flex flex-col justify-end p-6 sm:p-8 text-white">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-1">
+                6-Pound Boski Silk • Waistcoats • Groom Sherwani
+              </span>
+              <h3 className="font-serif font-black text-2xl sm:text-3xl text-white mb-2">
+                Men's Kurta & Sherwani Edit
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-200 line-clamp-2 max-w-md mb-4 leading-relaxed font-sans">
+                From everyday cotton kurta pajama to hand-embroidered velvet sherwani for Baraat, complete with watches, leather shoes & fragrance.
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-serif font-bold text-[#F2B705] group-hover:underline">
+                <span>View Men's Collection</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </div>
+
+          {/* Secondary Row: Kids, Jewelry, Men's Accessories, Gifting */}
+          <div className="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {/* Kids Punjabi */}
             <div
-              onClick={() => handleShopCategory('mens')}
-              className="group relative rounded-3xl overflow-hidden min-h-[200px] sm:min-h-[210px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all duration-300 border border-gold-hairline"
+              onClick={() => handleShopCategory('kids')}
+              className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
             >
               <img
-                src="https://images.unsplash.com/photo-1723051948247-01e16b6a1481?w=700&auto=format&fit=crop&q=80"
-                alt="Men's Boski Silk & Kurtas"
-                className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700"
+                src="https://images.unsplash.com/photo-1654363761792-5a9e1a562104?w=500&auto=format&fit=crop&q=80"
+                alt="Kids Punjabi Outfits"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-5 text-white">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-0.5">
-                  6-Pound Silk & Egyptian Latha
-                </span>
-                <h3 className="font-serif font-bold text-lg sm:text-xl text-white">
-                  Men's Kurta & Boski Suits
-                </h3>
-                <span className="text-xs text-gray-300 mt-0.5 inline-flex items-center gap-1 group-hover:text-white">
-                  <span>Explore Men's Wear</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
+                <span className="text-[9px] font-bold text-[#F2B705] uppercase">Festive</span>
+                <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
+                  Kids Punjabi
+                </h4>
+                <span className="text-[10px] text-gray-300 mt-1">Ghararas & Kurtas</span>
               </div>
             </div>
 
-            {/* Tile 3: Kids Punjabi & Accessories Split Row */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Kids Punjabi */}
-              <div
-                onClick={() => handleShopCategory('kids')}
-                className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1639563853019-779fb4e41844?w=500&auto=format&fit=crop&q=80"
-                  alt="Kids Punjabi Outfits"
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
-                  <span className="text-[9px] font-bold text-[#F2B705] uppercase">Festive</span>
-                  <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
-                    Kids Punjabi
-                  </h4>
-                  <span className="text-[10px] text-gray-300 mt-1">Ghararas & Kurtas</span>
-                </div>
+            {/* 18K Anti-Tarnish Jewelry */}
+            <div
+              onClick={() => handleShopCategory(undefined, undefined, 'accessories')}
+              className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1655707063513-a08dad26440e?w=500&auto=format&fit=crop&q=80"
+                alt="Anti-Tarnish Jewelry"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
+                <span className="text-[9px] font-bold text-[#F2B705] uppercase">PVD Gold</span>
+                <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
+                  18K Jewelry
+                </h4>
+                <span className="text-[10px] text-gray-300 mt-1">Anti-Tarnish Wear</span>
               </div>
+            </div>
 
-              {/* 18K Anti-Tarnish Jewelry */}
-              <div
-                onClick={() => handleShopCategory(undefined, undefined, 'accessories')}
-                className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1655707063513-a08dad26440e?w=500&auto=format&fit=crop&q=80"
-                  alt="Anti-Tarnish Jewelry"
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
-                  <span className="text-[9px] font-bold text-[#F2B705] uppercase">PVD Gold</span>
-                  <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
-                    18K Jewelry
-                  </h4>
-                  <span className="text-[10px] text-gray-300 mt-1">Anti-Tarnish Wear</span>
-                </div>
+            {/* Men's Watches & Shoes */}
+            <div
+              onClick={() => handleShopCategory('mens', undefined, 'accessories')}
+              className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1717157197005-b851de4abc63?w=500&auto=format&fit=crop&q=80"
+                alt="Men's Watches & Leather Shoes"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
+                <span className="text-[9px] font-bold text-[#F2B705] uppercase">Finishing Touches</span>
+                <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
+                  Men's Accessories
+                </h4>
+                <span className="text-[10px] text-gray-300 mt-1">Watches, Shoes & Cologne</span>
+              </div>
+            </div>
+
+            {/* Gifting */}
+            <div
+              onClick={() => handleShopCategory(undefined, undefined, 'gifting')}
+              className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80"
+                alt="Gifting & Keepsake Boxes"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
+                <span className="text-[9px] font-bold text-[#F2B705] uppercase">For Him & Her</span>
+                <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
+                  Gifting Edit
+                </h4>
+                <span className="text-[10px] text-gray-300 mt-1">Keepsake Boxes</span>
               </div>
             </div>
           </div>
@@ -603,7 +644,7 @@ export const HomePage: React.FC = () => {
         <div className="text-center max-w-xl mx-auto mb-6">
           <div className="inline-flex items-center gap-1.5 bg-[#F9F6F0] px-3.5 py-1.5 rounded-full text-xs font-serif font-bold text-[#8A6D1F] border border-gold-hairline mb-2">
             <Instagram className="w-3.5 h-3.5 text-[#8A6D1F]" />
-            <span>@trendybazaar Community</span>
+            <span>@trandylibas Community</span>
           </div>
           <h2 className="font-serif font-black text-2xl sm:text-3xl text-[#141414]">
             Unboxings on TikTok & Reels
@@ -666,7 +707,7 @@ export const HomePage: React.FC = () => {
           <div className="relative z-10 max-w-xl mx-auto text-center space-y-4">
             <span className="inline-flex items-center gap-1.5 bg-[#8A6D1F]/30 border border-gold-hairline text-[#F2B705] text-xs font-serif font-bold px-3.5 py-1 rounded-full">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>TRENDY BAZAAR PATRON PRIVILEGES</span>
+              <span>TRANDY LIBAS PATRON PRIVILEGES</span>
             </span>
 
             <h2 className="font-serif font-black text-2xl sm:text-4xl leading-tight text-white">

@@ -18,9 +18,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 6500,
     discountPercentage: 24,
     images: [
-      'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1707576618343-26a1b377ca7a?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1708534246051-7f47b279e94b?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1708534419572-6e6614a53ca1?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1597983073750-16f5ded1321f?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Our showstopping festive pret collection. Features heavy thread embroidery on the neckline, lace detailing on chalks and daman, paired with dyed cambric straight pants and an ethereal gold-foiled organza dupatta. Tailored with neat overlocking for wedding dinners and Eid gatherings.',
     details: [
@@ -84,8 +84,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 4800,
     discountPercentage: 20,
     images: [
-      'https://images.unsplash.com/photo-1707576618343-26a1b377ca7a?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1733209587923-77ff33202f7c?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Celebrating authentic Punjabi heritage. Features vibrant multi-color Phulkari thread embroidery across the chest and sleeves, paired with a comfortable pleated Punjabi salwar. Soft on the skin and effortless for dholki nights, university culture days, or family brunches.',
     details: [
@@ -127,8 +127,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 4500,
     discountPercentage: 23,
     images: [
-      'https://images.unsplash.com/photo-1721324807072-784ab8ddf166?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1733731402869-57e0cce24aea?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1733209589780-ece842d0dcf8?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1733209588000-339b73c36575?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'A timeless Pakistani summer essential. Pure breathable lawn shirt embellished with detailed Lucknowi Chikankari floral motifs across the front and bell sleeves. Comes with dyed matching lawn culottes with lace inserts.',
     details: [
@@ -171,9 +171,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 5200,
     discountPercentage: 26,
     images: [
-      'https://images.unsplash.com/photo-1705920824583-0e783235394d?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1704119142483-1269733bcedb?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1708534246055-d7b149acb731?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1604436607823-d721dfe2df46?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1747049559461-560c02b192b2?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Boutique-grade unstitched 3-piece suit for those who love custom tailored Pakistani cuts. Includes 3.25 meters of premium Swiss Lawn shirt fabric with embroidered front & organza embroidered patch, 2.5m pure digital silk dupatta, and 2.5m dyed cotton trousers. Choose "Stitch For Me" to have our Lahore master darzi tailor it to your exact size!',
     details: [
@@ -228,8 +228,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 7500,
     discountPercentage: 27,
     images: [
-      'https://images.unsplash.com/photo-1707576618343-26a1b377ca7a?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1705920824583-0e783235394d?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1650301856518-7c6fe081d2f2?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1670320747683-853071613c85?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Turn heads at wedding dawats. Intricately embellished unstitched pure crinkle chiffon 3-piece suit featuring zari, sequence, and resham needlework. Includes dyed slip lining, embroidered sleeves, and raw silk trousers fabric.',
     details: [
@@ -270,9 +270,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 3800,
     discountPercentage: 22,
     images: [
-      'https://images.unsplash.com/photo-1744551358303-46edae8b374b?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1723051963745-d10d43248655?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1701365676249-9d7ab5022dec?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=900&auto=format&fit=crop&q=80',
+      'https://i.etsystatic.com/39698029/r/il/4ed395/5742814712/il_fullxfull.5742814712_tgzp.jpg'
     ],
     description: "The quintessential Pakistani men's wardrobe staple. Tailored from premium 100% combed cotton with a crisp band collar, minimalist tonal thread embroidery along the button placket, two deep side utility pockets, and straight white cotton pajama trousers.",
     details: [
@@ -327,8 +326,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 4400,
     discountPercentage: 21,
     images: [
-      'https://images.unsplash.com/photo-1727835523545-70ee992b5763?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1701365676249-9d7ab5022dec?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1734418058629-f4baa916db38?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Crafted for the modern Pakistani gentleman. Heavyweight, fluid wash & wear fabric that resists wrinkles all day long. Features a sharp shirt collar, cuffed sleeves with metallic snap buttons, matching traditional shalwar, and double-stitched durability.',
     details: [
@@ -372,10 +370,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 5500,
     discountPercentage: 28,
     images: [
-      'https://images.unsplash.com/photo-1606259457945-67dc66271ee6?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1705920824583-0e783235394d?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1734418038517-ffc3a6a6751f?w=900&auto=format&fit=crop&q=80',
+      'https://www.khasstores.com/cdn/shop/files/luxury-wash-wear-unstitched-fabric-mens-shalwar-kameez-mens-unstitched-suit-katanya-729740.jpg?v=1782813123&width=1000'
     ],
-    description: 'The golden standard of Pakistani ethnic luxury. 4.5 meters of original-feel Royal Boski silk blend with an unmatched buttery soft texture and natural liquid fall. Ships in an embossed Trendy Bazaar presentation box with branded buttons and woven collar tag — ideal for personal wear or premium gifting.',
+    description: 'The golden standard of Pakistani ethnic luxury. 4.5 meters of original-feel Royal Boski silk blend with an unmatched buttery soft texture and natural liquid fall. Ships in an embossed Trandy Libas presentation box with branded buttons and woven collar tag — ideal for personal wear or premium gifting.',
     details: [
       'Cut: 4.5 Meters Standard Suit Length (54 inches width / BARR)',
       'Weight: 6-Pound heavy luxury fall grade',
@@ -423,8 +421,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 3800,
     discountPercentage: 25,
     images: [
-      'https://images.unsplash.com/photo-1594734415578-00fc9540929b?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1606259457945-67dc66271ee6?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1734418057609-7b28f889f66d?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1734418051949-cfeb496fd81e?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Traditional Pakistani Cotton Latha at its finest. Spun from 100% long-staple combed cotton yarn with a crisp, breathable texture that feels cool in peak summer. Holds its stiff, authoritative press through all-day events and prayers.',
     details: [
@@ -463,8 +461,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 3600,
     discountPercentage: 20,
     images: [
-      'https://images.unsplash.com/photo-1639563853019-779fb4e41844?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1597294151491-1d22b38698d6?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1654363761792-5a9e1a562104?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1787733998047-9246d7c26aca?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Make your little princess shine at weddings and festive events. A gorgeous stitched 3-piece traditional Punjabi outfit featuring a fitted peplum top with gota patti work, a voluminous two-tier flared gharara, and a matching lightweight net dupatta. Non-itchy cotton inner lining ensures your child stays comfortable all day.',
     details: [
@@ -512,8 +510,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 4200,
     discountPercentage: 25,
     images: [
-      'https://images.unsplash.com/photo-1774437676511-ea3b86c8e988?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1768518354624-98338b3ea30f?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1685218519480-0407f4546347?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1739650376417-6bd9041c6ed4?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Dress your young prince in dignified Pakistani style! Stitched 3-piece set comprising an ivory soft cotton kurta shalwar paired with a rich royal blue embroidered raw silk waistcoat featuring metal antique buttons and chest pocket.',
     details: [
@@ -550,8 +548,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 3200,
     discountPercentage: 23,
     images: [
-      'https://images.unsplash.com/photo-1597294150753-b6e790b68d1c?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1639563853019-779fb4e41844?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1651779470878-2a857735e97a?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1654363761829-7c9482cb5725?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Delightful summer pret for young girls. Tailored from soft breathable printed lawn with an Anarkali flare, crochet lace bordering, and comfortable stretch jersey churidar pants.',
     details: [
@@ -589,8 +587,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 2400,
     discountPercentage: 23,
     images: [
-      'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&auto=format&fit=crop&q=80'
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNQymJdrM9t_5WqKcUnisdV6jhBYDEyV3O9YfXq2pZaA&s=10',
+      'https://www.paperplanestore.com/cdn/shop/files/Kowtow-OversizedBoxyTee-Black-3_2048x2048@2x.jpg?v=1751492214'
     ],
     description: 'The viral oversized streetwear tee our TikTok fam cannot stop ordering! Made from 240 GSM breathable combed cotton that holds its structure wash after wash without shrinking.',
     details: [
@@ -621,6 +619,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'anti-tarnish-18k-gold-croissant-ring',
     tagline: 'Waterproof & sweatproof stainless steel jewelry that never tarnishes',
     category: 'accessories',
+    subCategory: 'jewelry',
     gender: 'ladies',
     price: 1250,
     originalPrice: 1800,
@@ -652,6 +651,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'chic-crescent-vegan-leather-shoulder-bag-warm-caramel',
     tagline: 'Aesthetic everyday baguette bag with smooth gold hardware & zipper closure',
     category: 'accessories',
+    subCategory: 'bags',
     gender: 'ladies',
     price: 2450,
     originalPrice: 3200,
@@ -712,5 +712,327 @@ export const INITIAL_PRODUCTS: Product[] = [
     stockCount: 14,
     rating: 5.0,
     reviewCount: 51
+  },
+
+  // ==========================================
+  // 9. MEN'S COMPLETE OUTFIT - WAISTCOAT SETS
+  // ==========================================
+  {
+    id: 'tb-mens-stitched-03',
+    name: "Men's Embroidered Velvet Nehru Waistcoat & Kurta Shalwar - Complete Outfit",
+    slug: 'mens-embroidered-velvet-nehru-waistcoat-kurta-shalwar-complete-outfit',
+    tagline: 'Head-to-toe festive look: hand-embroidered waistcoat, kurta & shalwar in one box',
+    category: 'clothing',
+    gender: 'mens',
+    stitchType: 'stitched',
+    suitPieces: '3-piece',
+    fabric: 'Velvet Waistcoat over Premium Cotton Kurta & Shalwar',
+    price: 5200,
+    originalPrice: 6800,
+    discountPercentage: 24,
+    images: [
+      'https://images.unsplash.com/photo-1734418050767-1d0f3d98b3d9?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1734418051356-9a8c398caaa1?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: "The complete festive edit, styled and boxed together so you don't have to piece together separates. A hand-embroidered mandarin-collar velvet waistcoat layers over a breathable cotton kurta with matching straight-cut shalwar — the same silhouette worn for Eid, walima and Nikkah functions across Lahore's finest tailoring houses.",
+    details: [
+      'Includes: 3-Piece Stitched Set (Waistcoat + Kurta + Shalwar)',
+      'Waistcoat: Structured velvet with hand-worked thread embroidery on the front panel',
+      'Collar: Stiffened Mandarin band collar with metal-accent buttons',
+      'Kurta: Breathable premium cotton with front chest pocket',
+      'Shalwar: Traditional Pakistani cut with drawstring waist'
+    ],
+    fabricCare: [
+      'Dry clean the velvet waistcoat only',
+      'Machine wash the kurta & shalwar gentle cycle, separately'
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Maroon Velvet', hex: '#5C1A24' },
+      { name: 'Grey Diamond Weave', hex: '#8A8A8E' },
+      { name: 'Navy Nehru Blue', hex: '#1B2A4A' }
+    ],
+    isTrending: true,
+    isBestSeller: true,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 18,
+    rating: 4.9,
+    reviewCount: 27,
+    reviews: [
+      {
+        id: 'rev-wc1',
+        userName: 'Hamza Tariq',
+        userCity: 'Lahore',
+        rating: 5,
+        date: '6 days ago',
+        comment: 'Wore this to my cousin\'s walima, got compliments all night. The waistcoat embroidery looks way more expensive than the price tag.',
+        verified: true
+      }
+    ]
+  },
+
+  {
+    id: 'tb-mens-stitched-04',
+    name: "Men's Embroidered Velvet Groom Sherwani with Kurta",
+    slug: 'mens-embroidered-velvet-groom-sherwani-kurta',
+    tagline: 'Hand-embroidered velvet sherwani with mirror-trim border, made for Baraat & Nikkah',
+    category: 'clothing',
+    gender: 'mens',
+    stitchType: 'stitched',
+    suitPieces: '2-piece',
+    fabric: 'Embroidered Velvet Sherwani over Silk-Blend Kurta',
+    price: 9500,
+    originalPrice: 13000,
+    discountPercentage: 27,
+    images: [
+      'https://images.unsplash.com/photo-1734418056033-b9714582e9c3?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1734418041662-ffd756053bb8?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1734418046223-567d550f457d?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: "The centrepiece for your Baraat or Nikkah look. A structured black velvet sherwani jacket hand-embroidered with tilla thread and a mirror-trim border, worn open over a matching silk-blend kurta. Comes with a coordinating Jinnah cap so you're ready straight out of the box.",
+    details: [
+      'Includes: 2-Piece Stitched (Embroidered Sherwani Jacket + Kurta)',
+      'Sherwani: Structured velvet with hand-worked tilla thread embroidery & mirror-trim border',
+      'Kurta: Silk-blend inner kurta, mandarin collar',
+      'Accessory: Matching embroidered Jinnah cap included',
+      'Fit: Tailored regular fit, available for custom stitching'
+    ],
+    fabricCare: [
+      'Dry clean only — do not machine wash the velvet sherwani',
+      'Store on a padded hanger to preserve embroidery'
+    ],
+    customStitchingAvailable: true,
+    stitchingPrice: 1500,
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Onyx Black & Gold', hex: '#111111' },
+      { name: 'Maroon & Gold', hex: '#5C1A24' }
+    ],
+    isTrending: true,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 9,
+    rating: 4.9,
+    reviewCount: 8,
+    reviews: [
+      {
+        id: 'rev-sw1',
+        userName: 'Ahmed Raza',
+        userCity: 'Islamabad',
+        rating: 5,
+        date: '2 weeks ago',
+        comment: 'Wore this for my own Baraat. The embroidery is dense and the velvet holds its shape all night. Worth every rupee.',
+        verified: true
+      }
+    ]
+  },
+
+  // ==========================================
+  // 10. MEN'S WATCHES, SHOES & FRAGRANCE
+  // ==========================================
+  {
+    id: 'tb-acc-03',
+    name: "Men's Chronograph Leather Strap Watch",
+    slug: 'mens-chronograph-leather-strap-watch',
+    tagline: 'Editorial-grade dial with genuine leather strap — the finishing piece for any outfit',
+    category: 'accessories',
+    subCategory: 'watches',
+    gender: 'mens',
+    price: 3200,
+    originalPrice: 4500,
+    discountPercentage: 29,
+    images: [
+      'https://images.unsplash.com/photo-1786124967103-875dda046e85?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1772949399884-01ec45bc5763?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1717157197005-b851de4abc63?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'A minimalist analog watch built to sit under a kurta cuff or a formal shirt sleeve alike. Stainless steel case, scratch-resistant crystal face, and a genuine leather strap that breaks in comfortably over the first week of wear.',
+    details: [
+      'Case: Stainless steel, scratch-resistant crystal face',
+      'Strap: Genuine leather, adjustable pin buckle',
+      'Movement: Precision quartz analog',
+      'Water Resistance: Splash & sweat resistant (not for swimming)'
+    ],
+    colors: [
+      { name: 'Black Dial / Black Strap', hex: '#111111' },
+      { name: 'Rose Gold / Steel Link', hex: '#B76E4C' },
+      { name: 'White Dial / Black Leather', hex: '#F5F5F0' }
+    ],
+    isTrending: true,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 25,
+    rating: 4.7,
+    reviewCount: 19
+  },
+  {
+    id: 'tb-acc-04',
+    name: "Men's Premium Leather Formal Shoes",
+    slug: 'mens-premium-leather-formal-shoes',
+    tagline: 'Hand-finished genuine leather derbies that pair with kurta shalwar or suits',
+    category: 'accessories',
+    subCategory: 'shoes',
+    gender: 'mens',
+    price: 3800,
+    originalPrice: 5000,
+    discountPercentage: 24,
+    images: [
+      'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1668069226492-508742b03147?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1563434564528-8fdf5996e622?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'Genuine leather formal shoes with a cushioned insole built for long wedding-season days on your feet. The lace-up derby silhouette works equally well under a shalwar kameez or tailored trousers.',
+    details: [
+      'Upper: Genuine leather, hand-burnished finish',
+      'Sole: Flexible TPR sole with cushioned insole',
+      'Closure: Classic lace-up derby',
+      'Care: Wipe clean with a soft dry cloth, use leather polish monthly'
+    ],
+    sizes: ['40', '41', '42', '43', '44', '45'],
+    colors: [
+      { name: 'Tan Brown', hex: '#8B5A2B' },
+      { name: 'Jet Black', hex: '#111111' }
+    ],
+    isTrending: false,
+    isBestSeller: true,
+    isNewDrop: false,
+    inStock: true,
+    stockCount: 20,
+    rating: 4.8,
+    reviewCount: 33
+  },
+  {
+    id: 'tb-acc-05',
+    name: 'Signature Oud Cologne for Men',
+    slug: 'signature-oud-cologne-for-men',
+    tagline: 'Long-lasting woody oud fragrance in a premium glass bottle, gift-box ready',
+    category: 'accessories',
+    subCategory: 'cologne',
+    gender: 'mens',
+    price: 2600,
+    originalPrice: 3400,
+    discountPercentage: 24,
+    images: [
+      'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1594125311687-3b1b3eafa9f4?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1615108395437-df128ad79e80?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'A warm, woody oud fragrance with notes of amber and musk that lasts from Jummah prayers straight through to the evening. Presented in a heavyweight glass bottle that looks the part on a dresser or in a gift box.',
+    details: [
+      'Volume: 50ml Eau de Parfum',
+      'Notes: Oud, Amber, Musk, Sandalwood base',
+      'Longevity: 8+ hours on skin',
+      'Packaging: Heavyweight glass bottle in a branded presentation box'
+    ],
+    isTrending: true,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 30,
+    rating: 4.6,
+    reviewCount: 12
+  },
+  {
+    id: 'tb-acc-06',
+    name: "Men's Aviator Sunglasses",
+    slug: 'mens-aviator-sunglasses',
+    tagline: 'UV-protected polarized lenses in a matte black frame, boxed with a microfiber pouch',
+    category: 'accessories',
+    subCategory: 'sunglasses',
+    gender: 'mens',
+    price: 1950,
+    originalPrice: 2600,
+    discountPercentage: 25,
+    images: [
+      'https://images.unsplash.com/photo-1655850106862-b39c99631c0a?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1642439048981-8d679ad5f843?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'Matte black acetate frame with polarized, UV400-protected lenses that cut glare on Karachi\'s brightest afternoons. Spring hinges keep the fit comfortable over a full day, from the drive to the dawat.',
+    details: [
+      'Lens: Polarized, UV400 protection, anti-scratch coating',
+      'Frame: Matte black acetate with spring hinges',
+      'Includes: Hard case + microfiber cleaning pouch',
+      'Fit: Unisex medium frame'
+    ],
+    colors: [{ name: 'Matte Black', hex: '#111111' }],
+    isTrending: false,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 40,
+    rating: 4.5,
+    reviewCount: 9
+  },
+  {
+    id: 'tb-acc-07',
+    name: "Men's Handcrafted Leather Strap Sandals",
+    slug: 'mens-handcrafted-leather-strap-sandals',
+    tagline: 'Peshawari-style leather sandals, hand-stitched with a cushioned footbed',
+    category: 'accessories',
+    subCategory: 'sandals',
+    gender: 'mens',
+    price: 2800,
+    originalPrice: 3800,
+    discountPercentage: 26,
+    images: [
+      'https://images.unsplash.com/photo-1585120824848-8a5cd41493d2?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1628375385879-1af64230c2e1?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'Open, breathable leather sandals in the classic Peshawari silhouette — hand-cut straps, hand-stitched edges, and a cushioned leather footbed that softens with every wear. Pairs naturally with kurta shalwar or rolled-up chinos.',
+    details: [
+      'Upper: Genuine hand-cut leather straps',
+      'Footbed: Cushioned leather sole, hand-stitched edges',
+      'Sole: Durable rubber outsole with grip tread',
+      'Care: Wipe clean with a damp cloth, air dry away from direct heat'
+    ],
+    sizes: ['40', '41', '42', '43', '44', '45'],
+    colors: [
+      { name: 'Chestnut Brown', hex: '#8B5A2B' },
+      { name: 'Jet Black', hex: '#111111' }
+    ],
+    isTrending: true,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 22,
+    rating: 4.7,
+    reviewCount: 15
+  },
+  {
+    id: 'tb-acc-08',
+    name: "Men's Silver Cufflinks",
+    slug: 'mens-silver-cufflinks',
+    tagline: 'Presentation-boxed cufflinks that finish off a French-cuff kurta or dress shirt',
+    category: 'accessories',
+    subCategory: 'cufflinks',
+    gender: 'mens',
+    price: 2200,
+    originalPrice: 2900,
+    discountPercentage: 24,
+    images: [
+      'https://images.unsplash.com/photo-1761110518837-689557b142bf?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1685392024138-36e7aade79f7?w=800&auto=format&fit=crop&q=80'
+    ],
+    description: 'A refined pair of cufflinks in a brushed metal finish, boxed and ready for gifting. Dresses up a French-cuff wedding kurta, a Nikkah sherwani, or a plain formal shirt in seconds.',
+    details: [
+      'Material: Brushed stainless steel base, tarnish-resistant',
+      'Fitting: Standard bullet-back closure for French cuffs',
+      'Packaging: Wooden presentation box included',
+      'Occasion: Wedding, formal event, or gifting'
+    ],
+    colors: [
+      { name: 'Silver', hex: '#C0C0C0' },
+      { name: 'Antique Gold', hex: '#B8860B' }
+    ],
+    isTrending: false,
+    isBestSeller: false,
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 28,
+    rating: 4.8,
+    reviewCount: 6
   }
 ];

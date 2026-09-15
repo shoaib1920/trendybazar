@@ -302,7 +302,7 @@ export const SizeFitQuizModal: React.FC = () => {
                   Size {calculatedSize}
                 </h3>
                 <p className="text-xs text-gray-600 max-w-sm mx-auto mt-2 leading-relaxed">
-                  Based on your reference from <strong>{usualBrand} ({usualSize})</strong> with a <strong>{fitPreference}</strong> cut, Trendy Bazaar’s <strong>Size {calculatedSize}</strong> will drape flawlessly without pulling at the arms or bust.
+                  Based on your reference from <strong>{usualBrand} ({usualSize})</strong> with a <strong>{fitPreference}</strong> cut, Trandy Libas’s <strong>Size {calculatedSize}</strong> will drape flawlessly without pulling at the arms or bust.
                 </p>
               </div>
 

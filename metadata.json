@@ -1,6 +1,6 @@
 {
-  "name": "Trendy Bazaar",
-  "description": "Trendy Bazaar – Authentic Pakistani fashion, luxury Swiss Lawn, pure 6-pound Chiniot Boski silk, and custom Lahore master tailoring with Cash on Delivery nationwide.",
+  "name": "Trandy Libas",
+  "description": "Trandy Libas – Authentic Pakistani fashion, luxury Swiss Lawn, pure 6-pound Chiniot Boski silk, and custom Lahore master tailoring with Cash on Delivery nationwide.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -96,7 +96,7 @@ export const ContactPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar! I have a question about an order / products.')}
+          onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trandy Libas! I have a question about an order / products.')}
           className="w-full md:w-auto py-3.5 px-8 bg-[#25D366] hover:bg-[#20ba5a] text-white font-heading font-bold text-sm rounded-full shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
         >
           <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
@@ -125,7 +125,7 @@ export const ContactPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Email Us</h4>
-              <p className="text-xs text-gray-600 mt-0.5">orders@trendybazaar.pk</p>
+              <p className="text-xs text-gray-600 mt-0.5">orders@trandylibas.pk</p>
               <span className="text-[11px] text-gray-400 block mt-1">For brand collabs & PR packages</span>
             </div>
           </div>
@@ -269,7 +269,7 @@ export const ContactPage: React.FC = () => {
             Frequently Asked Questions
           </h3>
           <p className="text-xs text-gray-500 mt-1">
-            Everything you need to know about shopping at Trendy Bazaar Pakistan
+            Everything you need to know about shopping at Trandy Libas Pakistan
           </p>
         </div>
 

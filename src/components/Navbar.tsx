@@ -36,6 +36,7 @@ export const Navbar: React.FC = () => {
     setShopCategoryFilter,
     setShopGenderFilter,
     setShopStitchFilter,
+    setShopSubCategoryFilter,
     searchQuery,
     setSearchQuery,
     showToast,
@@ -87,6 +88,8 @@ export const Navbar: React.FC = () => {
 
     if (category) setShopCategoryFilter(category);
     else setShopCategoryFilter('all');
+
+    setShopSubCategoryFilter('all');
 
     setActiveView(view as any);
     setIsMobileMenuOpen(false);
@@ -215,17 +218,17 @@ export const Navbar: React.FC = () => {
               {t('home')}
             </button>
             <button
+              onClick={() => handleNavClick('shop', 'mens')}
+              className="transition-colors hover:text-[#8A6D1F] py-2 border-b-2 border-transparent text-gray-700"
+            >
+              {t('mensKurta')}
+            </button>
+            <button
               onClick={() => handleNavClick('shop', 'ladies')}
               className="transition-colors hover:text-[#8A6D1F] py-2 border-b-2 border-transparent text-gray-700 flex items-center gap-1"
             >
               <span>{t('ladiesPret')}</span>
               <span className="text-[9px] bg-amber-100 text-[#8A6D1F] px-1.5 py-0.2 rounded font-sans font-bold">New</span>
-            </button>
-            <button
-              onClick={() => handleNavClick('shop', 'mens')}
-              className="transition-colors hover:text-[#8A6D1F] py-2 border-b-2 border-transparent text-gray-700"
-            >
-              {t('mensKurta')}
             </button>
             <button
               onClick={() => handleNavClick('shop', 'kids')}
@@ -397,28 +400,28 @@ export const Navbar: React.FC = () => {
                       Clothing Departments
                     </span>
                     <button
-                      onClick={() => handleNavClick('shop', 'ladies')}
+                      onClick={() => handleNavClick('shop', 'mens')}
                       className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] text-xs font-serif font-bold text-gray-800 flex items-center justify-between"
                     >
                       <span className="flex items-center gap-2">
                         <Shirt className="w-3.5 h-3.5 text-[#8A6D1F]" />
-                        <span>{t('ladiesPret')}</span>
+                        <span>{t('mensKurta')}</span>
                       </span>
                       <span className="text-[10px] text-[#8A6D1F] font-bold">Popular</span>
                     </button>
                     <button
-                      onClick={() => handleNavClick('shop', 'ladies', 'unstitched')}
+                      onClick={() => handleNavClick('shop', 'mens', 'unstitched')}
                       className="w-full text-left px-6 py-1.5 rounded-xl hover:bg-[#F9F6F0] text-xs text-gray-600 flex items-center gap-1.5"
                     >
                       <Scissors className="w-3 h-3 text-[#8A6D1F]" />
-                      <span>Unstitched 3-Pc Lawn</span>
+                      <span>Unstitched Boski & Latha</span>
                     </button>
                     <button
-                      onClick={() => handleNavClick('shop', 'mens')}
+                      onClick={() => handleNavClick('shop', 'ladies')}
                       className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] text-xs font-serif font-bold text-gray-800 flex items-center gap-2"
                     >
                       <Shirt className="w-3.5 h-3.5 text-[#8A6D1F]" />
-                      <span>{t('mensKurta')}</span>
+                      <span>{t('ladiesPret')}</span>
                     </button>
                     <button
                       onClick={() => handleNavClick('shop', 'kids')}
@@ -488,7 +491,7 @@ export const Navbar: React.FC = () => {
               {/* Bottom WhatsApp Help Button */}
               <div className="p-4 border-t border-gold-hairline bg-[#F9F6F0] space-y-2">
                 <a
-                  href="https://wa.me/923364300592?text=Assalam-o-Alaikum%20Trendy%20Bazaar!%20Need%20help%20with%20an%20order."
+                  href="https://wa.me/923364300592?text=Assalam-o-Alaikum%20Trandy%20Libas!%20Need%20help%20with%20an%20order."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-xs"

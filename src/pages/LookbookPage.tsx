@@ -130,7 +130,7 @@ export const LookbookPage: React.FC = () => {
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-1.5 bg-[#F9F6F0] px-3.5 py-1.5 rounded-full text-xs font-bold text-[#8A6D1F] border border-gold-hairline">
           <BookOpen className="w-3.5 h-3.5 text-[#F2B705]" />
-          <span>Bazaar Sartorial Journal</span>
+          <span>Libas Sartorial Journal</span>
         </div>
         <h1 className="font-serif font-black text-3xl sm:text-5xl text-[#141414]">
           Style Guides & Master Notes

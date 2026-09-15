@@ -91,12 +91,12 @@ export const Logo: React.FC<LogoProps> = ({
               isLight ? 'text-white' : 'text-[#1A1A1A]'
             }`}
           >
-            TRENDY
+            TRANDY
           </span>
           <span
             className={`font-heading font-black tracking-tight ${textSizes[size]} text-[#F2B705]`}
           >
-            BAZAAR
+            LIBAS
           </span>
         </div>
         {showTagline && (

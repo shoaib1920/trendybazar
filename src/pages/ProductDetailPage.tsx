@@ -91,11 +91,11 @@ export const ProductDetailPage: React.FC = () => {
   const handleWhatsAppOrder = () => {
     const stitchNote = isStitchingSelected ? ` [+ Custom Stitching: ${selectedStitchStyle}]` : '';
     const details = [selectedSize ? `Size: ${selectedSize}` : '', selectedColor ? `Color: ${selectedColor}` : '', stitchNote].filter(Boolean).join(', ');
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
+    const msg = `Assalam-o-Alaikum Trandy Libas! 👋
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${unitPrice} ${isStitchingSelected ? '(includes Custom Tailoring)' : ''}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trendybazaar.pk/product/${product.slug}
+${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trandylibas.pk/product/${product.slug}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     window.open(`https://wa.me/923364300592?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
@@ -105,7 +105,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Check out ${product.name} on Trendy Bazaar Pakistan!`,
+        text: `Check out ${product.name} on Trandy Libas Pakistan!`,
         url: window.location.href
       }).catch(() => {});
     } else {

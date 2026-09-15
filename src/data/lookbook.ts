@@ -9,7 +9,7 @@ export const LOOKBOOK_ARTICLES: LookbookArticle[] = [
     author: 'Tariq Mehmood, Master Clothier',
     readTime: '4 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1711374316403-2bfa31ae9c2a?w=1000&auto=format&fit=crop&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1734418038517-ffc3a6a6751f?w=1000&auto=format&fit=crop&q=80',
     summary: 'True 6-pound Boski represents the pinnacle of Punjabi celebratory menswear. Here is how to distinguish original spun silk selvedge from polyester counterfeits, and the collar specifications every bespoke tailor should follow.',
     content: [
       'Originating from traditional mulberry spun silk filaments, authentic Boski possesses a distinct matte cream sheen that deepens gracefully with every gentle wash.',
@@ -26,7 +26,7 @@ export const LOOKBOOK_ARTICLES: LookbookArticle[] = [
     author: 'Zainab Qazi, Head of Design',
     readTime: '5 min read',
     publishedDate: 'Autumn Edit 2026',
-    coverImage: 'https://images.unsplash.com/photo-1733470324488-d0e10d014d80?w=1000&auto=format&fit=crop&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1708534246051-7f47b279e94b?w=1000&auto=format&fit=crop&q=80',
     summary: 'Why buy unstitched? Because off-the-rack sizes rarely respect the precise proportion of your frame. Discover how our Lahore tailoring studio balances shirt length and trouser break for the perfect silhouette.',
     content: [
       'High-twist 80/80 combed Swiss lawn breathes effortlessly through 40-degree midsummer humidity while retaining saturated botanical dyes without bleeding.',
@@ -40,7 +40,7 @@ export const LOOKBOOK_ARTICLES: LookbookArticle[] = [
     slug: 'anti-tarnish-jewelry-care-in-monsoon-humidity',
     title: 'The Science of PVD 18K Gold Plating: Why It Outlasts Monsoons',
     subtitle: 'Physical Vapor Deposition over 316L medical grade stainless steel ensures your everyday jewelry never turns your skin green.',
-    author: 'Bazaar Metallurgy Lab',
+    author: 'Libas Metallurgy Lab',
     readTime: '3 min read',
     publishedDate: 'August 2026',
     coverImage: 'https://images.unsplash.com/photo-1611107683227-e9060eccd846?w=1000&auto=format&fit=crop&q=80',

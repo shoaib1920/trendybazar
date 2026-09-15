@@ -86,34 +86,34 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <Logo variant="light" size="lg" />
             <p className="text-xs sm:text-sm text-gray-400 max-w-sm leading-relaxed">
-              Trendy Bazaar is Pakistan's social-first shopping store. From Instagram viral coords and streetwear to anti-tarnish jewelry and curated gift boxes — delivered right to your doorstep with Cash on Delivery.
+              Trandy Libas is Pakistan's social-first shopping store. From Instagram viral coords and streetwear to anti-tarnish jewelry and curated gift boxes — delivered right to your doorstep with Cash on Delivery.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://instagram.com/trendybazaar"
+                href="https://www.instagram.com/trendy.bazaar.pk?stkn=MWdiYmt2N2V5ZmE5ZQ=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all"
-                title="Follow @trendybazaar on Instagram"
+                title="Follow Trandy Libas on Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://tiktok.com/@trendybazaar"
+                href="https://www.tiktok.com/@trendybazaar.pk44?_r=1&_t=ZN-99jNYcR9Tb4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all font-bold text-xs"
-                title="Follow @trendybazaar on TikTok"
+                title="Follow Trandy Libas on TikTok"
               >
                 TK
               </a>
               <a
-                href="https://facebook.com/trendybazaar"
+                href="https://www.facebook.com/share/1Brj1hewYh/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all"
-                title="Follow @trendybazaar on Facebook"
+                title="Follow Trandy Libas on Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
@@ -122,7 +122,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-[#25D366] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                title="Chat with Trendy Bazaar on WhatsApp"
+                title="Chat with Trandy Libas on WhatsApp"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
               </a>
@@ -214,7 +214,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleViewClick('about')} 
                   className="hover:text-[#F2B705] transition-colors"
                 >
-                  About Trendy Bazaar
+                  About Trandy Libas
                 </button>
               </li>
               <li>
@@ -245,7 +245,7 @@ export const Footer: React.FC = () => {
               </a>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#F2B705] shrink-0" />
-                <span>orders@trendybazaar.pk</span>
+                <span>orders@trandylibas.pk</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#F2B705] shrink-0 mt-0.5" />
@@ -263,7 +263,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & payment trust */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© 2026 Trendy Bazaar Pakistan. All rights reserved.</p>
+          <p>© 2026 Trandy Libas Pakistan. All rights reserved.</p>
           <div className="flex items-center gap-3 text-[11px]">
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">Cash on Delivery</span>
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">JazzCash</span>
