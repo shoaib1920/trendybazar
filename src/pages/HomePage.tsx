@@ -102,13 +102,13 @@ export const HomePage: React.FC = () => {
     {
       id: 'mens-boski',
       title: '6-Pound Boski',
-      image: 'https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=300&auto=format&fit=crop&q=80',
+      image: 'https://img.drz.lazcdn.com/g/kf/S75ebfda666d44c0489faa2e20d94f054h.jpg_720x720q80.jpg',
       action: () => handleShopCategory('mens', 'unstitched')
     },
     {
       id: 'mens-kurta',
       title: "Men's Kurta",
-      image: 'https://images.unsplash.com/photo-1734418042215-a1b79c18698f?w=300&auto=format&fit=crop&q=80',
+      image: 'https://assets2.andaazfashion.com/media/catalog/product/n/a/navy-blue-raw-silk-embroidered-mens-kurta-pajama-mkpa08448-1.jpg',
       action: () => handleShopCategory('mens', 'stitched')
     },
     {
@@ -281,7 +281,7 @@ export const HomePage: React.FC = () => {
                   className="absolute -top-3 -left-3 sm:-left-6 bg-white p-3 rounded-2xl shadow-xl border border-gold-hairline flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform"
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=200&auto=format&fit=crop&q=80"
+                    src="https://assets2.andaazfashion.com/media/catalog/product/n/a/navy-blue-raw-silk-embroidered-mens-kurta-pajama-mkpa08448-1.jpg"
                     alt="Royal Boski Silk"
                     className="w-12 h-12 rounded-xl object-cover"
                   />
@@ -364,7 +364,7 @@ export const HomePage: React.FC = () => {
             className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
           >
             <img
-              src="https://images.unsplash.com/photo-1785612826246-d1b19dabe6f6?w=1000&auto=format&fit=crop&q=80"
+              src="https://i.pinimg.com/236x/44/25/31/442531331c19e2fc8cb2f40a9cb0160b.jpgw=1000&auto=format&fit=crop&q=80"
               alt="Men's Boski Silk, Kurtas & Sherwani"
               className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
             />
