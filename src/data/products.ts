@@ -695,7 +695,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 3600,
     discountPercentage: 20,
     images: [
-      'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvnD1LtAxSgjg6Wjm1pOoe2KgGspnA-zAuevRMLCE1B3dwwLf1VZAcvRnB&s=10',
       'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'
     ],
     description: 'The ultimate care package curated for birthdays, anniversaries, Eid, or bride-to-be gifts. Presented in a premium magnetic-closure emerald velvet box tied with satin ribbon. We can handwrite your custom Urdu or English note on our textured calligraphy card for free!',
