@@ -10,10 +10,19 @@ interface CompleteTheLookProps {
 export const CompleteTheLook: React.FC<CompleteTheLookProps> = ({ currentProduct }) => {
   const { products, addToCart, navigateToProduct, showToast } = useShop();
 
-  // Pick 2 complementary items: one accessory and another distinct item
+  // Pick 2 complementary items: one accessory and another distinct item,
+  // both matched to the current product's gender (or unisex) so suggestions stay relevant
   const bundleCandidates = products.filter((p) => p.id !== currentProduct.id);
-  const accessory = bundleCandidates.find((p) => p.category === 'accessories') || bundleCandidates[0];
-  const secondary = bundleCandidates.find((p) => p.id !== accessory.id && p.gender === currentProduct.gender) || bundleCandidates[1];
+  const matchesGender = (p: Product) => p.gender === currentProduct.gender || p.gender === 'unisex';
+
+  const accessory =
+    bundleCandidates.find((p) => p.category === 'accessories' && matchesGender(p)) ||
+    bundleCandidates.find((p) => p.category === 'accessories') ||
+    bundleCandidates[0];
+  const secondary =
+    bundleCandidates.find((p) => p.id !== accessory.id && p.category === 'clothing' && matchesGender(p)) ||
+    bundleCandidates.find((p) => p.id !== accessory.id && matchesGender(p)) ||
+    bundleCandidates[1];
 
   const bundleItems = [currentProduct, accessory, secondary].filter(Boolean);
 

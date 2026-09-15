@@ -127,6 +127,95 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20 md:pb-16" id="home-page-container">
+      {/* GATEWAY: SHOP BY GENDER — the first thing every visitor sees */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6" id="gender-gateway-section">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          {/* Women */}
+          <button
+            onClick={() => handleShopCategory('ladies')}
+            id="gateway-women-btn"
+            className="group relative rounded-3xl overflow-hidden min-h-[280px] sm:min-h-[440px] bg-[#141414] shadow-sm hover:shadow-2xl transition-all duration-300 border border-gold-hairline text-left"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=1000&auto=format&fit=crop&q=80"
+              alt="Shop Women's Pakistani Wardrobe"
+              className="w-full h-full absolute inset-0 object-cover opacity-85 group-hover:scale-105 group-hover:opacity-90 transition-all duration-700 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent flex flex-col justify-end p-6 sm:p-9 text-white">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-1.5">
+                Swiss Lawn • Chikankari • Pret & Unstitched
+              </span>
+              <h2 className="font-serif font-black text-3xl sm:text-5xl text-white mb-2">
+                Women
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-200 max-w-sm mb-4 leading-relaxed font-sans">
+                Hand-embroidered dupattas, breathable Swiss Lawn & festive suits — plus jewelry &amp; bags to complete the look.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-serif font-bold text-[#F2B705] group-hover:underline">
+                <span>Shop Women's Wardrobe</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </button>
+
+          {/* Men */}
+          <button
+            onClick={() => handleShopCategory('mens')}
+            id="gateway-men-btn"
+            className="group relative rounded-3xl overflow-hidden min-h-[280px] sm:min-h-[440px] bg-[#141414] shadow-sm hover:shadow-2xl transition-all duration-300 border border-gold-hairline text-left"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1734418040900-e964f84e8abb?w=1000&auto=format&fit=crop&q=80"
+              alt="Shop Men's Pakistani Wardrobe"
+              className="w-full h-full absolute inset-0 object-cover opacity-85 group-hover:scale-105 group-hover:opacity-90 transition-all duration-700 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent flex flex-col justify-end p-6 sm:p-9 text-white">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-1.5">
+                6-Pound Boski Silk • Waistcoats • Groom Sherwani
+              </span>
+              <h2 className="font-serif font-black text-3xl sm:text-5xl text-white mb-2">
+                Men
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-200 max-w-sm mb-4 leading-relaxed font-sans">
+                Everyday cotton kurta pajama to hand-embroidered sherwani — plus watches, shoes &amp; fragrance to finish the outfit.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-serif font-bold text-[#F2B705] group-hover:underline">
+                <span>Shop Men's Wardrobe</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </button>
+        </div>
+
+        {/* Secondary quick links: Kids & Accessories stay one tap away without competing for top billing */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4">
+          <button
+            onClick={() => handleShopCategory('kids')}
+            className="flex items-center justify-center gap-2 py-3 px-3 bg-[#F7F3EC] hover:bg-amber-100 rounded-2xl text-xs font-bold text-[#141414] transition-colors border border-amber-100/80"
+          >
+            <span>👶 Kids Punjabi</span>
+          </button>
+          <button
+            onClick={() => handleShopCategory('ladies', undefined, 'accessories')}
+            className="flex items-center justify-center gap-2 py-3 px-3 bg-[#F7F3EC] hover:bg-amber-100 rounded-2xl text-xs font-bold text-[#141414] transition-colors border border-amber-100/80"
+          >
+            <span>💍 Women's Accessories</span>
+          </button>
+          <button
+            onClick={() => handleShopCategory('mens', undefined, 'accessories')}
+            className="flex items-center justify-center gap-2 py-3 px-3 bg-[#F7F3EC] hover:bg-amber-100 rounded-2xl text-xs font-bold text-[#141414] transition-colors border border-amber-100/80"
+          >
+            <span>⌚ Men's Accessories</span>
+          </button>
+          <button
+            onClick={() => handleShopCategory(undefined, undefined, 'gifting')}
+            className="flex items-center justify-center gap-2 py-3 px-3 bg-[#F7F3EC] hover:bg-amber-100 rounded-2xl text-xs font-bold text-[#141414] transition-colors border border-amber-100/80"
+          >
+            <span>🎁 Gifting Edit</span>
+          </button>
+        </div>
+      </section>
+
       {/* 0. INSTAGRAM STORIES-STYLE CATEGORY ROW */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <div className="flex items-center gap-3.5 sm:gap-6 overflow-x-auto pb-2 scrollbar-none">
@@ -329,63 +418,8 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
 
-        {/* Balanced Bento Grid: Ladies & Men's get equal billing */}
+        {/* Secondary Departments Row: Kids, Women's & Men's Accessories, Gifting — each is its own organized department */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
-          {/* Main Feature: Ladies Pret & Unstitched (Span 6 cols) */}
-          <div
-            onClick={() => handleShopCategory('ladies')}
-            className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1733209590486-4ed0bfcbc52a?w=1000&auto=format&fit=crop&q=80"
-              alt="Ladies Pakistani Lawn & Pret"
-              className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent flex flex-col justify-end p-6 sm:p-8 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-1">
-                Swiss Lawn • Chikankari • Pret & Unstitched
-              </span>
-              <h3 className="font-serif font-black text-2xl sm:text-3xl text-white mb-2">
-                Ladies Festive & Daily Pret
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-200 line-clamp-2 max-w-md mb-4 leading-relaxed font-sans">
-                Hand-embroidered organza dupattas, breathable Swiss Lawn, and ready-to-wear kurtis designed for warm Pakistani weather.
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-serif font-bold text-[#F2B705] group-hover:underline">
-                <span>View Ladies Collection</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-
-          {/* Main Feature: Men's Kurta, Boski & Sherwani (Span 6 cols) */}
-          <div
-            onClick={() => handleShopCategory('mens')}
-            className="md:col-span-6 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[420px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-gold-hairline"
-          >
-            <img
-              src="https://assets2.andaazfashion.com/media/catalog/product/n/a/navy-blue-raw-silk-embroidered-mens-kurta-pajama-mkpa08448-1.jpg"
-              alt="Men's Boski Silk, Kurtas & Sherwani"
-              className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-85 transition-all duration-700 ease-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent flex flex-col justify-end p-6 sm:p-8 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F2B705] mb-1">
-                6-Pound Boski Silk • Waistcoats • Groom Sherwani
-              </span>
-              <h3 className="font-serif font-black text-2xl sm:text-3xl text-white mb-2">
-                Men's Kurta & Sherwani Edit
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-200 line-clamp-2 max-w-md mb-4 leading-relaxed font-sans">
-                From everyday cotton kurta pajama to hand-embroidered velvet sherwani for Baraat, complete with watches, leather shoes & fragrance.
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-serif font-bold text-[#F2B705] group-hover:underline">
-                <span>View Men's Collection</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-
-          {/* Secondary Row: Kids, Jewelry, Men's Accessories, Gifting */}
           <div className="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {/* Kids Punjabi */}
             <div
@@ -406,22 +440,22 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* 18K Anti-Tarnish Jewelry */}
+            {/* Women's Accessories: Jewelry, Bags & Khussa */}
             <div
-              onClick={() => handleShopCategory(undefined, undefined, 'accessories')}
+              onClick={() => handleShopCategory('ladies', undefined, 'accessories')}
               className="group relative rounded-3xl overflow-hidden min-h-[190px] bg-[#141414] cursor-pointer shadow-sm hover:shadow-lg transition-all border border-gold-hairline"
             >
               <img
                 src="https://images.unsplash.com/photo-1655707063513-a08dad26440e?w=500&auto=format&fit=crop&q=80"
-                alt="Anti-Tarnish Jewelry"
+                alt="Women's Jewelry, Bags & Khussa"
                 className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 text-white">
                 <span className="text-[9px] font-bold text-[#F2B705] uppercase">PVD Gold</span>
                 <h4 className="font-serif font-bold text-sm text-white leading-tight mt-0.5">
-                  18K Jewelry
+                  Women's Accessories
                 </h4>
-                <span className="text-[10px] text-gray-300 mt-1">Anti-Tarnish Wear</span>
+                <span className="text-[10px] text-gray-300 mt-1">Jewelry, Bags & Khussa</span>
               </div>
             </div>
 

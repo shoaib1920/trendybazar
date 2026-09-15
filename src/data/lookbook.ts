@@ -9,7 +9,7 @@ export const LOOKBOOK_ARTICLES: LookbookArticle[] = [
     author: 'Tariq Mehmood, Master Clothier',
     readTime: '4 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1734418038517-ffc3a6a6751f?w=1000&auto=format&fit=crop&q=80',
+    coverImage: 'https://saleemfabrics.pk/cdn/shop/files/27_1fe1f50e-9e31-4dad-82e6-ed62f74b596c_1024x1024.jpg?v=1775481427',
     summary: 'True 6-pound Boski represents the pinnacle of Punjabi celebratory menswear. Here is how to distinguish original spun silk selvedge from polyester counterfeits, and the collar specifications every bespoke tailor should follow.',
     content: [
       'Originating from traditional mulberry spun silk filaments, authentic Boski possesses a distinct matte cream sheen that deepens gracefully with every gentle wash.',

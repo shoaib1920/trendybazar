@@ -20,7 +20,7 @@ export interface Product {
   slug: string;
   tagline: string;
   category: 'clothing' | 'accessories' | 'gifting';
-  subCategory?: 'watches' | 'shoes' | 'sandals' | 'sunglasses' | 'cufflinks' | 'cologne' | 'jewelry' | 'bags';
+  subCategory?: 'watches' | 'shoes' | 'sandals' | 'sunglasses' | 'cufflinks' | 'cologne' | 'jewelry' | 'bags' | 'caps';
   gender?: 'ladies' | 'mens' | 'kids' | 'unisex';
   stitchType?: 'stitched' | 'unstitched';
   suitPieces?: '1-piece' | '2-piece' | '3-piece' | 'fabric-meters';
