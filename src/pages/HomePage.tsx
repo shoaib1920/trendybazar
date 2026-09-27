@@ -53,10 +53,14 @@ export const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <div className="relative rounded-3xl overflow-hidden shadow-xl border border-gold-hairline aspect-4/3 lg:aspect-square max-w-md mx-auto w-full">
-            <img
-              src={heroProduct.images[0]}
-              alt={heroProduct.name}
+          <div className="relative rounded-3xl overflow-hidden shadow-xl border border-gold-hairline aspect-4/3 lg:aspect-square max-w-md mx-auto w-full bg-black">
+            <video
+              src="/hero-earbuds.mp4"
+              poster={heroProduct.images[0]}
+              autoPlay
+              muted
+              loop
+              playsInline
               className="w-full h-full object-cover"
             />
           </div>

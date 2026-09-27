@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Logo } from './Logo';
 import {
@@ -12,10 +12,7 @@ import {
   Copy,
   Check,
   Settings2,
-  Globe,
-  Award,
   PartyPopper,
-  Timer,
   Headphones
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -31,9 +28,6 @@ export const Navbar: React.FC = () => {
     searchQuery,
     setSearchQuery,
     showToast,
-    language,
-    toggleLanguage,
-    loyaltyPoints,
     setActiveView,
     t
   } = useShop();
@@ -41,26 +35,6 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
-
-  // Flash-sale countdown: resets daily at midnight local time
-  const getTimeUntilMidnight = () => {
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    const diff = Math.max(0, midnight.getTime() - now.getTime());
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-  const [saleCountdown, setSaleCountdown] = useState(getTimeUntilMidnight());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSaleCountdown(getTimeUntilMidnight());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleCopyCode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -123,30 +97,6 @@ export const Navbar: React.FC = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-5 text-gray-300 text-[11px]">
-          <span className="flex items-center gap-1.5 text-[#F2B705] font-serif font-bold tabular-nums" title="Today's promo pricing resets at midnight">
-            <Timer className="w-3.5 h-3.5" />
-            <span>Sale ends in {saleCountdown}</span>
-          </span>
-
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1 hover:text-white transition-colors bg-white/10 px-2 py-0.5 rounded-full text-[11px]"
-            title="Switch Language / زبان تبدیل کریں"
-          >
-            <Globe className="w-3 h-3 text-[#F2B705]" />
-            <span className="font-semibold">{language === 'en' ? 'اردو' : 'English'}</span>
-          </button>
-
-          <div className="flex items-center gap-1 text-[#F2B705] font-serif font-bold">
-            <Award className="w-3.5 h-3.5" />
-            <span>{loyaltyPoints} Rewards Pts</span>
-          </div>
-
-          <span className="flex items-center gap-1">
-            <Truck className="w-3.5 h-3.5 text-[#F2B705]" />
-            Rs. 150 Delivery Nationwide
-          </span>
-
           <button
             onClick={() => handleNavClick('track')}
             className="hover:text-[#F2B705] transition-colors underline underline-offset-2"
@@ -236,22 +186,13 @@ export const Navbar: React.FC = () => {
             <form onSubmit={handleSearchSubmit} className="relative hidden md:block w-48 lg:w-56">
               <input
                 type="text"
-                placeholder={language === 'ur' ? 'تلاش کریں...' : 'Search earbuds...'}
+                placeholder="Search earbuds..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#9C7A28] focus:bg-white text-xs rounded-full py-2 pl-9 pr-3 outline-none transition-all placeholder:text-gray-400"
               />
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 pointer-events-none" />
             </form>
-
-            {/* Mobile Language Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="p-1.5 text-xs font-serif font-bold text-[#8A6D1F] border border-gold-hairline rounded-full lg:hidden"
-              title="Language"
-            >
-              {language === 'en' ? 'اردو' : 'EN'}
-            </button>
 
             {/* Mobile Search Trigger */}
             <button
