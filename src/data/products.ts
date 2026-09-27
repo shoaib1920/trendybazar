@@ -65,7 +65,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     subCategory: 'watches',
     price: 4299,
     images: [
-      'https://images.unsplash.com/photo-1661030418545-fd307b4c6f16?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1661030418545-fd307b4c6f16?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1661030418924-52142661241d?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Stainless steel build, quartz movement, everyday water resistance.',
     details: [
@@ -90,7 +91,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     subCategory: 'watches',
     price: 4599,
     images: [
-      'https://images.unsplash.com/photo-1767009951305-5ed35f62e3c3?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1767009951305-5ed35f62e3c3?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1627350873107-d5d4e3977ec6?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'A dressier build with a warm gold-tone dial for formal wear.',
     details: [
@@ -115,7 +117,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     subCategory: 'watches',
     price: 4499,
     images: [
-      'https://images.unsplash.com/photo-1612817159623-0399784fd0ce?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1612817159623-0399784fd0ce?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1630552237339-9520955b603c?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Everyday analog watch with a soft leather strap.',
     details: [
@@ -139,7 +142,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     subCategory: 'watches',
     price: 4750,
     images: [
-      'https://images.unsplash.com/photo-1773414753637-2738750cfbb6?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1773414753637-2738750cfbb6?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1779409919727-bafd9a982269?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'A slim, minimalist watch that pairs with anything.',
     details: [
