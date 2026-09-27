@@ -29,28 +29,28 @@ export const ContactPage: React.FC = () => {
 
   const FAQS = [
     {
-      q: 'How long does delivery take across Pakistan?',
-      a: 'We ship through Trax Logistics, Leopards Courier, and PostEx. Delivery to major cities like Lahore, Karachi, and Islamabad takes 2 to 3 working days. Other nationwide cities take 3 to 4 working days.'
+      q: 'How long does delivery take?',
+      a: '2-3 days in major cities, 3-4 days elsewhere in Pakistan.'
     },
     {
       q: 'What are the delivery charges?',
-      a: 'We charge a flat Rs. 150 delivery fee across Pakistan. Any order of Rs. 3,500 or more (2+ pairs) qualifies for FREE delivery automatically at checkout!'
+      a: 'Flat Rs. 150 nationwide. Free on orders over Rs. 3,500.'
     },
     {
-      q: 'How does Cash on Delivery (COD) work?',
-      a: 'With COD, you place your order without entering any credit card. We pack and dispatch your parcel, and you simply hand Rs. 1,999 + Rs. 150 delivery to the courier rider at your doorstep.'
+      q: 'How does Cash on Delivery work?',
+      a: 'Pay the courier in cash when your parcel arrives — no card needed.'
     },
     {
-      q: 'What if my earbuds arrive faulty?',
-      a: 'Send a WhatsApp message to +92 336 4300592 within 7 days of delivery with a short video of the issue. We will arrange a replacement unit dispatched right to you.'
+      q: 'What if my item arrives faulty?',
+      a: 'WhatsApp us within 7 days with a short video and we\'ll replace it.'
     },
     {
-      q: 'Can I order directly on WhatsApp without using the website?',
-      a: 'Yes! Simply click the "Order on WhatsApp" button on the product page or click our floating chat icon. Send us your address and we book your order instantly.'
+      q: 'Can I order on WhatsApp directly?',
+      a: 'Yes — tap "Order on WhatsApp" on any product or use the chat icon.'
     },
     {
-      q: 'How do I redeem discount code WELCOME5?',
-      a: 'Enter WELCOME5 in the promo code box in your Cart Drawer or Checkout screen. It gives an instant 5% discount on your order!'
+      q: 'How do I use code WELCOME5?',
+      a: 'Enter it at checkout for an instant 5% discount.'
     }
   ];
 
@@ -68,12 +68,9 @@ export const ContactPage: React.FC = () => {
           <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
           <span>Support & Inquiries</span>
         </div>
-        <h1 className="font-heading font-black text-3xl sm:text-5xl text-[#1A1A1A]">
-          We’re Here to Help
+        <h1 className="font-heading font-black text-3xl sm:text-4xl text-[#1A1A1A]">
+          We're Here to Help
         </h1>
-        <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-          Need styling advice, size confirmation, order tracking, or custom gift arrangements? Reach out anytime!
-        </p>
       </div>
 
       {/* WhatsApp Hero Banner */}
@@ -89,9 +86,6 @@ export const ContactPage: React.FC = () => {
             <h3 className="font-heading font-black text-xl sm:text-2xl text-[#1A1A1A] mt-1">
               Chat with Us on WhatsApp
             </h3>
-            <p className="text-xs text-gray-600">
-              Our team typically replies in <strong>less than 5 minutes</strong> between 10:00 AM – 10:00 PM PKT.
-            </p>
           </div>
         </div>
 
@@ -115,7 +109,6 @@ export const ContactPage: React.FC = () => {
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Official WhatsApp</h4>
               <p className="text-xs text-gray-600 mt-0.5">{brandWhatsAppNumber}</p>
-              <span className="text-[11px] text-emerald-600 font-semibold block mt-1">Available 7 days a week</span>
             </div>
           </div>
 
@@ -126,7 +119,6 @@ export const ContactPage: React.FC = () => {
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Email Us</h4>
               <p className="text-xs text-gray-600 mt-0.5">orders@trendybazar.pk</p>
-              <span className="text-[11px] text-gray-400 block mt-1">For brand collabs & PR packages</span>
             </div>
           </div>
 
@@ -137,9 +129,8 @@ export const ContactPage: React.FC = () => {
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Fulfillment Hub</h4>
               <p className="text-xs text-gray-600 mt-0.5">
-                Block D, Gulberg III, Lahore, Punjab, Pakistan
+                Gulberg III, Lahore, Pakistan
               </p>
-              <span className="text-[11px] text-gray-400 block mt-1">Direct dispatch to 150+ Pakistani cities</span>
             </div>
           </div>
 
@@ -149,20 +140,16 @@ export const ContactPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Operating Hours</h4>
-              <p className="text-xs text-gray-600 mt-0.5">Monday – Sunday: 10:00 AM – 10:00 PM</p>
-              <span className="text-[11px] text-gray-400 block mt-1">Online website orders open 24/7</span>
+              <p className="text-xs text-gray-600 mt-0.5">Daily, 10:00 AM – 10:00 PM</p>
             </div>
           </div>
         </div>
 
         {/* Contact Form (7 Cols) */}
         <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="font-heading font-black text-xl text-[#1A1A1A] mb-1">
+          <h3 className="font-heading font-black text-xl text-[#1A1A1A] mb-4">
             Send Us a Message
           </h3>
-          <p className="text-xs text-gray-500 mb-6">
-            Fill in the details below and we’ll get back to you promptly.
-          </p>
 
           {formSubmitted ? (
             <div className="p-8 text-center bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-800 space-y-3">
@@ -268,9 +255,6 @@ export const ContactPage: React.FC = () => {
           <h3 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
             Frequently Asked Questions
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
-            Everything you need to know about shopping at Trendy Bazar Pakistan
-          </p>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-3">

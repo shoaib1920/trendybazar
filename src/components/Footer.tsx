@@ -33,45 +33,22 @@ export const Footer: React.FC = () => {
 
       {/* Trust Highlights Strip */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 pb-10 border-b border-white/10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-3 justify-center sm:justify-start">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#F2B705] shrink-0">
-              <Truck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-heading font-bold text-xs sm:text-sm text-white">Nationwide COD</h4>
-              <p className="text-[11px] text-gray-400">2-4 working days across Pakistan</p>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+            <Truck className="w-4 h-4 text-[#F2B705] shrink-0" />
+            <span className="text-xs font-semibold text-white">Nationwide COD</span>
           </div>
-
-          <div className="flex items-center gap-3 justify-center sm:justify-start">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#F2B705] shrink-0">
-              <RotateCcw className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-heading font-bold text-xs sm:text-sm text-white">7-Day Easy Exchange</h4>
-              <p className="text-[11px] text-gray-400">Hassle-free replacement if faulty</p>
-            </div>
+          <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+            <RotateCcw className="w-4 h-4 text-[#F2B705] shrink-0" />
+            <span className="text-xs font-semibold text-white">7-Day Exchange</span>
           </div>
-
-          <div className="flex items-center gap-3 justify-center sm:justify-start">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#F2B705] shrink-0">
-              <MessageCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-heading font-bold text-xs sm:text-sm text-white">WhatsApp Ordering</h4>
-              <p className="text-[11px] text-gray-400">Direct personal support on chat</p>
-            </div>
+          <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+            <MessageCircle className="w-4 h-4 text-[#F2B705] shrink-0" />
+            <span className="text-xs font-semibold text-white">WhatsApp Ordering</span>
           </div>
-
-          <div className="flex items-center gap-3 justify-center sm:justify-start">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#F2B705] shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-heading font-bold text-xs sm:text-sm text-white">Genuine Stock Checked</h4>
-              <p className="text-[11px] text-gray-400">Tested before dispatch</p>
-            </div>
+          <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+            <ShieldCheck className="w-4 h-4 text-[#F2B705] shrink-0" />
+            <span className="text-xs font-semibold text-white">Quality Checked</span>
           </div>
         </div>
       </div>
@@ -82,9 +59,6 @@ export const Footer: React.FC = () => {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <Logo variant="light" size="lg" />
-            <p className="text-xs sm:text-sm text-gray-400 max-w-sm leading-relaxed">
-              Trendy Bazar brings affordable, genuine wireless earbuds and audio accessories to Pakistan — delivered nationwide with Cash on Delivery.
-            </p>
 
             <div className="flex items-center gap-3 pt-2">
               <a
@@ -145,7 +119,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleCategoryClick('electronics')}
                   className="hover:text-[#F2B705] transition-colors"
                 >
-                  Wireless Earbuds
+                  Earbuds
                 </button>
               </li>
               <li>
@@ -153,7 +127,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleCategoryClick('accessories')}
                   className="hover:text-[#F2B705] transition-colors"
                 >
-                  Accessories
+                  Watches & Accessories
                 </button>
               </li>
             </ul>
@@ -235,8 +209,8 @@ export const Footer: React.FC = () => {
 
             {/* Standing Offer Reminder */}
             <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/10">
-              <span className="text-[11px] font-bold text-[#F2B705] block mb-0.5">Buds Pro 3 — Rs. 1,999</span>
-              <span className="text-[10px] text-gray-400">Rs. 150 Delivery Nationwide</span>
+              <span className="text-[11px] font-bold text-[#F2B705] block mb-0.5">Code: WELCOME5</span>
+              <span className="text-[10px] text-gray-400">5% off + Rs. 150 delivery nationwide</span>
             </div>
           </div>
         </div>

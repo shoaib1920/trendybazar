@@ -15,15 +15,13 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1677086776790-d62757265efe?w=900&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=900&auto=format&fit=crop&q=80'
     ],
-    description: 'The Buds Pro 3 pack punchy bass, clear call quality, and a battery that keeps up with a full day out — all in a pocket-sized case with a satisfying magnetic snap. Pair instantly with any Bluetooth 5.3 phone and control everything with a simple tap.',
+    description: 'Punchy bass, clear calls, and a battery that lasts all day.',
     details: [
-      'Bluetooth 5.3 — stable connection up to 10 meters',
-      'Up to 6 hours playback per charge, 24+ hours with the charging case',
-      'Touch controls: play/pause, skip track, answer calls, summon voice assistant',
-      'Built-in mic with noise-reduction for clear calls',
-      'IPX4 splash & sweat resistant — safe for workouts and light rain',
-      'USB-C fast charging: 10 minutes charge for 1 hour of playback',
-      'Auto-pairs the moment you open the case'
+      'Bluetooth 5.3, up to 10m range',
+      '6h playback, 24h+ with case',
+      'Touch controls & voice assistant',
+      'IPX4 splash resistant',
+      'USB-C fast charging'
     ],
     colors: [
       { name: 'Jet Black', hex: '#141414' },
@@ -44,7 +42,7 @@ export const INITIAL_PRODUCTS: Product[] = [
         userCity: 'Lahore',
         rating: 5,
         date: '2 days ago',
-        comment: 'Sound quality is way better than I expected for the price. Battery easily lasts my whole work day. COD delivery took 2 days.',
+        comment: 'Great sound for the price. Battery lasts my whole day.',
         verified: true
       },
       {
@@ -53,18 +51,108 @@ export const INITIAL_PRODUCTS: Product[] = [
         userCity: 'Karachi',
         rating: 5,
         date: '5 days ago',
-        comment: 'Bought the white pair, looks premium and fits snug during runs. Touch controls took a day to get used to but work great now.',
-        verified: true
-      },
-      {
-        id: 'rev-b3',
-        userName: 'Usman Ali',
-        userCity: 'Islamabad',
-        rating: 4,
-        date: '1 week ago',
-        comment: 'Good bass and call quality. Wish the case was a bit smaller but overall solid buy at Rs. 1999.',
+        comment: 'Fits snug during runs, looks premium.',
         verified: true
       }
     ]
+  },
+  {
+    id: 'tb-watch-01',
+    name: 'Classic Steel Chronograph',
+    slug: 'classic-steel-chronograph-watch',
+    tagline: 'Stainless steel case with a black chronograph dial',
+    category: 'accessories',
+    subCategory: 'watches',
+    price: 4299,
+    images: [
+      'https://images.unsplash.com/photo-1661030418545-fd307b4c6f16?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: 'Stainless steel build, quartz movement, everyday water resistance.',
+    details: [
+      'Stainless steel case & strap',
+      'Quartz movement',
+      'Water resistant (splash safe)',
+      '1-year warranty'
+    ],
+    colors: [{ name: 'Steel / Black', hex: '#2B2B2B' }],
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 25,
+    rating: 4.6,
+    reviewCount: 11
+  },
+  {
+    id: 'tb-watch-02',
+    name: 'Elite Gold-Dial Dress Watch',
+    slug: 'elite-gold-dial-dress-watch',
+    tagline: 'Steel case, gold-tone dial, minimalist face',
+    category: 'accessories',
+    subCategory: 'watches',
+    price: 4599,
+    images: [
+      'https://images.unsplash.com/photo-1767009951305-5ed35f62e3c3?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: 'A dressier build with a warm gold-tone dial for formal wear.',
+    details: [
+      'Stainless steel case',
+      'Gold-tone dial',
+      'Quartz movement',
+      '1-year warranty'
+    ],
+    colors: [{ name: 'Steel / Gold', hex: '#B8860B' }],
+    isNewDrop: true,
+    inStock: true,
+    stockCount: 18,
+    rating: 4.5,
+    reviewCount: 8
+  },
+  {
+    id: 'tb-watch-03',
+    name: 'Classic Leather Strap Watch',
+    slug: 'classic-leather-strap-watch',
+    tagline: 'Round steel case with a genuine leather strap',
+    category: 'accessories',
+    subCategory: 'watches',
+    price: 4499,
+    images: [
+      'https://images.unsplash.com/photo-1612817159623-0399784fd0ce?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: 'Everyday analog watch with a soft leather strap.',
+    details: [
+      'Genuine leather strap',
+      'Quartz movement',
+      'Steel case',
+      '1-year warranty'
+    ],
+    colors: [{ name: 'Brown / Silver', hex: '#6B4A2F' }],
+    inStock: true,
+    stockCount: 22,
+    rating: 4.4,
+    reviewCount: 6
+  },
+  {
+    id: 'tb-watch-04',
+    name: 'Minimalist Analog Watch',
+    slug: 'minimalist-analog-watch',
+    tagline: 'Slim gold and black minimalist face',
+    category: 'accessories',
+    subCategory: 'watches',
+    price: 4750,
+    images: [
+      'https://images.unsplash.com/photo-1773414753637-2738750cfbb6?w=900&auto=format&fit=crop&q=80'
+    ],
+    description: 'A slim, minimalist watch that pairs with anything.',
+    details: [
+      'Slim steel case',
+      'Quartz movement',
+      'Minimalist dial',
+      '1-year warranty'
+    ],
+    colors: [{ name: 'Black / Gold', hex: '#1A1A1A' }],
+    isTrending: true,
+    inStock: true,
+    stockCount: 16,
+    rating: 4.7,
+    reviewCount: 9
   }
 ];

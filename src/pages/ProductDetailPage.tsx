@@ -281,15 +281,15 @@ Please confirm availability and delivery time for Cash on Delivery!`;
           <div className="bg-[#F9F6F0] p-5 rounded-2xl border border-gold-hairline space-y-2.5 text-xs text-gray-600">
             <div className="flex items-center gap-2.5">
               <Truck className="w-4 h-4 text-[#8A6D1F] shrink-0" />
-              <span><strong>2-4 Days Fast Delivery:</strong> Nationwide via Trax Logistics & Leopards Courier</span>
+              <span>2-4 Days Delivery Nationwide</span>
             </div>
             <div className="flex items-center gap-2.5">
               <RotateCcw className="w-4 h-4 text-[#8A6D1F] shrink-0" />
-              <span><strong>7-Day Easy Exchange:</strong> Free replacement if a unit is faulty</span>
+              <span>7-Day Easy Exchange</span>
             </div>
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-[#8A6D1F] shrink-0" />
-              <span><strong>Cash on Delivery (COD):</strong> Pay cash when your parcel arrives</span>
+              <span>Cash on Delivery</span>
             </div>
           </div>
         </div>
@@ -337,10 +337,6 @@ Please confirm availability and delivery time for Cash on Delivery!`;
 
           {activeTab === 'shipping' && (
             <div className="space-y-3">
-              <h4 className="font-serif font-bold text-sm text-[#141414]">Nationwide Logistics:</h4>
-              <p>
-                Parcels are packed in tamper-proof bubble mailers and dispatched directly from our Lahore hub.
-              </p>
               <div className="bg-[#F9F6F0] p-4 rounded-2xl space-y-2 border border-gold-hairline text-xs">
                 <div>• <strong>Delivery Fee:</strong> Flat Rs. 150 (FREE on cart Rs. 3,500+)</div>
                 <div>• <strong>Delivery Timeline:</strong> 2 to 4 working days via Trax Logistics & Leopards Courier with SMS tracking</div>

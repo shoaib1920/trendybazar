@@ -66,7 +66,7 @@ export const ExitIntentPromo: React.FC = () => {
         </h2>
 
         <p className="text-xs text-gray-600 max-w-xs mx-auto mb-6 leading-relaxed">
-          Unlock 5% instant discount on the Buds Pro 3. Valid for our social media community across Pakistan!
+          Unlock 5% instant discount on your order. Valid across Pakistan!
         </p>
 
         {/* Promo Code Box */}

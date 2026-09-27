@@ -71,28 +71,15 @@ export const ShopPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-[#F7F3EC] via-[#FAF6F0] to-[#F7F3EC] rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-6 border border-amber-200/60 shadow-xs"
+        className="mb-6"
       >
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#1A1A1A] bg-[#F2B705] px-2.5 py-0.5 rounded-full">
-              Trendy Bazar
-            </span>
-            <span className="text-[11px] text-emerald-700 font-semibold hidden sm:inline">
-              • COD Nationwide Available
-            </span>
-          </div>
-          <h1 className="font-heading font-black text-2xl sm:text-4xl text-[#1A1A1A] mt-1 mb-2">
-            {shopCategoryFilter === 'electronics'
-              ? 'Wireless Earbuds'
-              : shopCategoryFilter === 'accessories'
-              ? 'Accessories'
-              : 'All Products'}
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Genuine wireless earbuds & audio accessories, delivered nationwide with Cash on Delivery.
-          </p>
-        </div>
+        <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
+          {shopCategoryFilter === 'electronics'
+            ? 'Earbuds'
+            : shopCategoryFilter === 'accessories'
+            ? 'Watches & Accessories'
+            : 'All Products'}
+        </h1>
       </motion.div>
 
       {/* Category Quick Pill Navigation */}

@@ -99,7 +99,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-2 mx-auto sm:mx-0 overflow-hidden text-center sm:text-left">
           <span className="inline-flex items-center gap-1.5 font-medium text-gray-200">
             <span className="w-2 h-2 rounded-full bg-[#8A6D1F] animate-pulse shrink-0"></span>
-            <span>Buds Pro 3 — Rs. 1,999 • Rs. 150 Delivery</span>
+            <span>Rs. 150 Flat Delivery Nationwide</span>
           </span>
           <span className="hidden sm:inline text-gray-500">•</span>
           <button
@@ -338,7 +338,7 @@ export const Navbar: React.FC = () => {
                 <div className="p-3 bg-amber-50 border-b border-gold-hairline flex items-center justify-between text-xs">
                   <span className="font-serif font-bold text-[#141414] flex items-center gap-1.5">
                     <PartyPopper className="w-3.5 h-3.5 text-[#8A6D1F]" />
-                    <span>Buds Pro 3 — Rs. 1,999</span>
+                    <span>5% Off Your First Order</span>
                   </span>
                   <button
                     onClick={handleCopyCode}

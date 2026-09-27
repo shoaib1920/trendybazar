@@ -123,7 +123,7 @@ export const CartDrawer: React.FC = () => {
               </div>
               <h3 className="font-heading font-bold text-base text-[#1A1A1A] mb-1">Your bag is empty</h3>
               <p className="text-xs text-gray-500 max-w-xs mb-6">
-Add the Buds Pro 3 wireless earbuds and audio accessories to get started.
+Add earbuds or a watch to get started.
               </p>
               <button
                 onClick={handleShopNow}

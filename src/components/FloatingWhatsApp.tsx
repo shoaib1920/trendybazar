@@ -8,7 +8,7 @@ export const FloatingWhatsApp: React.FC = () => {
   const [customMsg, setCustomMsg] = useState('');
 
   const QUICK_PROMPTS = [
-    'Assalam-o-Alaikum! Is Buds Pro 3 in stock right now?',
+    'Assalam-o-Alaikum! What do you have in stock right now?',
     'Is Cash on Delivery available for my city?',
     'I want to place an order directly via WhatsApp!',
     'How do I use the WELCOME5 discount code?'
