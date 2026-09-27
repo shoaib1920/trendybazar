@@ -1,0 +1,6 @@
+{
+  "name": "Trendy Bazar",
+  "description": "Trendy Bazar – Genuine Buds Pro 3 true wireless earbuds at Rs. 1,999 with nationwide Cash on Delivery and flat Rs. 150 delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
