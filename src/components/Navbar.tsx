@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Logo } from './Logo';
+import { WATCH_STYLES } from '../data/categories';
 import {
   ShoppingBag,
   Heart,
@@ -13,7 +14,9 @@ import {
   Check,
   Settings2,
   PartyPopper,
-  Headphones
+  Headphones,
+  ChevronDown,
+  Watch
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -23,6 +26,7 @@ export const Navbar: React.FC = () => {
     cartCount,
     setIsCartOpen,
     wishlist,
+    shopCategoryFilter,
     setShopCategoryFilter,
     setShopSubCategoryFilter,
     searchQuery,
@@ -35,6 +39,8 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [isWatchesMenuOpen, setIsWatchesMenuOpen] = useState(false);
+  const [isMobileWatchesOpen, setIsMobileWatchesOpen] = useState(false);
 
   const handleCopyCode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,13 +50,14 @@ export const Navbar: React.FC = () => {
     setTimeout(() => setCodeCopied(false), 2500);
   };
 
-  const handleNavClick = (view: 'home' | 'shop' | 'about' | 'contact' | 'track' | 'admin', category?: string) => {
+  const handleNavClick = (view: 'home' | 'shop' | 'about' | 'contact' | 'track' | 'admin', category?: string, subCategory?: string) => {
     if (category) setShopCategoryFilter(category);
     else setShopCategoryFilter('all');
-    setShopSubCategoryFilter('all');
+    setShopSubCategoryFilter(subCategory || 'all');
 
     setActiveView(view as any);
     setIsMobileMenuOpen(false);
+    setIsWatchesMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -156,12 +163,55 @@ export const Navbar: React.FC = () => {
               <Headphones className="w-3.5 h-3.5 text-[#8A6D1F]" />
               <span>Earbuds</span>
             </button>
-            <button
-              onClick={() => handleNavClick('shop', 'accessories')}
-              className="transition-colors hover:text-[#8A6D1F] py-2 border-b-2 border-transparent text-gray-700"
+            <div
+              className="relative"
+              onMouseEnter={() => setIsWatchesMenuOpen(true)}
+              onMouseLeave={() => setIsWatchesMenuOpen(false)}
             >
-              Accessories
-            </button>
+              <button
+                onClick={() => handleNavClick('shop', 'accessories')}
+                className={`transition-colors hover:text-[#8A6D1F] py-2 border-b-2 flex items-center gap-1 ${
+                  activeView === 'shop' && shopCategoryFilter === 'accessories'
+                    ? 'border-[#8A6D1F] text-[#141414]'
+                    : 'border-transparent text-gray-700'
+                }`}
+              >
+                <Watch className="w-3.5 h-3.5 text-[#8A6D1F]" />
+                <span>Watches</span>
+                <ChevronDown className="w-3 h-3 transition-transform" style={{ transform: isWatchesMenuOpen ? 'rotate(180deg)' : 'none' }} />
+              </button>
+
+              <AnimatePresence>
+                {isWatchesMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 pt-2 w-56 z-30"
+                  >
+                    <div className="bg-white rounded-2xl border border-gold-hairline shadow-xl p-2">
+                      <button
+                        onClick={() => handleNavClick('shop', 'accessories')}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-serif font-bold text-xs text-[#141414]"
+                      >
+                        Shop All Watches
+                      </button>
+                      <div className="my-1 border-t border-gold-hairline/60" />
+                      {WATCH_STYLES.map((style) => (
+                        <button
+                          key={style.id}
+                          onClick={() => handleNavClick('shop', 'accessories', style.id)}
+                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs text-gray-700 hover:text-[#141414]"
+                        >
+                          {style.label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <button
               onClick={() => handleNavClick('about')}
               className={`transition-colors hover:text-[#8A6D1F] py-2 border-b-2 ${
@@ -305,11 +355,41 @@ export const Navbar: React.FC = () => {
                     <span>Earbuds</span>
                   </button>
                   <button
-                    onClick={() => handleNavClick('shop', 'accessories')}
-                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F9F6F0] font-serif font-bold text-sm text-[#141414]"
+                    onClick={() => setIsMobileWatchesOpen(!isMobileWatchesOpen)}
+                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F9F6F0] font-serif font-bold text-sm text-[#141414] flex items-center justify-between"
                   >
-                    Accessories
+                    <span className="flex items-center gap-2">
+                      <Watch className="w-4 h-4 text-[#8A6D1F]" />
+                      <span>Watches</span>
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isMobileWatchesOpen ? 'rotate-180' : ''}`} />
                   </button>
+                  <AnimatePresence>
+                    {isMobileWatchesOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden pl-4 space-y-0.5"
+                      >
+                        <button
+                          onClick={() => handleNavClick('shop', 'accessories')}
+                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs font-bold text-gray-700"
+                        >
+                          Shop All Watches
+                        </button>
+                        {WATCH_STYLES.map((style) => (
+                          <button
+                            key={style.id}
+                            onClick={() => handleNavClick('shop', 'accessories', style.id)}
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs text-gray-700"
+                          >
+                            {style.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <div className="pt-2 border-t border-gold-hairline space-y-1">
                     <button

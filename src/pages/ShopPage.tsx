@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
+import { WATCH_STYLES } from '../data/categories';
 import {
   SlidersHorizontal,
   X,
@@ -8,7 +9,8 @@ import {
   RotateCcw,
   Zap,
   Headphones,
-  ShoppingBag as BagIcon
+  ShoppingBag as BagIcon,
+  ArrowUpDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -17,6 +19,8 @@ export const ShopPage: React.FC = () => {
     products,
     shopCategoryFilter,
     setShopCategoryFilter,
+    shopSubCategoryFilter,
+    setShopSubCategoryFilter,
     searchQuery,
     setSearchQuery
   } = useShop();
@@ -31,6 +35,9 @@ export const ShopPage: React.FC = () => {
     return products
       .filter((product) => {
         if (shopCategoryFilter !== 'all' && product.category !== shopCategoryFilter) {
+          return false;
+        }
+        if (shopSubCategoryFilter !== 'all' && product.subCategory !== shopSubCategoryFilter) {
           return false;
         }
         if (searchQuery.trim()) {
@@ -55,10 +62,11 @@ export const ShopPage: React.FC = () => {
         if (selectedSort === 'newest') return (b.isNewDrop ? 1 : 0) - (a.isNewDrop ? 1 : 0);
         return b.reviewCount * b.rating - a.reviewCount * a.rating;
       });
-  }, [products, shopCategoryFilter, searchQuery, maxPrice, inStockOnly, selectedSort]);
+  }, [products, shopCategoryFilter, shopSubCategoryFilter, searchQuery, maxPrice, inStockOnly, selectedSort]);
 
   const handleResetFilters = () => {
     setShopCategoryFilter('all');
+    setShopSubCategoryFilter('all');
     setSearchQuery('');
     setMaxPrice(5000);
     setInStockOnly(false);
@@ -74,7 +82,9 @@ export const ShopPage: React.FC = () => {
         className="mb-6"
       >
         <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
-          {shopCategoryFilter === 'electronics'
+          {shopSubCategoryFilter !== 'all'
+            ? WATCH_STYLES.find((s) => s.id === shopSubCategoryFilter)?.label + ' Watches'
+            : shopCategoryFilter === 'electronics'
             ? 'Earbuds'
             : shopCategoryFilter === 'accessories'
             ? 'Watches & Accessories'
@@ -89,11 +99,14 @@ export const ShopPage: React.FC = () => {
           {[
             { id: 'all', label: 'All Products', icon: null },
             { id: 'electronics', label: 'Earbuds', icon: Headphones },
-            { id: 'accessories', label: 'Accessories', icon: BagIcon }
+            { id: 'accessories', label: 'Watches', icon: BagIcon }
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setShopCategoryFilter(tab.id)}
+              onClick={() => {
+                setShopCategoryFilter(tab.id);
+                setShopSubCategoryFilter('all');
+              }}
               className={`flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                 shopCategoryFilter === tab.id
                   ? 'bg-[#1A1A1A] text-white shadow-sm ring-2 ring-[#1A1A1A]'
@@ -114,6 +127,36 @@ export const ShopPage: React.FC = () => {
             <span>Filters</span>
           </button>
         </div>
+
+        {/* Watch Style Sub-Pills (shown when browsing Watches) */}
+        {shopCategoryFilter === 'accessories' && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-[11px] font-bold text-gray-400 mr-0.5 hidden sm:inline">Style:</span>
+            <button
+              onClick={() => setShopSubCategoryFilter('all')}
+              className={`py-1.5 px-3 rounded-full text-[11px] font-bold whitespace-nowrap border transition-all ${
+                shopSubCategoryFilter === 'all'
+                  ? 'bg-[#8A6D1F] text-white border-[#8A6D1F]'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-[#8A6D1F]'
+              }`}
+            >
+              All Styles
+            </button>
+            {WATCH_STYLES.map((style) => (
+              <button
+                key={style.id}
+                onClick={() => setShopSubCategoryFilter(style.id)}
+                className={`py-1.5 px-3 rounded-full text-[11px] font-bold whitespace-nowrap border transition-all ${
+                  shopSubCategoryFilter === style.id
+                    ? 'bg-[#8A6D1F] text-white border-[#8A6D1F]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#8A6D1F]'
+                }`}
+              >
+                {style.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Main Content Layout: Desktop Sidebar + Product Grid */}
@@ -133,6 +176,38 @@ export const ShopPage: React.FC = () => {
               <span>Reset</span>
             </button>
           </div>
+
+          {/* Watch Style / Product Type Filter */}
+          {shopCategoryFilter === 'accessories' && (
+            <div className="pt-2">
+              <label className="block font-bold text-xs text-[#1A1A1A] mb-2">Watch Style</label>
+              <div className="grid grid-cols-1 gap-1.5">
+                <button
+                  onClick={() => setShopSubCategoryFilter('all')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
+                    shopSubCategoryFilter === 'all'
+                      ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                      : 'bg-gray-50 text-gray-700 border-gray-200'
+                  }`}
+                >
+                  All Styles
+                </button>
+                {WATCH_STYLES.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => setShopSubCategoryFilter(style.id)}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
+                      shopSubCategoryFilter === style.id
+                        ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                        : 'bg-gray-50 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    {style.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Price Range Slider */}
           <div>
@@ -211,11 +286,14 @@ export const ShopPage: React.FC = () => {
                       {[
                         { id: 'all', label: 'All Products' },
                         { id: 'electronics', label: 'Earbuds' },
-                        { id: 'accessories', label: 'Accessories' }
+                        { id: 'accessories', label: 'Watches' }
                       ].map((c) => (
                         <button
                           key={c.id}
-                          onClick={() => setShopCategoryFilter(c.id)}
+                          onClick={() => {
+                            setShopCategoryFilter(c.id);
+                            setShopSubCategoryFilter('all');
+                          }}
                           className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
                             shopCategoryFilter === c.id
                               ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
@@ -226,6 +304,53 @@ export const ShopPage: React.FC = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Watch Style Filter */}
+                  {shopCategoryFilter === 'accessories' && (
+                    <div>
+                      <label className="block font-bold text-xs text-[#1A1A1A] mb-2">Watch Style</label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          onClick={() => setShopSubCategoryFilter('all')}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
+                            shopSubCategoryFilter === 'all'
+                              ? 'bg-[#8A6D1F] text-white border-[#8A6D1F]'
+                              : 'bg-gray-50 text-gray-700 border-gray-200'
+                          }`}
+                        >
+                          All Styles
+                        </button>
+                        {WATCH_STYLES.map((style) => (
+                          <button
+                            key={style.id}
+                            onClick={() => setShopSubCategoryFilter(style.id)}
+                            className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
+                              shopSubCategoryFilter === style.id
+                                ? 'bg-[#8A6D1F] text-white border-[#8A6D1F]'
+                                : 'bg-gray-50 text-gray-700 border-gray-200'
+                            }`}
+                          >
+                            {style.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sort */}
+                  <div>
+                    <label className="block font-bold text-xs text-[#1A1A1A] mb-2">Sort By</label>
+                    <select
+                      value={selectedSort}
+                      onChange={(e) => setSelectedSort(e.target.value as typeof selectedSort)}
+                      className="w-full text-xs font-semibold text-[#1A1A1A] bg-gray-50 border border-gray-200 rounded-xl py-2.5 px-3 outline-none"
+                    >
+                      <option value="popularity">Featured</option>
+                      <option value="newest">Newest</option>
+                      <option value="price-asc">Price: Low to High</option>
+                      <option value="price-desc">Price: High to Low</option>
+                    </select>
                   </div>
 
                   {/* Price */}
@@ -282,13 +407,19 @@ export const ShopPage: React.FC = () => {
         {/* Product Grid Area */}
         <div className="lg:col-span-3">
           {/* Active Filter Badges */}
-          {(shopCategoryFilter !== 'all' || searchQuery || maxPrice < 5000 || inStockOnly) && (
+          {(shopCategoryFilter !== 'all' || shopSubCategoryFilter !== 'all' || searchQuery || maxPrice < 5000 || inStockOnly) && (
             <div className="flex flex-wrap items-center gap-1.5 mb-4">
               <span className="text-xs text-gray-500">Active:</span>
               {shopCategoryFilter !== 'all' && (
                 <span className="inline-flex items-center gap-1 bg-amber-100 text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
-                  {shopCategoryFilter}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setShopCategoryFilter('all')} />
+                  {shopCategoryFilter === 'accessories' ? 'watches' : shopCategoryFilter}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => { setShopCategoryFilter('all'); setShopSubCategoryFilter('all'); }} />
+                </span>
+              )}
+              {shopSubCategoryFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 bg-amber-100 text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
+                  {WATCH_STYLES.find((s) => s.id === shopSubCategoryFilter)?.label}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setShopSubCategoryFilter('all')} />
                 </span>
               )}
               {searchQuery && (
@@ -312,13 +443,26 @@ export const ShopPage: React.FC = () => {
             </div>
           )}
 
-          {/* Results Count */}
-          <div className="text-xs text-gray-500 mb-3 flex items-center justify-between">
-            <span>Showing <strong className="text-[#1A1A1A]">{filteredProducts.length}</strong> items</span>
-            <span className="text-emerald-700 font-medium hidden sm:inline-flex items-center gap-1">
+          {/* Results Count + Sort */}
+          <div className="text-xs text-gray-500 mb-3 flex items-center justify-between gap-3">
+            <span className="shrink-0">Showing <strong className="text-[#1A1A1A]">{filteredProducts.length}</strong> items</span>
+            <span className="text-emerald-700 font-medium hidden lg:inline-flex items-center gap-1">
               <Zap className="w-3.5 h-3.5 fill-emerald-700" />
               <span>2-4 Days Fast Delivery across Pakistan</span>
             </span>
+            <label className="flex items-center gap-1.5 shrink-0 bg-white border border-gray-200 rounded-full pl-3 pr-2 py-1.5">
+              <ArrowUpDown className="w-3 h-3 text-[#8A6D1F]" />
+              <select
+                value={selectedSort}
+                onChange={(e) => setSelectedSort(e.target.value as typeof selectedSort)}
+                className="text-xs font-semibold text-[#1A1A1A] bg-transparent outline-none cursor-pointer"
+              >
+                <option value="popularity">Featured</option>
+                <option value="newest">Newest</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </label>
           </div>
 
           {filteredProducts.length === 0 ? (

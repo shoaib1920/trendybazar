@@ -59,11 +59,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'classic-steel-chronograph-watch',
     tagline: 'Stainless steel case with a black chronograph dial',
     category: 'accessories',
-    subCategory: 'watches',
+    subCategory: 'chronograph',
     price: 4299,
     images: [
-      'https://images.unsplash.com/photo-1661030418545-fd307b4c6f16?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1661030418924-52142661241d?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1646292521154-08022551353b?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Stainless steel build, quartz movement, everyday water resistance.',
     details: [
@@ -85,11 +84,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'elite-gold-dial-dress-watch',
     tagline: 'Steel case, gold-tone dial, minimalist face',
     category: 'accessories',
-    subCategory: 'watches',
+    subCategory: 'dress',
     price: 4599,
     images: [
-      'https://images.unsplash.com/photo-1767009951305-5ed35f62e3c3?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1627350873107-d5d4e3977ec6?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1767009951305-5ed35f62e3c3?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'A dressier build with a warm gold-tone dial for formal wear.',
     details: [
@@ -111,11 +109,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'classic-leather-strap-watch',
     tagline: 'Round steel case with a genuine leather strap',
     category: 'accessories',
-    subCategory: 'watches',
+    subCategory: 'leather',
     price: 4499,
     images: [
-      'https://images.unsplash.com/photo-1612817159623-0399784fd0ce?w=900&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1630552237339-9520955b603c?w=900&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1572460150538-637eb6098256?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'Everyday analog watch with a soft leather strap.',
     details: [
@@ -136,10 +133,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: 'minimalist-analog-watch',
     tagline: 'Slim gold and black minimalist face',
     category: 'accessories',
-    subCategory: 'watches',
+    subCategory: 'minimalist',
     price: 4750,
     images: [
-      'https://images.unsplash.com/photo-1773414753637-2738750cfbb6?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1611758617265-c37748caee9f?w=900&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1779409919727-bafd9a982269?w=900&auto=format&fit=crop&q=80'
     ],
     description: 'A slim, minimalist watch that pairs with anything.',

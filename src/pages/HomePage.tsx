@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
+import { WATCH_STYLES } from '../data/categories';
 import {
   ShoppingBag,
   MessageCircle,
   Truck,
   RotateCcw,
-  ShieldCheck
+  ShieldCheck,
+  Headphones,
+  Watch,
+  Award,
+  ArrowRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const HomePage: React.FC = () => {
-  const { products, setActiveView, openWhatsAppGeneral, t } = useShop();
+  const { products, setActiveView, setShopCategoryFilter, setShopSubCategoryFilter, openWhatsAppGeneral, t } = useShop();
 
   const heroProduct = products.find((p) => p.slug === 'buds-pro-3-true-wireless-earbuds') || products[0];
+  const watchProducts = products.filter((p) => p.category === 'accessories');
+
+  const [activeTab, setActiveTab] = useState<'all' | 'electronics' | 'accessories'>('all');
+  const tabbedProducts = useMemo(
+    () => (activeTab === 'all' ? products : products.filter((p) => p.category === activeTab)),
+    [products, activeTab]
+  );
 
   const handleShopNow = () => {
+    setActiveView('shop');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCategoryTile = (category: string, subCategory?: string) => {
+    setShopCategoryFilter(category);
+    setShopSubCategoryFilter(subCategory || 'all');
     setActiveView('shop');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -69,7 +88,7 @@ export const HomePage: React.FC = () => {
 
       {/* TRUST STRIP — icons only */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-3 gap-3 sm:gap-6 bg-[#F9F6F0] border border-gold-hairline rounded-3xl p-5 sm:p-6 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 bg-[#F9F6F0] border border-gold-hairline rounded-3xl p-5 sm:p-6 text-center">
           <div className="flex flex-col items-center gap-1.5">
             <Truck className="w-5 h-5 text-[#8A6D1F]" />
             <span className="text-[11px] sm:text-xs font-semibold text-[#141414]">COD Nationwide</span>
@@ -82,18 +101,125 @@ export const HomePage: React.FC = () => {
             <ShieldCheck className="w-5 h-5 text-[#8A6D1F]" />
             <span className="text-[11px] sm:text-xs font-semibold text-[#141414]">Quality Checked</span>
           </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <Award className="w-5 h-5 text-[#8A6D1F]" />
+            <span className="text-[11px] sm:text-xs font-semibold text-[#141414]">1-Year Warranty</span>
+          </div>
         </div>
       </section>
 
-      {/* PRODUCT GRID */}
+      {/* SHOP BY CATEGORY */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="font-serif font-black text-xl sm:text-2xl text-[#141414] mb-5">
-          All Products
+          Shop by Category
         </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          {/* Earbuds Tile */}
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            onClick={() => handleCategoryTile('electronics')}
+            className="group relative rounded-3xl overflow-hidden border border-gold-hairline cursor-pointer aspect-[16/10] bg-[#141414]"
+          >
+            <img
+              src={heroProduct.images[0]}
+              alt="Shop Earbuds"
+              className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 flex items-end justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-[#F2B705] text-xs font-bold mb-1">
+                  <Headphones className="w-4 h-4" />
+                  <span>Audio</span>
+                </span>
+                <h3 className="font-serif font-black text-xl sm:text-2xl text-white">Earbuds</h3>
+              </div>
+              <span className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center group-hover:bg-[#F2B705] transition-colors shrink-0">
+                <ArrowRight className="w-4 h-4 text-[#141414]" />
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Watches Tile */}
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            onClick={() => handleCategoryTile('accessories')}
+            className="group relative rounded-3xl overflow-hidden border border-gold-hairline cursor-pointer aspect-[16/10] bg-[#141414]"
+          >
+            <img
+              src={watchProducts[0]?.images[0]}
+              alt="Shop Watches"
+              className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 flex items-end justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-[#F2B705] text-xs font-bold mb-1">
+                  <Watch className="w-4 h-4" />
+                  <span>Timepieces</span>
+                </span>
+                <h3 className="font-serif font-black text-xl sm:text-2xl text-white">Watches</h3>
+              </div>
+              <span className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center group-hover:bg-[#F2B705] transition-colors shrink-0">
+                <ArrowRight className="w-4 h-4 text-[#141414]" />
+              </span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Watch Style Chips */}
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          {WATCH_STYLES.map((style) => (
+            <button
+              key={style.id}
+              onClick={() => handleCategoryTile('accessories', style.id)}
+              className="py-2 px-4 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-700 hover:border-[#8A6D1F] hover:text-[#8A6D1F] transition-colors"
+            >
+              {style.label} Watches
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURED PRODUCTS — tabbed */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <h2 className="font-serif font-black text-xl sm:text-2xl text-[#141414]">
+            Featured Products
+          </h2>
+          <div className="flex items-center gap-1.5 bg-[#F7F3EC] rounded-full p-1">
+            {[
+              { id: 'all' as const, label: 'All' },
+              { id: 'electronics' as const, label: 'Earbuds' },
+              { id: 'accessories' as const, label: 'Watches' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-1.5 px-3.5 rounded-full text-xs font-bold transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-[#1A1A1A] text-white shadow-sm'
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {products.map((product) => (
+          {tabbedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
+        </div>
+        <div className="text-center mt-8">
+          <button
+            onClick={handleShopNow}
+            className="inline-flex items-center gap-2 px-7 py-3 bg-white border-2 border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white text-[#1A1A1A] font-serif font-bold text-xs rounded-full transition-all active:scale-95"
+          >
+            <span>View All Products</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </section>
     </div>
