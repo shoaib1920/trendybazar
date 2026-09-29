@@ -11,15 +11,31 @@ import {
   Headphones,
   Watch,
   Award,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+
+const HERO_SLIDES = [
+  { type: 'image' as const },
+  { type: 'video' as const, src: '/hero-video-2.mp4' }
+];
 
 export const HomePage: React.FC = () => {
   const { products, setActiveView, setShopCategoryFilter, setShopSubCategoryFilter, openWhatsAppGeneral, t } = useShop();
 
   const heroProduct = products.find((p) => p.slug === 'buds-pro-3-true-wireless-earbuds') || products[0];
   const watchProducts = products.filter((p) => p.category === 'accessories');
+
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [isHeroMuted, setIsHeroMuted] = useState(true);
+
+  const goToSlide = (index: number) => {
+    setHeroSlide((index + HERO_SLIDES.length) % HERO_SLIDES.length);
+  };
 
   const [activeTab, setActiveTab] = useState<'all' | 'electronics' | 'accessories'>('all');
   const tabbedProducts = useMemo(
@@ -73,15 +89,79 @@ export const HomePage: React.FC = () => {
           </motion.div>
 
           <div className="relative rounded-3xl overflow-hidden shadow-xl border border-gold-hairline aspect-4/3 lg:aspect-square max-w-md mx-auto w-full bg-black">
-            <video
-              src="/hero-earbuds.mp4"
-              poster={heroProduct.images[0]}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            <AnimatePresence mode="wait">
+              {heroSlide === 0 ? (
+                <motion.img
+                  key="hero-image"
+                  src={heroProduct.images[0]}
+                  alt={heroProduct.name}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <motion.video
+                  key="hero-video"
+                  src={HERO_SLIDES[1].src}
+                  autoPlay
+                  muted={isHeroMuted}
+                  loop
+                  playsInline
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Slide Arrows */}
+            <button
+              onClick={() => goToSlide(heroSlide - 1)}
+              aria-label="Previous slide"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white backdrop-blur-sm flex items-center justify-center shadow-md transition-all active:scale-90 z-10"
+            >
+              <ChevronLeft className="w-5 h-5 text-[#141414]" />
+            </button>
+            <button
+              onClick={() => goToSlide(heroSlide + 1)}
+              aria-label="Next slide"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white backdrop-blur-sm flex items-center justify-center shadow-md transition-all active:scale-90 z-10"
+            >
+              <ChevronRight className="w-5 h-5 text-[#141414]" />
+            </button>
+
+            {/* Mute Toggle — video slide only */}
+            {heroSlide === 1 && (
+              <button
+                onClick={() => setIsHeroMuted((m) => !m)}
+                aria-label={isHeroMuted ? 'Unmute video' : 'Mute video'}
+                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/85 hover:bg-white backdrop-blur-sm flex items-center justify-center shadow-md transition-all active:scale-90 z-10"
+              >
+                {isHeroMuted ? (
+                  <VolumeX className="w-4 h-4 text-[#141414]" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-[#141414]" />
+                )}
+              </button>
+            )}
+
+            {/* Slide Dots */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+              {HERO_SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToSlide(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    heroSlide === i ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>

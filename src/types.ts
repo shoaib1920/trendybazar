@@ -18,7 +18,7 @@ export interface Product {
   slug: string;
   tagline: string;
   category: 'electronics' | 'accessories';
-  subCategory?: 'earbuds' | 'cables' | 'cases' | 'chargers' | 'speakers' | 'chronograph' | 'dress' | 'leather' | 'minimalist';
+  subCategory?: string;
   price: number; // in PKR
   originalPrice?: number;
   discountPercentage?: number;

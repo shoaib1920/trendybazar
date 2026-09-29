@@ -8,6 +8,8 @@ import {
   BackInStockRequest
 } from '../types';
 import { INITIAL_PRODUCTS } from '../data/products';
+import { isFirebaseConfigured } from '../lib/firebase';
+import { subscribeToProducts, saveProductRemote, deleteProductRemote, seedProductsIfEmpty } from '../lib/productsService';
 
 export interface ToastMessage {
   id: string;
@@ -37,6 +39,9 @@ interface ShopContextType {
   // Catalog
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  saveProduct: (product: Product) => Promise<void>;
+  deleteProduct: (productId: string) => Promise<void>;
+  isCloudBackendConfigured: boolean;
 
   // Cart
   cart: CartItem[];
@@ -256,6 +261,41 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('tb_products_v2', JSON.stringify(products));
   }, [products]);
+
+  // When Firebase is configured, the Firestore `products` collection
+  // becomes the source of truth: seed it once if empty, then keep local
+  // state live-synced to it. Without Firebase, products stay in localStorage
+  // only (set up above), exactly as before.
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    let unsubscribe = () => {};
+    (async () => {
+      await seedProductsIfEmpty(INITIAL_PRODUCTS);
+      unsubscribe = subscribeToProducts((remoteProducts) => {
+        if (remoteProducts.length > 0) setProducts(remoteProducts);
+      });
+    })();
+    return () => unsubscribe();
+  }, []);
+
+  const saveProduct = async (product: Product) => {
+    if (isFirebaseConfigured) {
+      await saveProductRemote(product);
+    } else {
+      setProducts((prev) => {
+        const exists = prev.some((p) => p.id === product.id);
+        return exists ? prev.map((p) => (p.id === product.id ? product : p)) : [product, ...prev];
+      });
+    }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    if (isFirebaseConfigured) {
+      await deleteProductRemote(productId);
+    } else {
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('tb_loyalty_points', loyaltyPoints.toString());
@@ -525,6 +565,9 @@ Please send me the order confirmation and COD dispatch details!`;
         setShopSubCategoryFilter,
         products,
         setProducts,
+        saveProduct,
+        deleteProduct,
+        isCloudBackendConfigured: isFirebaseConfigured,
         cart,
         cartCount,
         cartSubtotal,

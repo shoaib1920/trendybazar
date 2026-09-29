@@ -1,93 +1,219 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Product } from '../types';
-import { 
-  Plus, 
-  Settings2, 
-  Package, 
-  ShoppingBag, 
-  Tag, 
-  Check, 
-  Trash2, 
-  Edit3, 
-  RefreshCw,
+import { WATCH_STYLES } from '../data/categories';
+import { subscribeToAdminAuth, signInAdmin, signOutAdmin } from '../lib/adminAuth';
+import { uploadImageToCloudinary, isCloudinaryConfigured } from '../lib/cloudinary';
+import type { User } from 'firebase/auth';
+import {
+  Plus,
+  Settings2,
+  Package,
+  ShoppingBag,
+  Tag,
+  Trash2,
+  Edit3,
   Phone,
-  MapPin,
-  X
+  X,
+  UploadCloud,
+  Cloud,
+  CloudOff,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 
+const emptyForm = () => ({
+  id: '',
+  name: '',
+  tagline: '',
+  description: '',
+  category: 'electronics' as 'electronics' | 'accessories',
+  subCategory: '',
+  price: 1999,
+  originalPrice: 0,
+  stockCount: 15,
+  rating: 5,
+  reviewCount: 1,
+  inStock: true,
+  isNewDrop: false,
+  isBestSeller: false,
+  isTrending: false,
+  images: [''] as string[],
+  details: ''
+});
+
 export const AdminManagerModal: React.FC = () => {
-  const { 
-    products, 
-    setProducts, 
-    orders, 
-    showToast, 
-    setActiveView 
+  const {
+    products,
+    saveProduct,
+    deleteProduct,
+    isCloudBackendConfigured,
+    orders,
+    showToast,
+    setActiveView
   } = useShop();
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'discounts'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'discounts'>('products');
 
-  // New Product Form state
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    category: 'electronics' as 'electronics' | 'accessories',
-    price: 1999,
-    originalPrice: 2500,
-    stockCount: 15,
-    imageUrl: 'https://images.unsplash.com/photo-1746645297670-80e76130ceca?w=900&auto=format&fit=crop&q=80',
-    description: 'Fresh stock item added by Trendy Bazar manager.',
-    tagline: 'Genuine stock, quality checked before dispatch'
-  });
+  // --- Admin auth (only relevant once Firebase is configured) ---
+  const [adminUser, setAdminUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
-  const handleAddProduct = (e: React.FormEvent) => {
+  useEffect(() => {
+    const unsubscribe = subscribeToAdminAuth((user) => {
+      setAdminUser(user);
+      setAuthChecked(true);
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProduct.name.trim()) return;
+    setLoginError('');
+    setIsSigningIn(true);
+    try {
+      await signInAdmin(loginEmail, loginPassword);
+      showToast('Signed in to admin panel', 'success');
+    } catch (err: any) {
+      setLoginError(err?.message?.includes('invalid-credential') || err?.code === 'auth/invalid-credential'
+        ? 'Incorrect email or password.'
+        : 'Sign-in failed. Check your Firebase Authentication setup.');
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
 
-    const slug = newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const created: Product = {
-      id: `tb-custom-${Date.now()}`,
-      name: newProduct.name,
-      slug,
-      tagline: newProduct.tagline,
-      category: newProduct.category,
-      price: Number(newProduct.price),
-      originalPrice: Number(newProduct.originalPrice),
-      discountPercentage: Math.round(((newProduct.originalPrice - newProduct.price) / newProduct.originalPrice) * 100),
-      images: [newProduct.imageUrl],
-      description: newProduct.description,
-      details: ['100% Quality inspected', 'Genuine stock', 'Dispatched from Lahore warehouse'],
-      inStock: true,
-      stockCount: Number(newProduct.stockCount),
-      rating: 5.0,
-      reviewCount: 1,
-      isNewDrop: true
-    };
+  // --- Product form state ---
+  const [form, setForm] = useState(emptyForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-    setProducts((prev) => [created, ...prev]);
-    showToast(`Added "${created.name}" to catalog!`, 'success');
-    setNewProduct({
-      name: '',
-      category: 'electronics',
-      price: 1999,
-      originalPrice: 2500,
-      stockCount: 15,
-      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNQymJdrM9t_5WqKcUnisdV6jhBYDEyV3O9YfXq2pZaA&s=10',
-      description: '',
-      tagline: ''
+  const resetForm = () => {
+    setForm(emptyForm());
+    setEditingId(null);
+  };
+
+  const handleEditProduct = (p: Product) => {
+    setEditingId(p.id);
+    setForm({
+      id: p.id,
+      name: p.name,
+      tagline: p.tagline,
+      description: p.description,
+      category: p.category,
+      subCategory: p.subCategory || '',
+      price: p.price,
+      originalPrice: p.originalPrice || 0,
+      stockCount: p.stockCount,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+      inStock: p.inStock,
+      isNewDrop: !!p.isNewDrop,
+      isBestSeller: !!p.isBestSeller,
+      isTrending: !!p.isTrending,
+      images: p.images.length > 0 ? [...p.images] : [''],
+      details: p.details.join('\n')
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleImageUrlChange = (index: number, value: string) => {
+    setForm((prev) => {
+      const images = [...prev.images];
+      images[index] = value;
+      return { ...prev, images };
     });
   };
 
-  const handleToggleStock = (productId: string) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, inStock: !p.inStock } : p))
-    );
+  const handleAddImageSlot = () => {
+    setForm((prev) => ({ ...prev, images: [...prev.images, ''] }));
+  };
+
+  const handleRemoveImageSlot = (index: number) => {
+    setForm((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
+
+  const handleFileSelected = async (index: number, file: File | undefined) => {
+    if (!file) return;
+    setUploadingIndex(index);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      handleImageUrlChange(index, url);
+      showToast('Image uploaded to Cloudinary', 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Image upload failed', 'warning');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+
+    const cleanImages = form.images.map((i) => i.trim()).filter(Boolean);
+    if (cleanImages.length === 0) {
+      showToast('Add at least one image URL', 'warning');
+      return;
+    }
+
+    const slug = form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const id = editingId || `tb-custom-${Date.now()}`;
+    const discountPercentage =
+      form.originalPrice && form.originalPrice > form.price
+        ? Math.round(((form.originalPrice - form.price) / form.originalPrice) * 100)
+        : undefined;
+
+    const product: Product = {
+      id,
+      name: form.name.trim(),
+      slug,
+      tagline: form.tagline.trim(),
+      category: form.category,
+      subCategory: form.subCategory.trim() || undefined,
+      price: Number(form.price),
+      originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
+      discountPercentage,
+      images: cleanImages,
+      description: form.description.trim(),
+      details: form.details.split('\n').map((d) => d.trim()).filter(Boolean),
+      inStock: form.inStock,
+      stockCount: Number(form.stockCount),
+      rating: Number(form.rating),
+      reviewCount: Number(form.reviewCount),
+      isNewDrop: form.isNewDrop,
+      isBestSeller: form.isBestSeller,
+      isTrending: form.isTrending
+    };
+
+    setIsSaving(true);
+    try {
+      await saveProduct(product);
+      showToast(editingId ? `Updated "${product.name}"` : `Added "${product.name}" to catalog!`, 'success');
+      resetForm();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to save product', 'warning');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleStock = async (p: Product) => {
+    await saveProduct({ ...p, inStock: !p.inStock });
     showToast('Stock availability updated', 'info');
   };
 
-  const handleDeleteProduct = (productId: string) => {
-    if (confirm('Are you sure you want to remove this product from the store catalog?')) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+  const handleDeleteProduct = async (productId: string, name: string) => {
+    if (confirm(`Remove "${name}" from the store catalog?`)) {
+      await deleteProduct(productId);
       showToast('Product removed', 'info');
+      if (editingId === productId) resetForm();
     }
   };
 
@@ -102,9 +228,70 @@ export const AdminManagerModal: React.FC = () => {
     showToast('Copied orders list to clipboard for courier manifest!', 'success');
   };
 
+  // --- Auth gate: only enforced once Firebase is actually configured ---
+  const needsLogin = isCloudBackendConfigured && authChecked && !adminUser;
+
+  if (isCloudBackendConfigured && !authChecked) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-24 flex justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#8A6D1F]" />
+      </div>
+    );
+  }
+
+  if (needsLogin) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 sm:py-24">
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#8A6D1F] mb-2">
+            <Settings2 className="w-4 h-4" />
+            <span>Admin Sign In</span>
+          </div>
+          <h1 className="font-heading font-black text-xl text-[#1A1A1A] mb-1">Trendy Bazar Admin</h1>
+          <p className="text-xs text-gray-500 mb-5">Sign in with your Firebase admin account to manage the live catalog.</p>
+
+          <form onSubmit={handleLogin} className="space-y-3">
+            <input
+              type="email"
+              required
+              placeholder="admin@email.com"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-[#8A6D1F]"
+            />
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-[#8A6D1F]"
+            />
+            {loginError && <p className="text-xs text-red-600">{loginError}</p>}
+            <button
+              type="submit"
+              disabled={isSigningIn}
+              className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isSigningIn && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              <span>Sign In</span>
+            </button>
+          </form>
+
+          <button
+            onClick={() => setActiveView('home')}
+            className="w-full text-center mt-4 text-xs text-gray-500 hover:text-black"
+          >
+            ← Back to store
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10" id="admin-manager-dashboard">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-gray-200">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-[#F2B705] mb-1">
             <Settings2 className="w-4 h-4" />
@@ -114,11 +301,20 @@ export const AdminManagerModal: React.FC = () => {
             Trendy Bazar Admin Manager
           </h1>
           <p className="text-xs text-gray-500">
-            Easily manage live inventory, price updates, discounts, and courier booking manifests.
+            Manage live inventory, prices, images, and courier booking manifests — no code changes needed.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          {adminUser && (
+            <button
+              onClick={() => signOutAdmin()}
+              className="text-xs font-bold text-gray-600 hover:text-black py-2 px-3.5 bg-gray-100 rounded-full flex items-center gap-1.5"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          )}
           <button
             onClick={() => setActiveView('shop')}
             className="text-xs font-bold text-gray-600 hover:text-black py-2 px-3.5 bg-gray-100 rounded-full"
@@ -128,36 +324,46 @@ export const AdminManagerModal: React.FC = () => {
         </div>
       </div>
 
+      {/* Backend status banner */}
+      <div
+        className={`flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-xl mb-6 ${
+          isCloudBackendConfigured
+            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+            : 'bg-amber-50 text-amber-800 border border-amber-200'
+        }`}
+      >
+        {isCloudBackendConfigured ? <Cloud className="w-4 h-4 shrink-0" /> : <CloudOff className="w-4 h-4 shrink-0" />}
+        <span>
+          {isCloudBackendConfigured
+            ? `Connected to Firebase — changes are live for every visitor${adminUser ? ` (signed in as ${adminUser.email})` : ''}.`
+            : 'Local demo mode — changes are saved only in this browser. Set up Firebase to make edits live for everyone.'}
+        </span>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 pb-2">
         <button
-          onClick={() => setActiveTab('orders')}
-          className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'orders'
-              ? 'bg-[#1A1A1A] text-white'
-              : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
-          }`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>Customer Orders ({orders.length})</span>
-        </button>
-        <button
           onClick={() => setActiveTab('products')}
           className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'products'
-              ? 'bg-[#1A1A1A] text-white'
-              : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
+            activeTab === 'products' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
           }`}
         >
           <Package className="w-3.5 h-3.5" />
           <span>Product Catalog ({products.length})</span>
         </button>
         <button
+          onClick={() => setActiveTab('orders')}
+          className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'orders' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
+          }`}
+        >
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Customer Orders ({orders.length})</span>
+        </button>
+        <button
           onClick={() => setActiveTab('discounts')}
           className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'discounts'
-              ? 'bg-[#1A1A1A] text-white'
-              : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
+            activeTab === 'discounts' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
           }`}
         >
           <Tag className="w-3.5 h-3.5" />
@@ -165,7 +371,312 @@ export const AdminManagerModal: React.FC = () => {
         </button>
       </div>
 
-      {/* 1. ORDERS TAB */}
+      {/* 1. PRODUCTS TAB */}
+      {activeTab === 'products' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Add / Edit Product Form */}
+          <div className="lg:col-span-1 bg-white p-5 rounded-2xl border border-gray-200 shadow-xs h-fit">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-heading font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
+                {editingId ? <Edit3 className="w-4 h-4 text-[#F2B705]" /> : <Plus className="w-4 h-4 text-[#F2B705]" />}
+                <span>{editingId ? 'Edit Product' : 'Add New Product'}</span>
+              </h3>
+              {editingId && (
+                <button type="button" onClick={resetForm} className="text-[11px] text-gray-500 hover:text-red-600 font-semibold">
+                  Cancel
+                </button>
+              )}
+            </div>
+
+            <form onSubmit={handleSaveProduct} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Product Title</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Buds Pro 3 True Wireless Earbuds"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Tagline</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Crisp bass, all-day battery"
+                  value={form.tagline}
+                  onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Category</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value as any, subCategory: '' })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  >
+                    <option value="electronics">Electronics</option>
+                    <option value="accessories">Accessories</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Sub-Category</label>
+                  {form.category === 'accessories' ? (
+                    <select
+                      value={form.subCategory}
+                      onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+                      className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                    >
+                      <option value="">None</option>
+                      {WATCH_STYLES.map((s) => (
+                        <option key={s.id} value={s.id}>{s.label}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="e.g. earbuds"
+                      value={form.subCategory}
+                      onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+                      className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Price (Rs.)</label>
+                  <input
+                    type="number"
+                    required
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Was (Rs.)</label>
+                  <input
+                    type="number"
+                    value={form.originalPrice}
+                    onChange={(e) => setForm({ ...form, originalPrice: Number(e.target.value) })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Stock</label>
+                  <input
+                    type="number"
+                    value={form.stockCount}
+                    onChange={(e) => setForm({ ...form, stockCount: Number(e.target.value) })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Rating (0-5)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={form.rating}
+                    onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Review Count</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.reviewCount}
+                    onChange={(e) => setForm({ ...form, reviewCount: Number(e.target.value) })}
+                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Images */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-gray-700">Product Images</label>
+                  {!isCloudinaryConfigured && (
+                    <span className="text-[10px] text-gray-400">Paste URLs (Cloudinary not set up)</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {form.images.map((url, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <input
+                        type="url"
+                        required={i === 0}
+                        placeholder="https://..."
+                        value={url}
+                        onChange={(e) => handleImageUrlChange(i, e.target.value)}
+                        className="flex-1 min-w-0 bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none text-[11px]"
+                      />
+                      {isCloudinaryConfigured && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={(el) => { fileInputRefs.current[i] = el; }}
+                            onChange={(e) => handleFileSelected(i, e.target.files?.[0])}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputRefs.current[i]?.click()}
+                            disabled={uploadingIndex === i}
+                            title="Upload image"
+                            className="p-2 bg-[#1A1A1A] text-white rounded-xl shrink-0 disabled:opacity-50"
+                          >
+                            {uploadingIndex === i ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <UploadCloud className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </>
+                      )}
+                      {form.images.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImageSlot(i)}
+                          className="p-2 text-gray-400 hover:text-red-600 shrink-0"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddImageSlot}
+                  className="mt-1.5 text-[11px] font-bold text-[#8A6D1F] hover:underline"
+                >
+                  + Add another image
+                </button>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Bullet Details (one per line)</label>
+                <textarea
+                  rows={3}
+                  placeholder={'Quartz movement\nWater resistant\n1-year warranty'}
+                  value={form.details}
+                  onChange={(e) => setForm({ ...form, details: e.target.value })}
+                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-3 pt-1">
+                <label className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={form.inStock} onChange={(e) => setForm({ ...form, inStock: e.target.checked })} />
+                  <span>In Stock</span>
+                </label>
+                <label className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={form.isNewDrop} onChange={(e) => setForm({ ...form, isNewDrop: e.target.checked })} />
+                  <span>New Drop</span>
+                </label>
+                <label className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={form.isBestSeller} onChange={(e) => setForm({ ...form, isBestSeller: e.target.checked })} />
+                  <span>Bestseller</span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{editingId ? 'Save Changes' : 'Publish to Store'}</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Existing Products List */}
+          <div className="lg:col-span-2 space-y-2.5">
+            <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">
+              Live Catalog Items ({products.length})
+            </h3>
+
+            <div className="space-y-2 max-h-[700px] overflow-y-auto pr-1">
+              {products.map((p) => (
+                <div
+                  key={p.id}
+                  className={`bg-white p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
+                    editingId === p.id ? 'border-[#8A6D1F] ring-1 ring-[#8A6D1F]/30' : 'border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={p.images[0]}
+                      alt={p.name}
+                      className="w-12 h-12 object-cover rounded-lg bg-gray-100 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-[#1A1A1A] line-clamp-1">{p.name}</h4>
+                      <span className="text-[11px] text-gray-500 capitalize">
+                        {p.category}{p.subCategory ? ` • ${p.subCategory}` : ''} • Stock: {p.stockCount}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-bold text-[#1A1A1A] hidden sm:inline">Rs. {p.price.toLocaleString()}</span>
+                    <button
+                      onClick={() => handleToggleStock(p)}
+                      className={`px-2 py-1 rounded text-[10px] font-bold ${
+                        p.inStock ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {p.inStock ? 'In Stock' : 'Out of Stock'}
+                    </button>
+                    <button
+                      onClick={() => handleEditProduct(p)}
+                      className="p-1.5 text-gray-400 hover:text-[#8A6D1F] rounded"
+                      title="Edit Product"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(p.id, p.name)}
+                      className="p-1.5 text-gray-400 hover:text-red-600 rounded"
+                      title="Delete Product"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. ORDERS TAB */}
       {activeTab === 'orders' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center bg-[#F7F3EC] p-4 rounded-2xl">
@@ -230,154 +741,6 @@ export const AdminManagerModal: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* 2. PRODUCTS TAB */}
-      {activeTab === 'products' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Add New Product Form */}
-          <div className="lg:col-span-1 bg-white p-5 rounded-2xl border border-gray-200 shadow-xs">
-            <h3 className="font-heading font-bold text-sm text-[#1A1A1A] mb-3 flex items-center gap-1.5">
-              <Plus className="w-4 h-4 text-[#F2B705]" />
-              <span>Add New Product to Store</span>
-            </h3>
-
-            <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Product Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Buds Pro 3 True Wireless Earbuds"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Category</label>
-                  <select
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value as any })}
-                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                  >
-                    <option value="electronics">Electronics</option>
-                    <option value="accessories">Accessories</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Stock Count</label>
-                  <input
-                    type="number"
-                    value={newProduct.stockCount}
-                    onChange={(e) => setNewProduct({ ...newProduct, stockCount: Number(e.target.value) })}
-                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Selling Price (Rs.)</label>
-                  <input
-                    type="number"
-                    required
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Original Price (Rs.)</label>
-                  <input
-                    type="number"
-                    value={newProduct.originalPrice}
-                    onChange={(e) => setNewProduct({ ...newProduct, originalPrice: Number(e.target.value) })}
-                    className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Image URL</label>
-                <input
-                  type="url"
-                  required
-                  value={newProduct.imageUrl}
-                  onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none text-[11px]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Short Tagline</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Crisp bass, all-day battery"
-                  value={newProduct.tagline}
-                  onChange={(e) => setNewProduct({ ...newProduct, tagline: e.target.value })}
-                  className="w-full bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs rounded-xl transition-all"
-              >
-                Publish to Store
-              </button>
-            </form>
-          </div>
-
-          {/* Existing Products List */}
-          <div className="lg:col-span-2 space-y-2.5">
-            <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">
-              Live Catalog Items ({products.length})
-            </h3>
-
-            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-              {products.map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-white p-3 rounded-xl border border-gray-200 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={p.images[0]}
-                      alt={p.name}
-                      className="w-12 h-12 object-cover rounded-lg bg-gray-100"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-[#1A1A1A] line-clamp-1">{p.name}</h4>
-                      <span className="text-[11px] text-gray-500 capitalize">{p.category} • Stock: {p.stockCount}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-[#1A1A1A]">Rs. {p.price.toLocaleString()}</span>
-                    <button
-                      onClick={() => handleToggleStock(p.id)}
-                      className={`px-2 py-1 rounded text-[10px] font-bold ${
-                        p.inStock ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {p.inStock ? 'In Stock' : 'Out of Stock'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(p.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 rounded"
-                      title="Delete Product"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}

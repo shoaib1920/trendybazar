@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Product catalog: anyone can read (storefront), only a signed-in
+    // admin can create/update/delete (used by the Admin Manager panel).
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
