@@ -51,7 +51,7 @@ export const HomePage: React.FC = () => {
   const handleCategoryTile = (category: string, subCategory?: string) => {
     setShopCategoryFilter(category);
     setShopSubCategoryFilter(subCategory || 'all');
-    setActiveView('shop');
+    setActiveView(category === 'electronics' ? 'earbuds' : category === 'accessories' ? 'watches' : 'shop');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

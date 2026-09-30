@@ -1,5 +1,5 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { initializeFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -24,7 +24,9 @@ let auth: Auth | undefined;
 
 if (isFirebaseConfigured) {
   app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  // Product objects carry optional fields (subCategory, originalPrice, etc.)
+  // as `undefined` rather than omitted — Firestore rejects that by default.
+  db = initializeFirestore(app, { ignoreUndefinedProperties: true });
   auth = getAuth(app);
 }
 

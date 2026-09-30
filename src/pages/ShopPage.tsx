@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
 import { WATCH_STYLES } from '../data/categories';
@@ -14,7 +14,14 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const ShopPage: React.FC = () => {
+interface ShopPageProps {
+  // When set, this page is dedicated to a single category (a separate
+  // "page" from the user's point of view): the cross-category switcher
+  // is hidden and the category can't be changed away from here.
+  lockedCategory?: 'electronics' | 'accessories';
+}
+
+export const ShopPage: React.FC<ShopPageProps> = ({ lockedCategory }) => {
   const {
     products,
     shopCategoryFilter,
@@ -29,6 +36,10 @@ export const ShopPage: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  useEffect(() => {
+    if (lockedCategory) setShopCategoryFilter(lockedCategory);
+  }, [lockedCategory]);
 
   // Filtered and Sorted Products
   const filteredProducts = useMemo(() => {
@@ -65,7 +76,7 @@ export const ShopPage: React.FC = () => {
   }, [products, shopCategoryFilter, shopSubCategoryFilter, searchQuery, maxPrice, inStockOnly, selectedSort]);
 
   const handleResetFilters = () => {
-    setShopCategoryFilter('all');
+    setShopCategoryFilter(lockedCategory || 'all');
     setShopSubCategoryFilter('all');
     setSearchQuery('');
     setMaxPrice(5000);
@@ -84,39 +95,40 @@ export const ShopPage: React.FC = () => {
         <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
           {shopSubCategoryFilter !== 'all'
             ? WATCH_STYLES.find((s) => s.id === shopSubCategoryFilter)?.label + ' Watches'
-            : shopCategoryFilter === 'electronics'
+            : lockedCategory === 'electronics' || shopCategoryFilter === 'electronics'
             ? 'Earbuds'
-            : shopCategoryFilter === 'accessories'
+            : lockedCategory === 'accessories' || shopCategoryFilter === 'accessories'
             ? 'Watches & Accessories'
             : 'All Products'}
         </h1>
       </motion.div>
 
-      {/* Category Quick Pill Navigation */}
+      {/* Category Quick Pill Navigation (hidden on a dedicated Earbuds/Watches page) */}
       <div className="space-y-3 mb-6">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-xs font-bold text-gray-400 mr-1 hidden sm:inline">Explore:</span>
-          {[
-            { id: 'all', label: 'All Products', icon: null },
-            { id: 'electronics', label: 'Earbuds', icon: Headphones },
-            { id: 'accessories', label: 'Watches', icon: BagIcon }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setShopCategoryFilter(tab.id);
-                setShopSubCategoryFilter('all');
-              }}
-              className={`flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-                shopCategoryFilter === tab.id
-                  ? 'bg-[#1A1A1A] text-white shadow-sm ring-2 ring-[#1A1A1A]'
-                  : 'bg-[#F7F3EC] text-gray-700 hover:text-black hover:bg-gray-200'
-              }`}
-            >
-              {tab.icon && <tab.icon className={`w-3.5 h-3.5 ${shopCategoryFilter === tab.id ? 'text-[#F2B705]' : 'text-[#8A6D1F]'}`} />}
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          {!lockedCategory && <span className="text-xs font-bold text-gray-400 mr-1 hidden sm:inline">Explore:</span>}
+          {!lockedCategory &&
+            [
+              { id: 'all', label: 'All Products', icon: null },
+              { id: 'electronics', label: 'Earbuds', icon: Headphones },
+              { id: 'accessories', label: 'Watches', icon: BagIcon }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setShopCategoryFilter(tab.id);
+                  setShopSubCategoryFilter('all');
+                }}
+                className={`flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                  shopCategoryFilter === tab.id
+                    ? 'bg-[#1A1A1A] text-white shadow-sm ring-2 ring-[#1A1A1A]'
+                    : 'bg-[#F7F3EC] text-gray-700 hover:text-black hover:bg-gray-200'
+                }`}
+              >
+                {tab.icon && <tab.icon className={`w-3.5 h-3.5 ${shopCategoryFilter === tab.id ? 'text-[#F2B705]' : 'text-[#8A6D1F]'}`} />}
+                <span>{tab.label}</span>
+              </button>
+            ))}
 
           {/* Mobile Filter Sheet Button */}
           <button
@@ -279,32 +291,34 @@ export const ShopPage: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Category Filter */}
-                  <div>
-                    <label className="block font-bold text-xs text-[#1A1A1A] mb-2">Category</label>
-                    <div className="grid grid-cols-1 gap-1.5">
-                      {[
-                        { id: 'all', label: 'All Products' },
-                        { id: 'electronics', label: 'Earbuds' },
-                        { id: 'accessories', label: 'Watches' }
-                      ].map((c) => (
-                        <button
-                          key={c.id}
-                          onClick={() => {
-                            setShopCategoryFilter(c.id);
-                            setShopSubCategoryFilter('all');
-                          }}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
-                            shopCategoryFilter === c.id
-                              ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
-                              : 'bg-gray-50 text-gray-700 border-gray-200'
-                          }`}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
+                  {/* Category Filter (hidden on a dedicated Earbuds/Watches page) */}
+                  {!lockedCategory && (
+                    <div>
+                      <label className="block font-bold text-xs text-[#1A1A1A] mb-2">Category</label>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {[
+                          { id: 'all', label: 'All Products' },
+                          { id: 'electronics', label: 'Earbuds' },
+                          { id: 'accessories', label: 'Watches' }
+                        ].map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => {
+                              setShopCategoryFilter(c.id);
+                              setShopSubCategoryFilter('all');
+                            }}
+                            className={`py-2 px-3 rounded-xl text-xs font-bold border text-left ${
+                              shopCategoryFilter === c.id
+                                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                                : 'bg-gray-50 text-gray-700 border-gray-200'
+                            }`}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Watch Style Filter */}
                   {shopCategoryFilter === 'accessories' && (
@@ -407,10 +421,10 @@ export const ShopPage: React.FC = () => {
         {/* Product Grid Area */}
         <div className="lg:col-span-3">
           {/* Active Filter Badges */}
-          {(shopCategoryFilter !== 'all' || shopSubCategoryFilter !== 'all' || searchQuery || maxPrice < 5000 || inStockOnly) && (
+          {((!lockedCategory && shopCategoryFilter !== 'all') || shopSubCategoryFilter !== 'all' || searchQuery || maxPrice < 5000 || inStockOnly) && (
             <div className="flex flex-wrap items-center gap-1.5 mb-4">
               <span className="text-xs text-gray-500">Active:</span>
-              {shopCategoryFilter !== 'all' && (
+              {!lockedCategory && shopCategoryFilter !== 'all' && (
                 <span className="inline-flex items-center gap-1 bg-amber-100 text-[#1A1A1A] text-xs px-2.5 py-1 rounded-full font-semibold">
                   {shopCategoryFilter === 'accessories' ? 'watches' : shopCategoryFilter}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => { setShopCategoryFilter('all'); setShopSubCategoryFilter('all'); }} />

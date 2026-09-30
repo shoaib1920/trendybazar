@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
 
   const handleCategoryClick = (cat: string) => {
     setShopCategoryFilter(cat);
-    setActiveView('shop');
+    setActiveView(cat === 'electronics' ? 'earbuds' : cat === 'accessories' ? 'watches' : 'shop');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

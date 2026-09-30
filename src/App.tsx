@@ -35,6 +35,10 @@ const AppContent: React.FC = () => {
         return <HomePage />;
       case 'shop':
         return <ShopPage />;
+      case 'earbuds':
+        return <ShopPage lockedCategory="electronics" />;
+      case 'watches':
+        return <ShopPage lockedCategory="accessories" />;
       case 'product':
         return <ProductDetailPage />;
       case 'wishlist':

@@ -27,8 +27,8 @@ interface ShopContextType {
   t: (key: string) => string;
 
   // Navigation
-  activeView: 'home' | 'shop' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin';
-  setActiveView: (view: 'home' | 'shop' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin') => void;
+  activeView: 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin';
+  setActiveView: (view: 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin') => void;
   selectedProductSlug: string | null;
   navigateToProduct: (slug: string) => void;
   shopCategoryFilter: string;
@@ -168,7 +168,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Navigation
-  const [activeView, setActiveView] = useState<'home' | 'shop' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin'>('home');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [shopCategoryFilter, setShopCategoryFilter] = useState<string>('all');
   const [shopSubCategoryFilter, setShopSubCategoryFilter] = useState<string>('all');

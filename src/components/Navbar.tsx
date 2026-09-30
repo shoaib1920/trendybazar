@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
     setTimeout(() => setCodeCopied(false), 2500);
   };
 
-  const handleNavClick = (view: 'home' | 'shop' | 'about' | 'contact' | 'track' | 'admin', category?: string, subCategory?: string) => {
+  const handleNavClick = (view: 'home' | 'shop' | 'earbuds' | 'watches' | 'about' | 'contact' | 'track' | 'admin', category?: string, subCategory?: string) => {
     if (category) setShopCategoryFilter(category);
     else setShopCategoryFilter('all');
     setShopSubCategoryFilter(subCategory || 'all');
@@ -155,9 +155,9 @@ export const Navbar: React.FC = () => {
               {t('home')}
             </button>
             <button
-              onClick={() => handleNavClick('shop', 'electronics')}
+              onClick={() => handleNavClick('earbuds', 'electronics')}
               className={`transition-colors hover:text-[#8A6D1F] py-2 border-b-2 flex items-center gap-1.5 ${
-                activeView === 'shop' ? 'border-[#8A6D1F] text-[#141414]' : 'border-transparent text-gray-700'
+                activeView === 'earbuds' ? 'border-[#8A6D1F] text-[#141414]' : 'border-transparent text-gray-700'
               }`}
             >
               <Headphones className="w-3.5 h-3.5 text-[#8A6D1F]" />
@@ -169,9 +169,9 @@ export const Navbar: React.FC = () => {
               onMouseLeave={() => setIsWatchesMenuOpen(false)}
             >
               <button
-                onClick={() => handleNavClick('shop', 'accessories')}
+                onClick={() => handleNavClick('watches', 'accessories')}
                 className={`transition-colors hover:text-[#8A6D1F] py-2 border-b-2 flex items-center gap-1 ${
-                  activeView === 'shop' && shopCategoryFilter === 'accessories'
+                  activeView === 'watches'
                     ? 'border-[#8A6D1F] text-[#141414]'
                     : 'border-transparent text-gray-700'
                 }`}
@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
                   >
                     <div className="bg-white rounded-2xl border border-gold-hairline shadow-xl p-2">
                       <button
-                        onClick={() => handleNavClick('shop', 'accessories')}
+                        onClick={() => handleNavClick('watches', 'accessories')}
                         className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-serif font-bold text-xs text-[#141414]"
                       >
                         Shop All Watches
@@ -201,7 +201,7 @@ export const Navbar: React.FC = () => {
                       {WATCH_STYLES.map((style) => (
                         <button
                           key={style.id}
-                          onClick={() => handleNavClick('shop', 'accessories', style.id)}
+                          onClick={() => handleNavClick('watches', 'accessories', style.id)}
                           className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs text-gray-700 hover:text-[#141414]"
                         >
                           {style.label}
@@ -348,7 +348,7 @@ export const Navbar: React.FC = () => {
                     {t('home')}
                   </button>
                   <button
-                    onClick={() => handleNavClick('shop', 'electronics')}
+                    onClick={() => handleNavClick('earbuds', 'electronics')}
                     className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F9F6F0] font-serif font-bold text-sm text-[#141414] flex items-center gap-2"
                   >
                     <Headphones className="w-4 h-4 text-[#8A6D1F]" />
@@ -373,7 +373,7 @@ export const Navbar: React.FC = () => {
                         className="overflow-hidden pl-4 space-y-0.5"
                       >
                         <button
-                          onClick={() => handleNavClick('shop', 'accessories')}
+                          onClick={() => handleNavClick('watches', 'accessories')}
                           className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs font-bold text-gray-700"
                         >
                           Shop All Watches
@@ -381,7 +381,7 @@ export const Navbar: React.FC = () => {
                         {WATCH_STYLES.map((style) => (
                           <button
                             key={style.id}
-                            onClick={() => handleNavClick('shop', 'accessories', style.id)}
+                            onClick={() => handleNavClick('watches', 'accessories', style.id)}
                             className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] font-sans text-xs text-gray-700"
                           >
                             {style.label}
