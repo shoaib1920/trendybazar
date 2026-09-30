@@ -10,7 +10,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     subCategory: 'earbuds',
     price: 1999,
     images: [
-      'https://shopnow.com.pk/uploads/products/mpf8k52p-kYxDoscAqM.webp',
+      'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=900&auto=format&fit=crop&q=80',
     ],
     description: 'Punchy bass, clear calls, and a battery that lasts all day.',
     details: [

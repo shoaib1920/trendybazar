@@ -417,7 +417,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
       )}
 
       {/* Mobile Sticky Purchase Bar */}
-      <div className="md:hidden fixed bottom-14 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-gold-hairline px-4 py-2.5 shadow-lg flex items-center justify-between gap-3">
+      <div className="md:hidden fixed bottom-[73px] left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-gold-hairline px-4 py-2.5 shadow-lg flex items-center justify-between gap-3">
         <div>
           <span className="text-[10px] text-gray-500 block">Total Price:</span>
           <span className="font-serif font-bold text-sm text-[#141414]">

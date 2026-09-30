@@ -4,6 +4,11 @@ import { useShop } from '../context/ShopContext';
 import { Heart, Eye, ShoppingBag, MessageCircle, Star, Bell } from 'lucide-react';
 import { BackInStockModal } from './BackInStockModal';
 
+// Shown in place of a product image that fails to load (e.g. a bad URL
+// pasted in the admin panel), so a 404 never collapses the card layout.
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Crect width='400' height='500' fill='%23F9F6F0'/%3E%3Cg fill='none' stroke='%23D8CCA8' stroke-width='8'%3E%3Crect x='90' y='170' width='220' height='160' rx='10'/%3E%3Ccircle cx='150' cy='215' r='16'/%3E%3Cpath d='M90 300l55-55 40 40 60-60 65 65'/%3E%3C/g%3E%3C/svg%3E";
+
 interface ProductCardProps {
   product: Product;
   priority?: boolean;
@@ -66,6 +71,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={primaryImage}
             alt={product.name}
             loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = PLACEHOLDER_IMAGE;
+            }}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
           />
 
@@ -75,6 +84,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               src={secondaryImage}
               alt={`${product.name} alternate view`}
               loading="lazy"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = PLACEHOLDER_IMAGE;
+              }}
               className="w-full h-full object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 ease-out"
             />
           )}
