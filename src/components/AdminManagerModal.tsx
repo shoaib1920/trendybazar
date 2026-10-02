@@ -4,6 +4,7 @@ import { Product } from '../types';
 import { WATCH_STYLES } from '../data/categories';
 import { subscribeToAdminAuth, signInAdmin, signOutAdmin } from '../lib/adminAuth';
 import { uploadImageToCloudinary, isCloudinaryConfigured } from '../lib/cloudinary';
+import { ProductImageCropModal } from './ProductImageCropModal';
 import type { User } from 'firebase/auth';
 import {
   Plus,
@@ -16,7 +17,6 @@ import {
   Phone,
   X,
   UploadCloud,
-  Cloud,
   CloudOff,
   LogOut,
   Loader2
@@ -91,12 +91,14 @@ export const AdminManagerModal: React.FC = () => {
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
-  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const [imageQueue, setImageQueue] = useState<File[]>([]);
+  const [isUploadingCroppedImage, setIsUploadingCroppedImage] = useState(false);
+  const multiImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const resetForm = () => {
     setForm(emptyForm());
     setEditingId(null);
+    setImageQueue([]);
   };
 
   const handleEditProduct = (p: Product) => {
@@ -139,18 +141,28 @@ export const AdminManagerModal: React.FC = () => {
     setForm((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
-  const handleFileSelected = async (index: number, file: File | undefined) => {
-    if (!file) return;
-    setUploadingIndex(index);
+  const handleFilesSelected = (files: FileList | null) => {
+    if (!files?.length) return;
+    setImageQueue((current) => [...current, ...Array.from(files)]);
+    if (multiImageInputRef.current) multiImageInputRef.current.value = '';
+  };
+
+  const handleCroppedImage = async (file: File) => {
+    setIsUploadingCroppedImage(true);
     try {
       const url = await uploadImageToCloudinary(file);
-      handleImageUrlChange(index, url);
-      showToast('Image uploaded to Cloudinary', 'success');
+      setForm((prev) => ({ ...prev, images: [...prev.images.filter(Boolean), url] }));
+      setImageQueue((current) => current.slice(1));
+      showToast('Adjusted image uploaded to Cloudinary', 'success');
     } catch (err: any) {
       showToast(err?.message || 'Image upload failed', 'warning');
     } finally {
-      setUploadingIndex(null);
+      setIsUploadingCroppedImage(false);
     }
+  };
+
+  const handleCancelCrop = () => {
+    if (!isUploadingCroppedImage) setImageQueue((current) => current.slice(1));
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -324,21 +336,12 @@ export const AdminManagerModal: React.FC = () => {
         </div>
       </div>
 
-      {/* Backend status banner */}
-      <div
-        className={`flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-xl mb-6 ${
-          isCloudBackendConfigured
-            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-            : 'bg-amber-50 text-amber-800 border border-amber-200'
-        }`}
-      >
-        {isCloudBackendConfigured ? <Cloud className="w-4 h-4 shrink-0" /> : <CloudOff className="w-4 h-4 shrink-0" />}
-        <span>
-          {isCloudBackendConfigured
-            ? `Connected to Firebase — changes are live for every visitor${adminUser ? ` (signed in as ${adminUser.email})` : ''}.`
-            : 'Local demo mode — changes are saved only in this browser. Set up Firebase to make edits live for everyone.'}
-        </span>
-      </div>
+      {!isCloudBackendConfigured && (
+        <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-xl mb-6 bg-amber-50 text-amber-800 border border-amber-200">
+          <CloudOff className="w-4 h-4 shrink-0" />
+          <span>Local demo mode — changes are saved only in this browser. Set up Firebase to make edits live for everyone.</span>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 pb-2">
@@ -523,6 +526,26 @@ export const AdminManagerModal: React.FC = () => {
                     <span className="text-[10px] text-gray-400">Paste URLs (Cloudinary not set up)</span>
                   )}
                 </div>
+                {isCloudinaryConfigured && (
+                  <>
+                    <input
+                      ref={multiImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => handleFilesSelected(e.target.files)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => multiImageInputRef.current?.click()}
+                      className="w-full mb-2 py-2.5 border border-dashed border-gray-300 hover:border-[#8A6D1F] rounded-xl text-xs font-bold text-gray-700 flex items-center justify-center gap-2"
+                    >
+                      <UploadCloud className="w-4 h-4" />
+                      <span>Upload multiple product images</span>
+                    </button>
+                  </>
+                )}
                 <div className="space-y-1.5">
                   {form.images.map((url, i) => (
                     <div key={i} className="flex items-center gap-1.5">
@@ -534,30 +557,6 @@ export const AdminManagerModal: React.FC = () => {
                         onChange={(e) => handleImageUrlChange(i, e.target.value)}
                         className="flex-1 min-w-0 bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none text-[11px]"
                       />
-                      {isCloudinaryConfigured && (
-                        <>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            ref={(el) => { fileInputRefs.current[i] = el; }}
-                            onChange={(e) => handleFileSelected(i, e.target.files?.[0])}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => fileInputRefs.current[i]?.click()}
-                            disabled={uploadingIndex === i}
-                            title="Upload image"
-                            className="p-2 bg-[#1A1A1A] text-white rounded-xl shrink-0 disabled:opacity-50"
-                          >
-                            {uploadingIndex === i ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <UploadCloud className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </>
-                      )}
                       {form.images.length > 1 && (
                         <button
                           type="button"
@@ -575,7 +574,7 @@ export const AdminManagerModal: React.FC = () => {
                   onClick={handleAddImageSlot}
                   className="mt-1.5 text-[11px] font-bold text-[#8A6D1F] hover:underline"
                 >
-                  + Add another image
+                  + Add image URL
                 </button>
               </div>
 
@@ -607,7 +606,7 @@ export const AdminManagerModal: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || imageQueue.length > 0 || isUploadingCroppedImage}
                 className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -764,6 +763,13 @@ export const AdminManagerModal: React.FC = () => {
             </p>
           </div>
         </div>
+      )}
+      {isCloudinaryConfigured && imageQueue[0] && (
+        <ProductImageCropModal
+          file={imageQueue[0]}
+          onCancel={handleCancelCrop}
+          onApply={handleCroppedImage}
+        />
       )}
     </div>
   );

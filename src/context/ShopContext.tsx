@@ -18,6 +18,10 @@ export interface ToastMessage {
 }
 
 export type AppLanguage = 'en' | 'ur';
+type ActiveView = 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin';
+
+const getViewFromPath = (): ActiveView =>
+  window.location.pathname.replace(/\/+$/, '') === '/admin' ? 'admin' : 'home';
 
 interface ShopContextType {
   // Language Toggle
@@ -27,8 +31,8 @@ interface ShopContextType {
   t: (key: string) => string;
 
   // Navigation
-  activeView: 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin';
-  setActiveView: (view: 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin') => void;
+  activeView: ActiveView;
+  setActiveView: (view: ActiveView) => void;
   selectedProductSlug: string | null;
   navigateToProduct: (slug: string) => void;
   shopCategoryFilter: string;
@@ -168,7 +172,19 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Navigation
-  const [activeView, setActiveView] = useState<'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin'>('home');
+  const [activeView, setActiveViewState] = useState<ActiveView>(getViewFromPath);
+  const setActiveView = (view: ActiveView) => {
+    setActiveViewState(view);
+    const nextPath = view === 'admin' ? '/admin' : '/';
+    if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath);
+  };
+
+  useEffect(() => {
+    const syncViewWithPath = () => setActiveViewState(getViewFromPath());
+    window.addEventListener('popstate', syncViewWithPath);
+    return () => window.removeEventListener('popstate', syncViewWithPath);
+  }, []);
+
   const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [shopCategoryFilter, setShopCategoryFilter] = useState<string>('all');
   const [shopSubCategoryFilter, setShopSubCategoryFilter] = useState<string>('all');

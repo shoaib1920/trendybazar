@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
 import { CityDeliveryChecker } from '../components/CityDeliveryChecker';
@@ -38,6 +38,10 @@ export const ProductDetailPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'details' | 'shipping' | 'reviews'>('details');
   const [isBackInStockOpen, setIsBackInStockOpen] = useState(false);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [product.id]);
 
   const isFavorited = isInWishlist(product.id);
   const totalPrice = product.price * quantity;

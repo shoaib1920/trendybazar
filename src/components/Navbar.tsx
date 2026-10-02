@@ -12,7 +12,6 @@ import {
   MessageCircle,
   Copy,
   Check,
-  Settings2,
   PartyPopper,
   Headphones,
   ChevronDown,
@@ -50,7 +49,7 @@ export const Navbar: React.FC = () => {
     setTimeout(() => setCodeCopied(false), 2500);
   };
 
-  const handleNavClick = (view: 'home' | 'shop' | 'earbuds' | 'watches' | 'about' | 'contact' | 'track' | 'admin', category?: string, subCategory?: string) => {
+  const handleNavClick = (view: 'home' | 'shop' | 'earbuds' | 'watches' | 'about' | 'contact' | 'track', category?: string, subCategory?: string) => {
     if (category) setShopCategoryFilter(category);
     else setShopCategoryFilter('all');
     setShopSubCategoryFilter(subCategory || 'all');
@@ -111,14 +110,6 @@ export const Navbar: React.FC = () => {
             Track Parcel
           </button>
 
-          <button
-            onClick={() => handleNavClick('admin')}
-            className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors"
-            title="Store Admin Panel"
-          >
-            <Settings2 className="w-3 h-3" />
-            <span>Admin</span>
-          </button>
         </div>
       </div>
 
@@ -410,13 +401,6 @@ export const Navbar: React.FC = () => {
                       className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] text-xs font-serif font-bold text-gray-700"
                     >
                       Help & FAQs
-                    </button>
-                    <button
-                      onClick={() => handleNavClick('admin')}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#F9F6F0] text-xs text-gray-500 flex items-center gap-2"
-                    >
-                      <Settings2 className="w-3.5 h-3.5" />
-                      <span>Store Admin Panel</span>
                     </button>
                   </div>
                 </div>

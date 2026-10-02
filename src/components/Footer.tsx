@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleViewClick = (view: 'home' | 'shop' | 'about' | 'contact' | 'track' | 'admin') => {
+  const handleViewClick = (view: 'home' | 'shop' | 'about' | 'contact' | 'track') => {
     setActiveView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -169,14 +169,6 @@ export const Footer: React.FC = () => {
                   className="hover:text-[#F2B705] transition-colors"
                 >
                   About Trendy Bazar
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleViewClick('admin')}
-                  className="text-gray-500 hover:text-white transition-colors"
-                >
-                  Store Admin Login
                 </button>
               </li>
             </ul>
