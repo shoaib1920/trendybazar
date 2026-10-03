@@ -3,8 +3,16 @@ import { useShop } from '../context/ShopContext';
 import { Product } from '../types';
 import { WATCH_STYLES } from '../data/categories';
 import { subscribeToAdminAuth, signInAdmin, signOutAdmin } from '../lib/adminAuth';
-import { uploadImageToCloudinary, isCloudinaryConfigured } from '../lib/cloudinary';
+import { uploadImageToCloudinary, isCloudinaryConfigured, isOwnCloudinaryUrl } from '../lib/cloudinary';
 import { ProductImageCropModal } from './ProductImageCropModal';
+import { subscribeToOrders } from '../lib/ordersService';
+import { AdminDashboard } from './admin/AdminDashboard';
+import { AdminOrders } from './admin/AdminOrders';
+import { AdminInventory } from './admin/AdminInventory';
+import { AdminCustomers } from './admin/AdminCustomers';
+import { AdminDiscounts } from './admin/AdminDiscounts';
+import { DEFAULT_DISCOUNT, subscribeAllDiscounts } from '../lib/discountsService';
+import { DiscountCode, PlacedOrder } from '../types';
 import type { User } from 'firebase/auth';
 import {
   Plus,
@@ -19,7 +27,14 @@ import {
   UploadCloud,
   CloudOff,
   LogOut,
-  Loader2
+  Loader2,
+  ArrowUp,
+  ArrowDown,
+  ImageIcon,
+  Pencil,
+  LayoutDashboard,
+  Boxes,
+  Users
 } from 'lucide-react';
 
 const emptyForm = () => ({
@@ -48,12 +63,18 @@ export const AdminManagerModal: React.FC = () => {
     saveProduct,
     deleteProduct,
     isCloudBackendConfigured,
-    orders,
+    orders: deviceOrders,
+    updateOrder,
     showToast,
-    setActiveView
+    setActiveView,
+    localDiscounts,
+    saveDiscount,
+    deleteDiscount
   } = useShop();
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'discounts'>('products');
+  type AdminTab = 'dashboard' | 'orders' | 'products' | 'inventory' | 'customers' | 'discounts';
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   // --- Admin auth (only relevant once Firebase is configured) ---
   const [adminUser, setAdminUser] = useState<User | null>(null);
@@ -70,6 +91,72 @@ export const AdminManagerModal: React.FC = () => {
     });
     return unsubscribe;
   }, []);
+
+  // --- Orders: live from Firestore for the signed-in admin, else this browser's orders ---
+  const [remoteOrders, setRemoteOrders] = useState<PlacedOrder[] | null>(null);
+  const [ordersError, setOrdersError] = useState('');
+  const knownOrderIds = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    if (!isCloudBackendConfigured || !adminUser) {
+      setRemoteOrders(null);
+      return;
+    }
+    knownOrderIds.current = null;
+    return subscribeToOrders(
+      (list) => {
+        // Announce orders that arrive while the panel is open.
+        if (knownOrderIds.current) {
+          list
+            .filter((o) => !knownOrderIds.current!.has(o.orderId))
+            .forEach((o) => showToast(`🛒 New order ${o.orderId} from ${o.customer.fullName} — Rs. ${o.total.toLocaleString()}`, 'success'));
+        }
+        knownOrderIds.current = new Set(list.map((o) => o.orderId));
+        setRemoteOrders(list);
+        setOrdersError('');
+      },
+      (err) =>
+        setOrdersError(
+          err.message.includes('permission')
+            ? 'Orders could not be loaded: Firestore rules need updating (see firestore.rules).'
+            : `Orders could not be loaded: ${err.message}`
+        )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCloudBackendConfigured, adminUser]);
+
+  const orders = remoteOrders ?? deviceOrders;
+
+  // --- Discount codes: live from Firestore for the admin, else this browser's list ---
+  const [remoteDiscounts, setRemoteDiscounts] = useState<DiscountCode[] | null>(null);
+  const seededDiscounts = useRef(false);
+
+  useEffect(() => {
+    if (!isCloudBackendConfigured || !adminUser) {
+      setRemoteDiscounts(null);
+      return;
+    }
+    return subscribeAllDiscounts(
+      (list) => {
+        setRemoteDiscounts(list);
+        // First run: create the store's long-standing WELCOME5 offer so it keeps working.
+        if (list.length === 0 && !seededDiscounts.current) {
+          seededDiscounts.current = true;
+          saveDiscount({ ...DEFAULT_DISCOUNT, createdAt: new Date().toISOString() }).catch(() => {});
+        }
+      },
+      (err) => console.error('Could not load discount codes:', err)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCloudBackendConfigured, adminUser]);
+
+  const discounts = remoteDiscounts ?? (isCloudBackendConfigured ? [] : localDiscounts);
+  const pendingCount = orders.filter((o) => o.status === 'Pending').length;
+
+  const openOrder = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setActiveTab('orders');
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +178,10 @@ export const AdminManagerModal: React.FC = () => {
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [imageQueue, setImageQueue] = useState<File[]>([]);
+  // Images waiting for the editor. `replaceIndex` is set when re-editing an
+  // already uploaded image, so the result replaces it instead of being appended.
+  const [imageQueue, setImageQueue] = useState<{ file: File; replaceIndex?: number }[]>([]);
+  const [loadingImageIndex, setLoadingImageIndex] = useState<number | null>(null);
   const [isUploadingCroppedImage, setIsUploadingCroppedImage] = useState(false);
   const multiImageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -141,9 +231,21 @@ export const AdminManagerModal: React.FC = () => {
     setForm((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
+  const handleMoveImage = (index: number, direction: -1 | 1) => {
+    setForm((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.images.length) return prev;
+      const images = [...prev.images];
+      [images[index], images[target]] = [images[target], images[index]];
+      return { ...prev, images };
+    });
+  };
+
   const handleFilesSelected = (files: FileList | null) => {
     if (!files?.length) return;
-    setImageQueue((current) => [...current, ...Array.from(files)]);
+    // Copy the files out first: clearing the input below empties the live FileList.
+    const selected = Array.from(files).map((file) => ({ file }));
+    setImageQueue((current) => [...current, ...selected]);
     if (multiImageInputRef.current) multiImageInputRef.current.value = '';
   };
 
@@ -151,13 +253,37 @@ export const AdminManagerModal: React.FC = () => {
     setIsUploadingCroppedImage(true);
     try {
       const url = await uploadImageToCloudinary(file);
-      setForm((prev) => ({ ...prev, images: [...prev.images.filter(Boolean), url] }));
+      const replaceIndex = imageQueue[0]?.replaceIndex;
+      setForm((prev) => {
+        if (replaceIndex === undefined) return { ...prev, images: [...prev.images.filter(Boolean), url] };
+        const images = [...prev.images];
+        images[replaceIndex] = url;
+        return { ...prev, images };
+      });
       setImageQueue((current) => current.slice(1));
-      showToast('Adjusted image uploaded to Cloudinary', 'success');
+      showToast('Image uploaded to Cloudinary', 'success');
     } catch (err: any) {
       showToast(err?.message || 'Image upload failed', 'warning');
+      throw err; // let the editor show the error inline too
     } finally {
       setIsUploadingCroppedImage(false);
+    }
+  };
+
+  const handleEditUploadedImage = async (index: number) => {
+    const url = form.images[index]?.trim();
+    if (!url) return;
+    setLoadingImageIndex(index);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error();
+      const blob = await response.blob();
+      const file = new File([blob], `product-image-${index + 1}.jpg`, { type: blob.type || 'image/jpeg' });
+      setImageQueue((current) => [...current, { file, replaceIndex: index }]);
+    } catch {
+      showToast('Could not open this image for editing', 'warning');
+    } finally {
+      setLoadingImageIndex(null);
     }
   };
 
@@ -171,7 +297,7 @@ export const AdminManagerModal: React.FC = () => {
 
     const cleanImages = form.images.map((i) => i.trim()).filter(Boolean);
     if (cleanImages.length === 0) {
-      showToast('Add at least one image URL', 'warning');
+      showToast('Add at least one image URL or upload an image', 'warning');
       return;
     }
 
@@ -227,17 +353,6 @@ export const AdminManagerModal: React.FC = () => {
       showToast('Product removed', 'info');
       if (editingId === productId) resetForm();
     }
-  };
-
-  const handleExportOrders = () => {
-    const text = orders
-      .map(
-        (o) =>
-          `[${o.orderId}] ${o.customer.fullName} | ${o.customer.phone} | ${o.customer.city} | Rs. ${o.total} (${o.paymentMethod})`
-      )
-      .join('\n');
-    navigator.clipboard.writeText(text);
-    showToast('Copied orders list to clipboard for courier manifest!', 'success');
   };
 
   // --- Auth gate: only enforced once Firebase is actually configured ---
@@ -313,7 +428,7 @@ export const AdminManagerModal: React.FC = () => {
             Trendy Bazar Admin Manager
           </h1>
           <p className="text-xs text-gray-500">
-            Manage live inventory, prices, images, and courier booking manifests — no code changes needed.
+            Orders, inventory, customers and products — everything to run the store in one place.
           </p>
         </div>
 
@@ -343,36 +458,53 @@ export const AdminManagerModal: React.FC = () => {
         </div>
       )}
 
+      {ordersError && (
+        <div className="text-xs font-semibold px-3.5 py-2.5 rounded-xl mb-4 bg-red-50 text-red-700 border border-red-200">{ordersError}</div>
+      )}
+
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 pb-2">
-        <button
-          onClick={() => setActiveTab('products')}
-          className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'products' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
-          }`}
-        >
-          <Package className="w-3.5 h-3.5" />
-          <span>Product Catalog ({products.length})</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'orders' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
-          }`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>Customer Orders ({orders.length})</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('discounts')}
-          className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'discounts' ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
-          }`}
-        >
-          <Tag className="w-3.5 h-3.5" />
-          <span>Discount Rules (WELCOME5)</span>
-        </button>
+      <div className="flex gap-2 mb-6 border-b border-gray-200 pb-2 overflow-x-auto scrollbar-none">
+        {(
+          [
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag, badge: pendingCount },
+            { id: 'products', label: `Products (${products.length})`, icon: Package },
+            { id: 'inventory', label: 'Inventory', icon: Boxes },
+            { id: 'customers', label: 'Customers', icon: Users },
+            { id: 'discounts', label: `Discounts (${discounts.length})`, icon: Tag }
+          ] as { id: AdminTab; label: string; icon: React.FC<{ className?: string }>; badge?: number }[]
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`py-2 px-4 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0 ${
+              activeTab === tab.id ? 'bg-[#1A1A1A] text-white' : 'bg-[#F7F3EC] text-gray-600 hover:text-black'
+            }`}
+          >
+            <tab.icon className="w-3.5 h-3.5" />
+            <span>{tab.label}</span>
+            {!!tab.badge && (
+              <span className="ml-0.5 min-w-4 h-4 px-1 rounded-full bg-[#F2B705] text-[#1A1A1A] text-[10px] flex items-center justify-center">
+                {tab.badge}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
+
+      {activeTab === 'dashboard' && (
+        <AdminDashboard
+          orders={orders}
+          products={products}
+          onOpenOrder={openOrder}
+          onOpenOrdersTab={() => setActiveTab('orders')}
+          onOpenInventory={() => setActiveTab('inventory')}
+        />
+      )}
+
+      {activeTab === 'inventory' && <AdminInventory products={products} saveProduct={saveProduct} showToast={showToast} />}
+
+      {activeTab === 'customers' && <AdminCustomers orders={orders} onOpenOrder={openOrder} />}
 
       {/* 1. PRODUCTS TAB */}
       {activeTab === 'products' && (
@@ -523,7 +655,7 @@ export const AdminManagerModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-1">
                   <label className="block font-semibold text-gray-700">Product Images</label>
                   {!isCloudinaryConfigured && (
-                    <span className="text-[10px] text-gray-400">Paste URLs (Cloudinary not set up)</span>
+                    <span className="text-[10px] text-gray-400">Optional: paste image URLs or upload when Cloudinary is configured</span>
                   )}
                 </div>
                 {isCloudinaryConfigured && (
@@ -546,25 +678,81 @@ export const AdminManagerModal: React.FC = () => {
                     </button>
                   </>
                 )}
+                <p className="text-[10px] text-gray-400 mb-1.5">
+                  Add as many images as you like — customers can browse them all. The first image is the main/cover photo.
+                </p>
                 <div className="space-y-1.5">
                   {form.images.map((url, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <input
-                        type="url"
-                        required={i === 0}
-                        placeholder="https://..."
-                        value={url}
-                        onChange={(e) => handleImageUrlChange(i, e.target.value)}
-                        className="flex-1 min-w-0 bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none text-[11px]"
-                      />
+                      <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-[#F7F3EC] flex items-center justify-center">
+                        {url.trim() ? (
+                          <img src={url.trim()} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-gray-300" />
+                        )}
+                        {i === 0 && url.trim() && (
+                          <span className="absolute bottom-0 inset-x-0 bg-[#8A6D1F] text-white text-[8px] font-bold text-center leading-tight">
+                            MAIN
+                          </span>
+                        )}
+                      </div>
+                      {isOwnCloudinaryUrl(url) ? (
+                        <div className="flex-1 min-w-0 flex items-center justify-between gap-2 bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 text-[11px]">
+                          <span className="font-semibold text-gray-600 truncate">Uploaded image {i + 1}</span>
+                          {isCloudinaryConfigured && (
+                            <button
+                              type="button"
+                              onClick={() => handleEditUploadedImage(i)}
+                              disabled={loadingImageIndex !== null}
+                              className="flex items-center gap-1 font-bold text-[#8A6D1F] hover:underline disabled:opacity-50 shrink-0"
+                            >
+                              {loadingImageIndex === i ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Pencil className="w-3 h-3" />
+                              )}
+                              <span>Edit</span>
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <input
+                          type="url"
+                          placeholder="https://... (optional)"
+                          value={url}
+                          onChange={(e) => handleImageUrlChange(i, e.target.value)}
+                          className="flex-1 min-w-0 bg-[#F7F3EC]/50 border border-gray-200 rounded-xl p-2 outline-none text-[11px]"
+                        />
+                      )}
                       {form.images.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImageSlot(i)}
-                          className="p-2 text-gray-400 hover:text-red-600 shrink-0"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            title="Move up"
+                            disabled={i === 0}
+                            onClick={() => handleMoveImage(i, -1)}
+                            className="p-1 text-gray-400 hover:text-[#8A6D1F] disabled:opacity-30 shrink-0"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Move down"
+                            disabled={i === form.images.length - 1}
+                            onClick={() => handleMoveImage(i, 1)}
+                            className="p-1 text-gray-400 hover:text-[#8A6D1F] disabled:opacity-30 shrink-0"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Remove image"
+                            onClick={() => handleRemoveImageSlot(i)}
+                            className="p-1 text-gray-400 hover:text-red-600 shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </>
                       )}
                     </div>
                   ))}
@@ -677,96 +865,31 @@ export const AdminManagerModal: React.FC = () => {
 
       {/* 2. ORDERS TAB */}
       {activeTab === 'orders' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center bg-[#F7F3EC] p-4 rounded-2xl">
-            <div>
-              <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">
-                Recent Orders ({orders.length})
-              </h3>
-              <p className="text-xs text-gray-500">
-                Incoming orders from Website and WhatsApp checkouts
-              </p>
-            </div>
-            <button
-              onClick={handleExportOrders}
-              className="py-2 px-3.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 text-xs font-bold rounded-xl shadow-xs"
-            >
-              Export Courier Manifest
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {orders.map((o) => (
-              <div
-                key={o.orderId}
-                className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-heading font-black text-sm text-[#1A1A1A]">
-                      #{o.orderId}
-                    </span>
-                    <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {o.status}
-                    </span>
-                    <span className="text-xs text-gray-400">{o.date}</span>
-                  </div>
-
-                  <div className="text-xs text-gray-700">
-                    <strong>{o.customer.fullName}</strong> • {o.customer.phone} • {o.customer.city}
-                  </div>
-                  <div className="text-[11px] text-gray-500 max-w-md line-clamp-1">
-                    {o.customer.address}
-                  </div>
-                  <div className="text-[11px] text-gray-400">
-                    Items: {o.items.map((it) => `${it.product.name} (x${it.quantity})`).join(', ')}
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="font-heading font-black text-base text-[#1A1A1A]">
-                    Rs. {o.total.toLocaleString()}
-                  </div>
-                  <span className="text-[11px] text-gray-500 block">{o.paymentMethod}</span>
-                  <a
-                    href={`https://wa.me/${o.customer.phone.replace(/[^0-9]/g, '')}?text=Assalam-o-Alaikum%20${encodeURIComponent(o.customer.fullName)}!%20Trendy%20Bazar%20here%20regarding%20your%20order%20${o.orderId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#25D366] hover:underline mt-1"
-                  >
-                    <Phone className="w-3 h-3" />
-                    <span>WhatsApp Customer</span>
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <AdminOrders
+          orders={orders}
+          products={products}
+          updateOrder={updateOrder}
+          saveProduct={saveProduct}
+          showToast={showToast}
+          selectedOrderId={selectedOrderId}
+          onSelectOrder={setSelectedOrderId}
+        />
       )}
 
       {/* 3. DISCOUNTS TAB */}
       {activeTab === 'discounts' && (
-        <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs max-w-xl space-y-4 text-xs">
-          <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">
-            Active Promo Rules & Terms
-          </h3>
-
-          <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <span className="font-heading font-black text-sm text-[#1A1A1A]">CODE: WELCOME5</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Active
-              </span>
-            </div>
-            <p className="text-gray-600">
-              5% instant discount on any cart value for new visitors.
-            </p>
-          </div>
-        </div>
+        <AdminDiscounts
+          discounts={discounts}
+          orders={orders}
+          saveDiscount={saveDiscount}
+          deleteDiscount={deleteDiscount}
+          showToast={showToast}
+        />
       )}
       {isCloudinaryConfigured && imageQueue[0] && (
         <ProductImageCropModal
-          file={imageQueue[0]}
+          file={imageQueue[0].file}
+          remaining={imageQueue.length - 1}
           onCancel={handleCancelCrop}
           onApply={handleCroppedImage}
         />

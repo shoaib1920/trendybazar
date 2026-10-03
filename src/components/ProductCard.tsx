@@ -60,6 +60,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div 
         className="group relative bg-white rounded-2xl sm:rounded-3xl border border-gold-hairline hover:border-gold-subtle shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
         id={`product-card-${product.id}`}
+        data-tour="product-card"
       >
         {/* 1. Image Container (4:5 Editorial Aspect Ratio) */}
         <div 
@@ -193,6 +194,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <button
                 onClick={handleQuickAdd}
                 id={`quick-add-btn-${product.id}`}
+                data-tour="card-add"
                 className="col-span-3 sm:col-span-4 bg-[#141414] hover:bg-black text-white text-[11px] sm:text-xs font-serif font-bold py-2.5 px-2 rounded-xl sm:rounded-full flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs"
               >
                 <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F2B705]" />

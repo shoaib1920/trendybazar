@@ -1,9 +1,10 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountLabel } from '../lib/discountsService';
 import { MessageCircle, CheckCircle2 } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
-  const { setActiveView, openWhatsAppGeneral } = useShop();
+  const { setActiveView, openWhatsAppGeneral, featuredDiscount } = useShop();
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12" id="about-us-page">
@@ -71,7 +72,12 @@ export const AboutPage: React.FC = () => {
             <span>No Hidden Fees</span>
           </h4>
           <p className="text-xs text-gray-600 leading-relaxed">
-            Flat Rs. 150 delivery. Use code <strong>WELCOME5</strong> for 5% off.
+            Flat Rs. 150 delivery.
+            {featuredDiscount && (
+              <>
+                {' '}Use code <strong>{featuredDiscount.code}</strong> for {discountLabel(featuredDiscount)}.
+              </>
+            )}
           </p>
         </div>
       </div>

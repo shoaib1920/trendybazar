@@ -11,7 +11,7 @@ export const FloatingWhatsApp: React.FC = () => {
     'Assalam-o-Alaikum! What do you have in stock right now?',
     'Is Cash on Delivery available for my city?',
     'I want to place an order directly via WhatsApp!',
-    'How do I use the WELCOME5 discount code?'
+    'How do I use a discount code?'
   ];
 
   const handleSendPrompt = (msg: string) => {
@@ -110,6 +110,7 @@ export const FloatingWhatsApp: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         id="floating-whatsapp-trigger"
+        data-tour="whatsapp"
         className="group relative flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white p-3 sm:px-4 sm:py-3 rounded-full shadow-[0_8px_25px_rgba(37,211,102,0.4)] transition-all hover:scale-105 active:scale-95 z-40"
         aria-label="Chat on WhatsApp"
       >

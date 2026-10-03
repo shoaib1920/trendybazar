@@ -5,11 +5,37 @@ import {
   AppliedDiscount,
   PlacedOrder,
   CheckoutFormData,
-  BackInStockRequest
+  BackInStockRequest,
+  DiscountCode
 } from '../types';
 import { INITIAL_PRODUCTS } from '../data/products';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { subscribeToProducts, saveProductRemote, deleteProductRemote, seedProductsIfEmpty } from '../lib/productsService';
+import { createOrderRemote, generateOrderId, updateOrderRemote } from '../lib/ordersService';
+import {
+  DEFAULT_DISCOUNT,
+  deleteDiscountRemote,
+  discountLabel,
+  discountProblem,
+  getDiscountRemote,
+  incrementDiscountUsage,
+  normalizeCode,
+  saveDiscountRemote,
+  subscribeFeaturedDiscount
+} from '../lib/discountsService';
+
+export interface CheckoutExtras {
+  giftWrapFee: number;
+  giftNote?: string;
+  pointsDiscount: number;
+}
+
+// `synced` is false when the order could not be saved to the online store
+// database (it is still kept on this device and can be sent via WhatsApp).
+export interface OrderSubmitResult {
+  order: PlacedOrder;
+  synced: boolean;
+}
 
 export interface ToastMessage {
   id: string;
@@ -69,8 +95,14 @@ interface ShopContextType {
   // Discount
   appliedDiscount: AppliedDiscount | null;
   discountError: string | null;
-  applyPromoCode: (code: string) => boolean;
+  applyPromoCode: (code: string) => Promise<boolean>;
   removePromoCode: () => void;
+  // The code advertised across the site (null = no promotion running).
+  featuredDiscount: DiscountCode | null;
+  // Browser-only codes, used when Firebase is not configured.
+  localDiscounts: DiscountCode[];
+  saveDiscount: (d: DiscountCode) => Promise<void>;
+  deleteDiscount: (code: string) => Promise<void>;
 
   // Quick View Modal
   quickViewProduct: Product | null;
@@ -79,7 +111,10 @@ interface ShopContextType {
   // Checkout Modal
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
-  placeOrder: (formData: CheckoutFormData) => PlacedOrder;
+  placeOrder: (formData: CheckoutFormData, extras: CheckoutExtras) => Promise<OrderSubmitResult>;
+  submitOrder: (order: PlacedOrder) => Promise<OrderSubmitResult>;
+  updateOrder: (orderId: string, patch: Partial<PlacedOrder>) => Promise<void>;
+  // Orders placed from this device (the full list for admins lives in Firestore).
   orders: PlacedOrder[];
 
   // Loyalty Rewards
@@ -110,9 +145,16 @@ interface ShopContextType {
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
-const WHATSAPP_NUMBER = '923364300592';
+export const WHATSAPP_NUMBER = '923364300592';
 const FREE_SHIPPING_THRESHOLD = 3500;
 const STANDARD_SHIPPING_FEE = 150;
+const LEGACY_SEEDED_PRODUCT_IDS = [
+  'tb-buds-pro-3',
+  'tb-watch-01',
+  'tb-watch-02',
+  'tb-watch-03',
+  'tb-watch-04'
+];
 
 // Translation dictionary for English <-> Urdu
 const DICTIONARY: Record<AppLanguage, Record<string, string>> = {
@@ -196,8 +238,14 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem('tb_products_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_PRODUCTS.length) {
-          return parsed;
+        if (Array.isArray(parsed)) {
+          const hasLegacySeed = parsed.length > 0 && parsed.every((item) =>
+            item && typeof item === 'object' && 'id' in item && LEGACY_SEEDED_PRODUCT_IDS.includes(String(item.id))
+          );
+          if (!hasLegacySeed) {
+            return parsed;
+          }
+          localStorage.removeItem('tb_products_v2');
         }
       }
     } catch (e) {
@@ -244,14 +292,65 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [discountError, setDiscountError] = useState<string | null>(null);
 
+  const [localDiscounts, setLocalDiscounts] = useState<DiscountCode[]>(() => {
+    try {
+      const saved = localStorage.getItem('tb_discounts');
+      return saved ? JSON.parse(saved) : [DEFAULT_DISCOUNT];
+    } catch {
+      return [DEFAULT_DISCOUNT];
+    }
+  });
+  const [remoteFeatured, setRemoteFeatured] = useState<DiscountCode | null>(null);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) localStorage.setItem('tb_discounts', JSON.stringify(localDiscounts));
+  }, [localDiscounts]);
+
+  useEffect(() => subscribeFeaturedDiscount(setRemoteFeatured), []);
+
+  const featuredDiscount = isFirebaseConfigured
+    ? remoteFeatured
+    : localDiscounts.find((d) => d.featured && !discountProblem(d)) || null;
+
+  const findDiscount = async (code: string): Promise<DiscountCode | null> =>
+    isFirebaseConfigured
+      ? getDiscountRemote(code)
+      : localDiscounts.find((d) => normalizeCode(d.code) === normalizeCode(code)) || null;
+
+  const saveDiscount = async (d: DiscountCode) => {
+    const code = normalizeCode(d.code);
+    const next = { ...d, code };
+    if (isFirebaseConfigured) {
+      await saveDiscountRemote(next);
+    } else {
+      setLocalDiscounts((prev) => {
+        // Only one featured code at a time.
+        const others = prev.filter((x) => x.code !== code).map((x) => (next.featured ? { ...x, featured: false } : x));
+        return [next, ...others];
+      });
+    }
+  };
+
+  const deleteDiscount = async (code: string) => {
+    if (isFirebaseConfigured) {
+      await deleteDiscountRemote(code);
+    } else {
+      setLocalDiscounts((prev) => prev.filter((x) => x.code !== normalizeCode(code)));
+    }
+  };
+
   // Modals
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   // Orders
   const [orders, setOrders] = useState<PlacedOrder[]>(() => {
-    const saved = localStorage.getItem('tb_orders');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('tb_orders_v2');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   // Toasts
@@ -271,7 +370,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [appliedDiscount]);
 
   useEffect(() => {
-    localStorage.setItem('tb_orders', JSON.stringify(orders));
+    localStorage.setItem('tb_orders_v2', JSON.stringify(orders));
   }, [orders]);
 
   useEffect(() => {
@@ -368,7 +467,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Validate discount against subtotal
   const isDiscountValid = appliedDiscount ? cartSubtotal >= appliedDiscount.minSpend : false;
   const cartDiscount = isDiscountValid && appliedDiscount
-    ? Math.round((cartSubtotal * appliedDiscount.percentage) / 100)
+    ? appliedDiscount.type === 'fixed'
+      ? Math.min(cartSubtotal, appliedDiscount.amount || 0)
+      : Math.round((cartSubtotal * appliedDiscount.percentage) / 100)
     : 0;
 
   const cartShipping = cartSubtotal >= FREE_SHIPPING_THRESHOLD || cartCount === 0 ? 0 : STANDARD_SHIPPING_FEE;
@@ -444,27 +545,62 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isInWishlist = (productId: string) => wishlist.includes(productId);
 
-  // Promo code
-  const applyPromoCode = (inputCode: string): boolean => {
-    const code = inputCode.trim().toUpperCase();
-    setDiscountError(null);
+  // Promo code — checked against the codes managed in the admin panel.
+  const toApplied = (d: DiscountCode): AppliedDiscount => ({
+    code: d.code,
+    type: d.type,
+    percentage: d.type === 'percent' ? d.value : 0,
+    amount: d.type === 'fixed' ? d.value : undefined,
+    minSpend: d.minSpend,
+    discountAmount: 0,
+    description: d.description || discountLabel(d)
+  });
 
-    if (code === 'WELCOME5') {
-      setAppliedDiscount({
-        code: 'WELCOME5',
-        percentage: 5,
-        minSpend: 0,
-        discountAmount: Math.round(cartSubtotal * 0.05),
-        description: '5% Welcome Offer'
-      });
-      showToast('🎉 WELCOME5 applied! Saved 5%', 'success');
-      return true;
+  const applyPromoCode = async (inputCode: string): Promise<boolean> => {
+    const code = normalizeCode(inputCode);
+    setDiscountError(null);
+    if (!code) return false;
+
+    let found: DiscountCode | null = null;
+    try {
+      found = await findDiscount(code);
+    } catch {
+      setDiscountError('Could not check the code right now. Please try again.');
+      return false;
+    }
+    const problem = discountProblem(found);
+    if (problem || !found) {
+      setDiscountError(problem || 'Invalid discount code.');
+      showToast(problem || 'Invalid promo code', 'warning');
+      return false;
     }
 
-    setDiscountError('Invalid discount code.');
-    showToast('Invalid promo code', 'warning');
-    return false;
+    setAppliedDiscount(toApplied(found));
+    showToast(
+      found.minSpend > cartSubtotal
+        ? `${found.code} saved — add Rs. ${(found.minSpend - cartSubtotal).toLocaleString()} more to unlock ${discountLabel(found, false)}`
+        : `🎉 ${found.code} applied! ${discountLabel(found, false)}`,
+      'success'
+    );
+    return true;
   };
+
+  // Re-check a code saved from an earlier visit (it may have been edited or switched off).
+  useEffect(() => {
+    if (!appliedDiscount) return;
+    let cancelled = false;
+    findDiscount(appliedDiscount.code)
+      .then((d) => {
+        if (cancelled) return;
+        if (discountProblem(d) || !d) setAppliedDiscount(null);
+        else setAppliedDiscount(toApplied(d));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const removePromoCode = () => {
     setAppliedDiscount(null);
@@ -519,49 +655,89 @@ Please send me the order confirmation and COD dispatch details!`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(defaultMsg)}`, '_blank', 'noopener,noreferrer');
   };
 
-  // Place Order
-  const placeOrder = (formData: CheckoutFormData): PlacedOrder => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const orderId = `TB-${randomNum}`;
-    const couriers: ('Trax Logistics' | 'Leopards Courier' | 'PostEx')[] = ['Trax Logistics', 'Leopards Courier', 'PostEx'];
-    const chosenCourier = couriers[Math.floor(Math.random() * couriers.length)];
+  // Saves an order online (Firestore) and on this device. Never throws:
+  // if the online save fails the order is still kept locally.
+  const submitOrder = async (order: PlacedOrder): Promise<OrderSubmitResult> => {
+    let synced = !isFirebaseConfigured;
+    if (isFirebaseConfigured) {
+      try {
+        await createOrderRemote(order);
+        synced = true;
+      } catch (err) {
+        console.error('Failed to save order online:', err);
+      }
+    }
+    setOrders((prev) => [order, ...prev.filter((o) => o.orderId !== order.orderId)]);
+    return { order, synced };
+  };
 
+  const updateOrder = async (orderId: string, patch: Partial<PlacedOrder>) => {
+    if (isFirebaseConfigured) {
+      await updateOrderRemote(orderId, patch);
+    }
+    setOrders((prev) => prev.map((o) => (o.orderId === orderId ? { ...o, ...patch } : o)));
+  };
+
+  // Place Order (website checkout)
+  const placeOrder = async (formData: CheckoutFormData, extras: CheckoutExtras): Promise<OrderSubmitResult> => {
     const paymentLabels: Record<string, string> = {
       cod: 'Cash on Delivery (COD)',
-      jazzcash: 'JazzCash Mobile Account',
-      easypaisa: 'Easypaisa Wallet',
+      jazzcash: 'JazzCash / Easypaisa',
+      easypaisa: 'JazzCash / Easypaisa',
       card: 'Debit / Credit Card'
     };
+    const now = new Date().toISOString();
 
-    const giftFee = formData.giftWrapping ? 150 : 0;
-    const pointsDiscount = formData.pointsToRedeem ? Math.min(formData.pointsToRedeem, cartTotal) : 0;
-    const finalTotal = Math.max(0, cartTotal + giftFee - pointsDiscount);
-
-    const newOrder: PlacedOrder = {
-      orderId,
-      date: new Date().toISOString().split('T')[0],
-      customer: formData,
-      items: [...cart],
+    const order: PlacedOrder = {
+      orderId: generateOrderId(),
+      createdAt: now,
+      source: 'website',
+      customer: {
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email?.trim() || undefined,
+        city: formData.city,
+        address: formData.address.trim(),
+        nearestLandmark: formData.nearestLandmark?.trim() || undefined,
+        orderNotes: formData.orderNotes?.trim() || undefined
+      },
+      items: cart.map((item) => ({
+        productId: item.product.id,
+        name: item.product.name,
+        image: item.product.images[0] || '',
+        price: item.product.price,
+        quantity: item.quantity,
+        color: item.selectedColor || undefined
+      })),
       subtotal: cartSubtotal,
       discount: cartDiscount,
+      discountCode: cartDiscount > 0 ? appliedDiscount?.code : undefined,
       shipping: cartShipping,
-      giftWrapFee: giftFee,
-      pointsDiscount: pointsDiscount,
-      total: finalTotal,
-      status: 'Confirmed',
-      trackingNumber: `TRX-${Math.floor(1000000 + Math.random() * 9000000)}`,
-      courier: chosenCourier,
-      paymentMethod: paymentLabels[formData.paymentMethod] || 'Cash on Delivery'
+      giftWrapFee: extras.giftWrapFee,
+      giftNote: extras.giftNote || undefined,
+      pointsDiscount: extras.pointsDiscount,
+      total: Math.max(0, cartTotal + extras.giftWrapFee - extras.pointsDiscount),
+      paymentMethod: paymentLabels[formData.paymentMethod] || 'Cash on Delivery (COD)',
+      status: 'Pending',
+      statusHistory: [{ status: 'Pending', at: now }]
     };
 
-    const earnedPoints = Math.round(cartSubtotal * 0.05);
-    setLoyaltyPoints((prev) => Math.max(0, prev - (formData.pointsToRedeem || 0)) + earnedPoints);
+    const result = await submitOrder(order);
 
-    setOrders((prev) => [newOrder, ...prev]);
+    if (order.discountCode && result.synced) {
+      const usedCode = normalizeCode(order.discountCode);
+      if (isFirebaseConfigured) {
+        incrementDiscountUsage(usedCode).catch((err) => console.error('Could not count discount usage:', err));
+      } else {
+        setLocalDiscounts((prev) => prev.map((d) => (d.code === usedCode ? { ...d, usedCount: d.usedCount + 1 } : d)));
+      }
+    }
+
+    const earnedPoints = Math.round(cartSubtotal * 0.05);
+    setLoyaltyPoints((prev) => Math.max(0, prev - extras.pointsDiscount) + earnedPoints);
     clearCart();
     setAppliedDiscount(null);
-    showToast(`🎉 Order #${orderId} placed! You earned ${earnedPoints} rewards points.`, 'success');
-    return newOrder;
+    return result;
   };
 
   return (
@@ -603,11 +779,17 @@ Please send me the order confirmation and COD dispatch details!`;
         discountError,
         applyPromoCode,
         removePromoCode,
+        featuredDiscount,
+        localDiscounts,
+        saveDiscount,
+        deleteDiscount,
         quickViewProduct,
         setQuickViewProduct,
         isCheckoutOpen,
         setIsCheckoutOpen,
         placeOrder,
+        submitOrder,
+        updateOrder,
         orders,
         loyaltyPoints,
         earnPoints,

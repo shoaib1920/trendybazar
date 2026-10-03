@@ -3,6 +3,11 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export const isCloudinaryConfigured = Boolean(CLOUD_NAME && UPLOAD_PRESET);
 
+// True for images hosted on this store's own Cloudinary account (as opposed
+// to an image URL pasted from some other site).
+export const isOwnCloudinaryUrl = (url: string) =>
+  Boolean(CLOUD_NAME) && url.trim().startsWith(`https://res.cloudinary.com/${CLOUD_NAME}/`);
+
 // Uploads a single image file straight from the browser using an
 // unsigned upload preset (no API secret needed on the client).
 // Resolves to the hosted image URL, which is stored exactly like any
@@ -23,7 +28,13 @@ export const uploadImageToCloudinary = async (file: File): Promise<string> => {
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Cloudinary upload failed: ${errText}`);
+    let reason = errText;
+    try {
+      reason = JSON.parse(errText)?.error?.message || errText;
+    } catch {
+      // not JSON — keep the raw text
+    }
+    throw new Error(`Image upload failed: ${reason}`);
   }
 
   const data = await response.json();

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useShop } from '../context/ShopContext';
+import { useShop, WHATSAPP_NUMBER } from '../context/ShopContext';
+import { OrderReceipt, printReceipt, receiptText } from './OrderReceipt';
 import { CheckoutFormData, PlacedOrder } from '../types';
 import { 
   X, 
@@ -13,7 +14,9 @@ import {
   Sparkles,
   ArrowRight,
   Gift,
-  Award
+  Award,
+  Printer,
+  AlertTriangle
 } from 'lucide-react';
 
 const PAKISTAN_CITIES = [
@@ -71,6 +74,7 @@ export const CheckoutModal: React.FC = () => {
   const [redeemPoints, setRedeemPoints] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<PlacedOrder | null>(null);
+  const [orderSynced, setOrderSynced] = useState(true);
 
   if (!isCheckoutOpen) return null;
 
@@ -83,45 +87,41 @@ export const CheckoutModal: React.FC = () => {
     setCompletedOrder(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.phone.trim() || !formData.address.trim()) {
       showToast('Please fill in your Name, WhatsApp Phone Number, and Delivery Address.', 'warning');
       return;
     }
+    if (cart.length === 0) {
+      showToast('Your bag is empty.', 'warning');
+      return;
+    }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const combinedNotes = [
-        formData.orderNotes,
-        isGiftWrapSelected ? `[LUXURY GIFT WRAPPING: "${giftMessage || 'For someone special'}"]` : '',
-        redeemPoints && loyaltyDiscount > 0 ? `[REDEEMED ${loyaltyDiscount} LOYALTY POINTS]` : ''
-      ].filter(Boolean).join(' ');
-
-      const placed = placeOrder({
-        ...formData,
-        orderNotes: combinedNotes
+    try {
+      const { order, synced } = await placeOrder(formData, {
+        giftWrapFee,
+        giftNote: isGiftWrapSelected ? giftMessage || 'For someone special' : undefined,
+        pointsDiscount: loyaltyDiscount
       });
-      setCompletedOrder(placed);
+      setCompletedOrder(order);
+      setOrderSynced(synced);
+      setIsGiftWrapSelected(false);
+      setGiftMessage('');
+      setRedeemPoints(false);
+      showToast(`🎉 Order ${order.orderId} placed!`, 'success');
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
   };
 
   const handleNotifyWhatsApp = () => {
     if (!completedOrder) return;
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋
-I just placed an order on your website:
+    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 I just placed an order on your website.
 
-🆔 *Order ID:* ${completedOrder.orderId}
-👤 *Name:* ${completedOrder.customer.fullName}
-📞 *Phone:* ${completedOrder.customer.phone}
-📍 *City:* ${completedOrder.customer.city}
-🏠 *Address:* ${completedOrder.customer.address}
-💰 *Total to Pay:* Rs. ${finalPayableTotal.toLocaleString()} (${completedOrder.paymentMethod})
-${isGiftWrapSelected ? '🎁 *Gift Wrapped:* Yes with greeting card\n' : ''}
-Please dispatch soon! Shukriya!`;
-
-    window.open(`https://wa.me/923364300592?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+${receiptText(completedOrder)}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleTrackPlacedOrder = () => {
@@ -160,45 +160,47 @@ Please dispatch soon! Shukriya!`;
             </h2>
 
             <p className="text-xs sm:text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
-              Your parcel is booked with our logistics hub. We have registered your order tracking ID below.
+              Your order is received. Save your Order ID <strong className="font-mono">{completedOrder.orderId}</strong> to track it anytime.
             </p>
 
-            {/* Order Card */}
-            <div className="bg-[#F9F6F0] p-5 rounded-2xl border border-gold-hairline max-w-md mx-auto text-left space-y-2.5 text-xs">
-              <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span className="text-gray-500 font-serif">Order Tracking #</span>
-                <span className="font-mono font-bold text-sm text-[#141414]">{completedOrder.orderId}</span>
+            {!orderSynced && (
+              <div className="max-w-md mx-auto flex items-start gap-2 text-left text-xs p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  We couldn&apos;t reach our server. Please tap <strong>Send on WhatsApp</strong> below so we receive your order.
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Destination</span>
-                <span className="font-semibold text-gray-800">{completedOrder.customer.city}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Payment</span>
-                <span className="font-bold text-emerald-800 uppercase">{completedOrder.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between border-t border-gray-200 pt-2 font-serif font-bold text-sm">
-                <span>Total Amount Due</span>
-                <span className="text-base text-[#141414]">Rs. {finalPayableTotal.toLocaleString()}</span>
-              </div>
+            )}
+
+            {/* Receipt */}
+            <div className="max-w-md mx-auto">
+              <OrderReceipt order={completedOrder} />
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 max-w-md mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 max-w-md mx-auto">
+              <button
+                onClick={printReceipt}
+                className="py-3 px-4 bg-white border border-gold-hairline hover:bg-[#F9F6F0] text-[#141414] font-bold text-xs rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95"
+              >
+                <Printer className="w-4 h-4 text-[#8A6D1F]" />
+                <span>Print / Save PDF</span>
+              </button>
+
               <button
                 onClick={handleNotifyWhatsApp}
-                className="w-full sm:w-auto flex-1 py-3 px-5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-95"
+                className="py-3 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
-                <span>Notify via WhatsApp</span>
+                <span>Send on WhatsApp</span>
               </button>
 
               <button
                 onClick={handleTrackPlacedOrder}
-                className="w-full sm:w-auto flex-1 py-3 px-5 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95"
+                className="py-3 px-4 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95"
               >
                 <Truck className="w-4 h-4 text-[#F2B705]" />
-                <span>Track Parcel Status</span>
+                <span>Track Order</span>
               </button>
             </div>
           </div>
@@ -219,7 +221,7 @@ Please dispatch soon! Shukriya!`;
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               {/* Customer Contact */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div data-tour="co-contact" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-serif font-bold text-gray-800 mb-1">
                     Full Name <span className="text-red-500">*</span>
@@ -253,7 +255,7 @@ Please dispatch soon! Shukriya!`;
               </div>
 
               {/* City & Address */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div data-tour="co-address" className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
                   <label className="block font-serif font-bold text-gray-800 mb-1">
                     City <span className="text-red-500">*</span>
@@ -354,7 +356,7 @@ Please dispatch soon! Shukriya!`;
               )}
 
               {/* Payment Methods */}
-              <div className="pt-2">
+              <div data-tour="co-payment" className="pt-2">
                 <label className="block font-serif font-bold text-gray-800 mb-2">
                   Select Payment Method:
                 </label>
@@ -447,7 +449,7 @@ Please dispatch soon! Shukriya!`;
                 className="w-full py-4 px-4 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs sm:text-sm rounded-full flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <span>Booking Order with Lahore Hub...</span>
+                  <span>Placing your order...</span>
                 ) : (
                   <>
                     <span>Confirm Order • Rs. {finalPayableTotal.toLocaleString()}</span>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Logo } from './Logo';
 import { useShop } from '../context/ShopContext';
+import { discountLabel } from '../lib/discountsService';
 import {
   MessageCircle,
   Instagram,
@@ -13,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { setActiveView, setShopCategoryFilter } = useShop();
+  const { setActiveView, setShopCategoryFilter, featuredDiscount } = useShop();
 
   const handleCategoryClick = (cat: string) => {
     setShopCategoryFilter(cat);
@@ -200,10 +201,12 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Standing Offer Reminder */}
-            <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/10">
-              <span className="text-[11px] font-bold text-[#F2B705] block mb-0.5">Code: WELCOME5</span>
-              <span className="text-[10px] text-gray-400">5% off + Rs. 150 delivery nationwide</span>
-            </div>
+            {featuredDiscount && (
+              <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/10">
+                <span className="text-[11px] font-bold text-[#F2B705] block mb-0.5">Code: {featuredDiscount.code}</span>
+                <span className="text-[10px] text-gray-400">{discountLabel(featuredDiscount)} + Rs. 150 delivery nationwide</span>
+              </div>
+            )}
           </div>
         </div>
 

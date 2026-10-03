@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountLabel } from '../lib/discountsService';
 import { ProductCard } from '../components/ProductCard';
 import { WATCH_STYLES } from '../data/categories';
 import {
@@ -29,7 +30,8 @@ export const ShopPage: React.FC<ShopPageProps> = ({ lockedCategory }) => {
     shopSubCategoryFilter,
     setShopSubCategoryFilter,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    featuredDiscount
   } = useShop();
 
   const [selectedSort, setSelectedSort] = useState<'popularity' | 'newest' | 'price-asc' | 'price-desc'>('popularity');
@@ -256,15 +258,17 @@ export const ShopPage: React.FC<ShopPageProps> = ({ lockedCategory }) => {
           </div>
 
           {/* Promo Offer */}
-          <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200/70 text-xs">
-            <div className="font-bold text-[#1A1A1A] flex items-center gap-1 mb-0.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#F2B705]" />
-              <span>Promo Code Active</span>
+          {featuredDiscount && (
+            <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200/70 text-xs">
+              <div className="font-bold text-[#1A1A1A] flex items-center gap-1 mb-0.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#F2B705]" />
+                <span>Promo Code Active</span>
+              </div>
+              <p className="text-[11px] text-gray-600">
+                Use voucher <strong>{featuredDiscount.code}</strong> in your bag for {discountLabel(featuredDiscount)}!
+              </p>
             </div>
-            <p className="text-[11px] text-gray-600">
-              Use voucher <strong>WELCOME5</strong> at checkout for 5% off your order!
-            </p>
-          </div>
+          )}
         </aside>
 
         {/* Mobile Filter Sheet */}

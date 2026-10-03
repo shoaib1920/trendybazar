@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountLabel } from '../lib/discountsService';
 import { 
   MessageCircle, 
   Mail, 
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const ContactPage: React.FC = () => {
-  const { brandWhatsAppNumber, openWhatsAppGeneral, showToast } = useShop();
+  const { brandWhatsAppNumber, openWhatsAppGeneral, showToast, featuredDiscount } = useShop();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -49,8 +50,10 @@ export const ContactPage: React.FC = () => {
       a: 'Yes — tap "Order on WhatsApp" on any product or use the chat icon.'
     },
     {
-      q: 'How do I use code WELCOME5?',
-      a: 'Enter it at checkout for an instant 5% discount.'
+      q: 'How do I use a discount code?',
+      a: `Open your Shopping Bag, type the code in "Discount code" and tap Apply.${
+        featuredDiscount ? ` Current offer: ${featuredDiscount.code} for ${discountLabel(featuredDiscount)}.` : ''
+      }`
     }
   ];
 

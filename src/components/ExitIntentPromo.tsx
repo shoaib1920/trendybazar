@@ -1,35 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountAmountText, discountLabel } from '../lib/discountsService';
 import { X, Sparkles, Copy, Check, Gift, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export const ExitIntentPromo: React.FC = () => {
-  const { applyPromoCode, showToast, setActiveView } = useShop();
+  const { applyPromoCode, setActiveView, featuredDiscount } = useShop();
   const [isVisible, setIsVisible] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
-    // Show after 12 seconds if user hasn't seen it in this session
-    const hasSeen = sessionStorage.getItem('tb_seen_promo_popup');
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-        sessionStorage.setItem('tb_seen_promo_popup', 'true');
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
+    // Show once per session, ~10 seconds in — but never on top of the
+    // "How to order" guide, the bag or checkout; wait until the customer is free.
+    if (sessionStorage.getItem('tb_seen_promo_popup')) return;
+    const isBusy = () =>
+      document.body.classList.contains('driver-active') ||
+      Boolean(document.querySelector('[aria-label="Shopping guide"], #cart-drawer-panel, #checkout-modal-card'));
+    let timer: number;
+    const tryShow = () => {
+      if (isBusy()) {
+        timer = window.setTimeout(tryShow, 5000);
+        return;
+      }
+      setIsVisible(true);
+      sessionStorage.setItem('tb_seen_promo_popup', 'true');
+    };
+    timer = window.setTimeout(tryShow, 10000);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  if (!isVisible) return null;
+  // Nothing to advertise (no featured code set in admin) -> no popup.
+  if (!isVisible || !featuredDiscount) return null;
+  const offer = featuredDiscount;
 
   const handleClose = () => {
     setIsVisible(false);
   };
 
   const handleCopyAndClaim = () => {
-    navigator.clipboard.writeText('WELCOME5');
+    navigator.clipboard.writeText(offer.code).catch(() => {});
     setIsCopied(true);
-    applyPromoCode('WELCOME5');
-    showToast('Code WELCOME5 copied & applied to your order!', 'success');
+    void applyPromoCode(offer.code);
     setTimeout(() => {
       setIsVisible(false);
       setActiveView('shop');
@@ -62,18 +72,18 @@ export const ExitIntentPromo: React.FC = () => {
         </div>
 
         <h2 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A] leading-tight mb-2">
-          Take <span className="text-[#F2B705]">5% OFF</span> Your Order
+          Take <span className="text-[#F2B705]">{discountAmountText(offer)} OFF</span> Your Order
         </h2>
 
         <p className="text-xs text-gray-600 max-w-xs mx-auto mb-6 leading-relaxed">
-          Unlock 5% instant discount on your order. Valid across Pakistan!
+          Get {discountLabel(offer)}. Valid across Pakistan!
         </p>
 
         {/* Promo Code Box */}
         <div className="bg-[#F7F3EC] p-3.5 rounded-2xl border border-dashed border-amber-300 mb-5 flex items-center justify-between gap-2">
           <div className="text-left">
             <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold block">Coupon Code</span>
-            <span className="font-heading font-black text-lg text-[#1A1A1A] tracking-wider">WELCOME5</span>
+            <span className="font-heading font-black text-lg text-[#1A1A1A] tracking-wider">{offer.code}</span>
           </div>
           <button
             onClick={handleCopyAndClaim}

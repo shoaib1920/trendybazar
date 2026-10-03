@@ -29,6 +29,7 @@ export const HomePage: React.FC = () => {
 
   const heroProduct = products.find((p) => p.slug === 'buds-pro-3-true-wireless-earbuds') || products[0];
   const watchProducts = products.filter((p) => p.category === 'accessories');
+  const earbudProduct = products.find((p) => p.category === 'electronics') || heroProduct;
 
   const [heroSlide, setHeroSlide] = useState(0);
   const [isHeroMuted, setIsHeroMuted] = useState(true);
@@ -93,8 +94,8 @@ export const HomePage: React.FC = () => {
               {heroSlide === 0 ? (
                 <motion.img
                   key="hero-image"
-                  src={heroProduct.images[0]}
-                  alt={heroProduct.name}
+                  src={heroProduct?.images[0]}
+                  alt={heroProduct?.name || 'Trendy Bazaar'}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -201,7 +202,7 @@ export const HomePage: React.FC = () => {
             className="group relative rounded-3xl overflow-hidden border border-gold-hairline cursor-pointer aspect-[16/10] bg-[#141414]"
           >
             <img
-              src={heroProduct.images[0]}
+              src={earbudProduct?.images[0]}
               alt="Shop Earbuds"
               className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
             />

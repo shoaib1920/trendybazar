@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
 import { CityDeliveryChecker } from '../components/CityDeliveryChecker';
 import { CompleteTheLook } from '../components/CompleteTheLook';
 import { RecentlyViewed } from '../components/RecentlyViewed';
 import { BackInStockModal } from '../components/BackInStockModal';
+import { ImageZoomViewer } from '../components/ImageZoomViewer';
 import {
   Heart,
   ShoppingBag,
@@ -15,6 +16,8 @@ import {
   ShieldCheck,
   Share2,
   ChevronRight,
+  ChevronLeft,
+  ZoomIn,
   Bell
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -39,9 +42,41 @@ export const ProductDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'details' | 'shipping' | 'reviews'>('details');
   const [isBackInStockOpen, setIsBackInStockOpen] = useState(false);
 
+  const touchStartX = useRef<number | null>(null);
+  const [isZoomViewerOpen, setIsZoomViewerOpen] = useState(false);
+  // Desktop hover magnifier: cursor position over the main image, in %.
+  const [hoverZoomOrigin, setHoverZoomOrigin] = useState<{ x: number; y: number } | null>(null);
+
+  const handleImagePointerMove = (e: React.PointerEvent<HTMLImageElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoverZoomOrigin({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100
+    });
+  };
+
   useEffect(() => {
     setActiveImageIndex(0);
   }, [product.id]);
+
+  const imageCount = product.images.length;
+  const showImage = (index: number) => {
+    if (imageCount === 0) return;
+    setActiveImageIndex((index + imageCount) % imageCount);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || imageCount < 2) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(deltaX) < 40) return;
+    showImage(activeImageIndex + (deltaX < 0 ? 1 : -1));
+  };
 
   const isFavorited = isInWishlist(product.id);
   const totalPrice = product.price * quantity;
@@ -100,13 +135,57 @@ Please confirm availability and delivery time for Cash on Delivery!`;
             initial={{ opacity: 0.85 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
+            onTouchStart={handleTouchStart}
+            data-tour="pdp-gallery"
+            onTouchEnd={handleTouchEnd}
             className="relative aspect-4/5 sm:aspect-square w-full rounded-3xl overflow-hidden bg-[#F9F6F0] border border-gold-hairline shadow-xs"
           >
             <img
               src={product.images[activeImageIndex] || product.images[0]}
               alt={product.name}
-              className="w-full h-full object-cover"
+              onClick={() => { setHoverZoomOrigin(null); setIsZoomViewerOpen(true); }}
+              onPointerMove={handleImagePointerMove}
+              onPointerLeave={() => setHoverZoomOrigin(null)}
+              className="w-full h-full object-cover cursor-zoom-in transition-transform duration-200 ease-out"
+              style={
+                hoverZoomOrigin
+                  ? { transform: 'scale(2)', transformOrigin: `${hoverZoomOrigin.x}% ${hoverZoomOrigin.y}%` }
+                  : undefined
+              }
             />
+
+            {/* Magnifier: opens the full-screen zoom viewer */}
+            <button
+              onClick={() => setIsZoomViewerOpen(true)}
+              className="absolute bottom-4 left-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md backdrop-blur-md transition-all active:scale-90"
+              aria-label="Zoom image"
+              title="Zoom"
+            >
+              <ZoomIn className="w-5 h-5" />
+            </button>
+
+            {/* Prev / Next arrows + counter (only when there are multiple images) */}
+            {imageCount > 1 && (
+              <>
+                <button
+                  onClick={() => showImage(activeImageIndex - 1)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md backdrop-blur-md transition-all active:scale-90"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => showImage(activeImageIndex + 1)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md backdrop-blur-md transition-all active:scale-90"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                <span className="absolute bottom-4 right-4 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none">
+                  {activeImageIndex + 1} / {imageCount}
+                </span>
+              </>
+            )}
 
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
@@ -229,7 +308,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-3">
               {/* Quantity counter */}
-              <div className="flex items-center border border-gold-hairline rounded-full bg-[#F9F6F0] p-1 text-xs">
+              <div data-tour="pdp-qty" className="flex items-center border border-gold-hairline rounded-full bg-[#F9F6F0] p-1 text-xs">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -447,6 +526,16 @@ Please confirm availability and delivery time for Cash on Delivery!`;
           </button>
         </div>
       </div>
+
+      {/* Full-screen image zoom viewer */}
+      {isZoomViewerOpen && (
+        <ImageZoomViewer
+          images={product.images}
+          startIndex={activeImageIndex}
+          alt={product.name}
+          onClose={() => setIsZoomViewerOpen(false)}
+        />
+      )}
 
       {/* Back In Stock Modal */}
       <BackInStockModal

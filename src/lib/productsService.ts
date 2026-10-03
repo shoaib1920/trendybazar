@@ -34,18 +34,13 @@ export const deleteProductRemote = async (productId: string) => {
   await deleteDoc(doc(db, COLLECTION, productId));
 };
 
-// One-time seed: if the Firestore collection is empty (fresh project),
-// populate it with the site's built-in starter catalog so the store
-// isn't blank the first time Firebase is switched on.
-export const seedProductsIfEmpty = async (initialProducts: Product[]) => {
+// Seed disabled: the app no longer ships a built-in starter catalog.
+// Products must be created from the admin panel or added through Firebase.
+export const seedProductsIfEmpty = async (_initialProducts: Product[]) => {
   if (!isFirebaseConfigured || !db) return;
 
   const snapshot = await getDocs(collection(db, COLLECTION));
   if (!snapshot.empty) return;
 
-  const batch = writeBatch(db);
-  initialProducts.forEach((product) => {
-    batch.set(doc(db, COLLECTION, product.id), product);
-  });
-  await batch.commit();
+  // Intentionally left empty to avoid injecting demo products.
 };

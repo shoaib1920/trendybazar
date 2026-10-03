@@ -16,9 +16,15 @@ export const Logo: React.FC<LogoProps> = ({
   const isLight = variant === 'light'; // Used on dark backgrounds (Footer)
 
   const imgSizes = {
-    sm: 'h-9',
-    md: 'h-11 md:h-12',
-    lg: 'h-16 md:h-20'
+    sm: 'h-11',
+    md: 'h-12 sm:h-14',
+    lg: 'h-20 md:h-24'
+  };
+
+  const nameSizes = {
+    sm: 'text-[13px]',
+    md: 'text-[13px] sm:text-[15px]',
+    lg: 'text-lg md:text-xl'
   };
 
   const logoImg = (
@@ -38,13 +44,22 @@ export const Logo: React.FC<LogoProps> = ({
       )}
 
       {showTagline && (
-        <span
-          className={`text-[9px] uppercase tracking-[0.2em] font-semibold ${
-            isLight ? 'text-gray-400' : 'text-gray-500'
-          }`}
-        >
-          Pakistan
-        </span>
+        <div className="flex flex-col leading-none">
+          <span
+            className={`font-black uppercase tracking-[0.14em] whitespace-nowrap ${nameSizes[size]} ${
+              isLight ? 'text-white' : 'text-[#141414]'
+            }`}
+          >
+            Trendy Bazaar
+          </span>
+          <span
+            className={`mt-1 text-[9px] uppercase tracking-[0.3em] font-semibold ${
+              isLight ? 'text-gray-400' : 'text-gray-500'
+            }`}
+          >
+            Pakistan
+          </span>
+        </div>
       )}
     </div>
   );

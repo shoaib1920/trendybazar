@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountAmountText } from '../lib/discountsService';
 import { 
   X, 
   Trash2, 
@@ -28,6 +29,7 @@ export const CartDrawer: React.FC = () => {
     applyPromoCode, 
     removePromoCode, 
     discountError,
+    featuredDiscount,
     setIsCheckoutOpen,
     getWhatsAppCartLink,
     setActiveView
@@ -48,9 +50,10 @@ export const CartDrawer: React.FC = () => {
     }
   };
 
-  const handleQuickApplyWELCOME5 = () => {
-    setPromoInput('WELCOME5');
-    applyPromoCode('WELCOME5');
+  const handleQuickApplyFeatured = () => {
+    if (!featuredDiscount) return;
+    setPromoInput(featuredDiscount.code);
+    void applyPromoCode(featuredDiscount.code);
   };
 
   const handleProceedCheckout = () => {
@@ -169,7 +172,7 @@ Add earbuds or a watch to get started.
                   </div>
 
                   <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center border border-gray-200 rounded-lg bg-white overflow-hidden">
+                    <div data-tour="cart-qty" className="flex items-center border border-gray-200 rounded-lg bg-white overflow-hidden">
                       <button
                         onClick={() => updateCartQuantity(idx, item.quantity - 1)}
                         className="px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-100"
@@ -201,7 +204,7 @@ Add earbuds or a watch to get started.
         {cart.length > 0 && (
           <div className="p-4 border-t border-gray-100 bg-[#F7F3EC]/30 space-y-3">
             {/* Promo Code Input */}
-            <div>
+            <div data-tour="cart-discount">
               {appliedDiscount ? (
                 <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs">
                   <div className="flex items-center gap-2 text-emerald-800">
@@ -224,7 +227,7 @@ Add earbuds or a watch to get started.
                     <div className="relative flex-1">
                       <input
                         type="text"
-                        placeholder="Discount code (e.g. WELCOME5)"
+                        placeholder="Discount code"
                         value={promoInput}
                         onChange={(e) => setPromoInput(e.target.value)}
                         className="w-full bg-white border border-gray-200 focus:border-[#F2B705] text-xs uppercase rounded-xl py-2 pl-8 pr-3 outline-none"
@@ -244,16 +247,20 @@ Add earbuds or a watch to get started.
                       <span>{discountError}</span>
                     </div>
                   )}
-                  {/* Quick Pill for WELCOME5 */}
-                  <div className="flex items-center justify-between text-[11px] text-gray-500 mt-1.5 px-0.5">
-                    <span>Have code <strong>WELCOME5</strong>?</span>
-                    <button
-                      onClick={handleQuickApplyWELCOME5}
-                      className="text-[#F2B705] hover:text-[#d49e00] font-bold underline"
-                    >
-                      Auto-Apply 5% Off
-                    </button>
-                  </div>
+                  {/* Quick pill for the advertised code */}
+                  {featuredDiscount && (
+                    <div className="flex items-center justify-between text-[11px] text-gray-500 mt-1.5 px-0.5">
+                      <span>
+                        Have code <strong>{featuredDiscount.code}</strong>?
+                      </span>
+                      <button
+                        onClick={handleQuickApplyFeatured}
+                        className="text-[#F2B705] hover:text-[#d49e00] font-bold underline"
+                      >
+                        Auto-Apply {discountAmountText(featuredDiscount)} Off
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

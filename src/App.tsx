@@ -10,6 +10,8 @@ import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { OrderTrackModal } from './components/OrderTrackModal';
 import { AdminManagerModal } from './components/AdminManagerModal';
+import { AiChatAssistant } from './components/AiChatAssistant';
+import { GuidedTour } from './components/GuidedTour';
 import { QuickViewModal } from './components/QuickViewModal';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
@@ -60,7 +62,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white text-[#141414]">
       {/* Toast Notification Stack */}
       {toasts.length > 0 && (
-        <div className="fixed top-20 right-4 sm:right-6 z-50 flex flex-col gap-2 max-w-sm">
+        <div className="fixed top-20 right-4 sm:right-6 z-[100] flex flex-col gap-2 max-w-sm">
           {toasts.map((toast) => (
             <div
               key={toast.id}
@@ -94,7 +96,9 @@ const AppContent: React.FC = () => {
       <QuickViewModal />
       <CartDrawer />
       <CheckoutModal />
-      <FloatingWhatsApp />
+      {activeView !== 'admin' && <FloatingWhatsApp />}
+      {activeView !== 'admin' && <AiChatAssistant />}
+      <GuidedTour />
       <ExitIntentPromo />
     </div>
   );

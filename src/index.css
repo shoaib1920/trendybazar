@@ -92,3 +92,100 @@ h1, h2, h3, .font-serif, .font-display {
   background: #9C7A28;
 }
 
+
+/* Receipt printing: only the element marked .print-receipt is printed
+   (customers can choose "Save as PDF" in the print dialog). */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .print-receipt,
+  .print-receipt * {
+    visibility: visible !important;
+  }
+  .print-receipt {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
+
+/* Guided "How to order" tour (driver.js) in the store theme */
+.driver-popover.tb-tour {
+  background: #fffdf8;
+  color: #141414;
+  border: 1px solid rgba(184, 134, 11, 0.35);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  max-width: 300px;
+  box-shadow: 0 18px 40px rgba(20, 20, 20, 0.25);
+  font-family: var(--font-sans);
+}
+.tb-tour .driver-popover-title {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.3;
+  padding-right: 18px;
+}
+.tb-tour .driver-popover-description {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #4b5563;
+  margin-top: 4px;
+}
+.tb-tour .tb-tour-ur {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  background: #f9f6f0;
+  color: #8a6d1f;
+  font-weight: 600;
+}
+.tb-tour .driver-popover-progress-text {
+  color: #8a6d1f;
+  font-weight: 700;
+  font-size: 11px;
+}
+.tb-tour .driver-popover-footer {
+  margin-top: 12px;
+}
+.tb-tour .driver-popover-footer button {
+  font-family: var(--font-sans);
+  text-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 7px 14px;
+  border: 1px solid rgba(184, 134, 11, 0.35);
+  background: #ffffff;
+  color: #141414;
+}
+.tb-tour .driver-popover-footer .driver-popover-next-btn {
+  background: #141414;
+  border-color: #141414;
+  color: #ffffff;
+}
+.tb-tour .driver-popover-footer button:hover {
+  background: #f9f6f0;
+}
+.tb-tour .driver-popover-footer .driver-popover-next-btn:hover {
+  background: #000000;
+}
+.tb-tour .driver-popover-close-btn {
+  color: #9ca3af;
+}
+.tb-tour .driver-popover-close-btn:hover {
+  color: #141414;
+}
+.tb-tour .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: #fffdf8; }
+.tb-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: #fffdf8; }
+.tb-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: #fffdf8; }
+.tb-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: #fffdf8; }

@@ -52,6 +52,7 @@ export const MobileBottomNav: React.FC = () => {
         {/* 2. Shop / Catalog */}
         <button
           onClick={handleShopClick}
+          data-tour="categories"
           className={`flex flex-col items-center justify-center py-1 px-1 transition-colors relative ${
             activeView === 'shop' ? 'text-[#141414] font-serif font-bold' : 'text-gray-500'
           }`}
@@ -76,6 +77,7 @@ export const MobileBottomNav: React.FC = () => {
           rel="noopener noreferrer"
           className="flex flex-col items-center justify-center py-1 px-1 text-emerald-600 transition-transform active:scale-95"
           aria-label="Order on WhatsApp"
+          data-tour="whatsapp"
         >
           <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md -mt-3 ring-2 ring-white">
             <MessageCircle className="w-5 h-5 fill-white text-emerald-600" />

@@ -8,5 +8,31 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    // Orders: customers can place a new order (always starting as Pending)
+    // and look up a single order by its exact, hard-to-guess ID for tracking.
+    // Only the signed-in admin can list, update or delete orders.
+    match /orders/{orderId} {
+      allow create: if request.resource.data.orderId == orderId
+        && request.resource.data.status == 'Pending'
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 50
+        && request.resource.data.total is number;
+      allow get: if true;
+      allow list, update, delete: if request.auth != null;
+    }
+
+    // Discount codes: customers can check the exact code they typed, and
+    // list only the featured (advertised) code. Using a code may only add 1
+    // to its usage count. Everything else is admin only.
+    match /discounts/{code} {
+      allow get: if true;
+      allow list: if request.auth != null || resource.data.featured == true;
+      allow create, delete: if request.auth != null;
+      allow update: if request.auth != null
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
+            && request.resource.data.usedCount == resource.data.usedCount + 1);
+    }
   }
 }

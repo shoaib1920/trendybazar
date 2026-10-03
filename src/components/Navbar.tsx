@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { discountAmountText, discountLabel } from '../lib/discountsService';
 import { Logo } from './Logo';
 import { WATCH_STYLES } from '../data/categories';
 import {
@@ -32,7 +33,8 @@ export const Navbar: React.FC = () => {
     setSearchQuery,
     showToast,
     setActiveView,
-    t
+    t,
+    featuredDiscount
   } = useShop();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,9 +45,10 @@ export const Navbar: React.FC = () => {
 
   const handleCopyCode = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText('WELCOME5');
+    if (!featuredDiscount) return;
+    navigator.clipboard.writeText(featuredDiscount.code);
     setCodeCopied(true);
-    showToast('Promo code WELCOME5 copied! Use at checkout for 5% off', 'success');
+    showToast(`Promo code ${featuredDiscount.code} copied! Use it in your bag for ${discountLabel(featuredDiscount)}`, 'success');
     setTimeout(() => setCodeCopied(false), 2500);
   };
 
@@ -81,6 +84,8 @@ export const Navbar: React.FC = () => {
             <span className="w-2 h-2 rounded-full bg-[#8A6D1F] animate-pulse shrink-0"></span>
             <span>Rs. 150 Flat Delivery Nationwide</span>
           </span>
+          {featuredDiscount && (
+            <>
           <span className="hidden sm:inline text-gray-500">•</span>
           <button
             onClick={handleCopyCode}
@@ -95,16 +100,19 @@ export const Navbar: React.FC = () => {
               </>
             ) : (
               <>
-                <span>CODE: WELCOME5</span>
+                <span>CODE: {featuredDiscount.code}</span>
                 <Copy className="w-2.5 h-2.5" />
               </>
             )}
           </button>
+            </>
+          )}
         </div>
 
         <div className="hidden lg:flex items-center gap-5 text-gray-300 text-[11px]">
           <button
             onClick={() => handleNavClick('track')}
+            data-tour="track"
             className="hover:text-[#F2B705] transition-colors underline underline-offset-2"
           >
             Track Parcel
@@ -136,7 +144,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-serif font-bold text-[#141414]">
+          <nav data-tour="categories" className="hidden lg:flex items-center gap-6 text-xs font-serif font-bold text-[#141414]">
             <button
               onClick={() => handleNavClick('home')}
               className={`transition-colors hover:text-[#8A6D1F] py-2 border-b-2 ${
@@ -224,7 +232,7 @@ export const Navbar: React.FC = () => {
           {/* Right Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Desktop Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="relative hidden md:block w-48 lg:w-56">
+            <form onSubmit={handleSearchSubmit} data-tour="search" className="relative hidden md:block w-48 lg:w-56">
               <input
                 type="text"
                 placeholder="Search earbuds..."
@@ -238,6 +246,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Search Trigger */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
+              data-tour="search"
               className="p-2 text-[#141414] hover:bg-[#F9F6F0] rounded-full md:hidden"
               aria-label="Search"
             >
@@ -263,6 +272,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsCartOpen(true)}
               id="cart-nav-btn"
+              data-tour="cart"
               className="relative flex items-center gap-2 bg-[#141414] hover:bg-black text-white px-3 sm:px-4 py-2 rounded-full transition-all active:scale-95 shadow-xs"
               aria-label="Shopping Cart"
             >
@@ -317,18 +327,20 @@ export const Navbar: React.FC = () => {
                 </div>
 
                 {/* Promo Strip */}
-                <div className="p-3 bg-amber-50 border-b border-gold-hairline flex items-center justify-between text-xs">
-                  <span className="font-serif font-bold text-[#141414] flex items-center gap-1.5">
-                    <PartyPopper className="w-3.5 h-3.5 text-[#8A6D1F]" />
-                    <span>5% Off Your First Order</span>
-                  </span>
-                  <button
-                    onClick={handleCopyCode}
-                    className="text-[10px] font-serif font-bold bg-[#8A6D1F] text-white px-2 py-0.5 rounded-full"
-                  >
-                    WELCOME5
-                  </button>
-                </div>
+                {featuredDiscount && (
+                  <div className="p-3 bg-amber-50 border-b border-gold-hairline flex items-center justify-between text-xs">
+                    <span className="font-serif font-bold text-[#141414] flex items-center gap-1.5">
+                      <PartyPopper className="w-3.5 h-3.5 text-[#8A6D1F]" />
+                      <span>{discountAmountText(featuredDiscount)} Off Your Order</span>
+                    </span>
+                    <button
+                      onClick={handleCopyCode}
+                      className="text-[10px] font-serif font-bold bg-[#8A6D1F] text-white px-2 py-0.5 rounded-full"
+                    >
+                      {featuredDiscount.code}
+                    </button>
+                  </div>
+                )}
 
                 {/* Main Navigation Links */}
                 <div className="p-4 space-y-1">
