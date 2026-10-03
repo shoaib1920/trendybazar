@@ -7,7 +7,7 @@ import {
 import { auth, isFirebaseConfigured } from './firebase';
 
 // The only account allowed to manage the store (must match firestore.rules).
-export const ADMIN_EMAIL = 'trendybazar@gmail.com';
+export const ADMIN_EMAIL = 'tbadmin@gmail.com';
 
 export const isAdminUser = (user: User | null) => Boolean(user?.email && user.email.toLowerCase() === ADMIN_EMAIL);
 

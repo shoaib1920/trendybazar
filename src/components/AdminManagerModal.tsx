@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Product } from '../types';
 import { WATCH_STYLES } from '../data/categories';
-import { subscribeToAdminAuth, signInAdmin, signOutAdmin, isAdminUser, ADMIN_EMAIL } from '../lib/adminAuth';
+import { subscribeToAdminAuth, signInAdmin, signOutAdmin, isAdminUser } from '../lib/adminAuth';
 import { uploadImageToCloudinary, isCloudinaryConfigured, isOwnCloudinaryUrl } from '../lib/cloudinary';
 import { ProductImageCropModal } from './ProductImageCropModal';
 import { subscribeToOrders } from '../lib/ordersService';
@@ -99,11 +99,12 @@ export const AdminManagerModal: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeToAdminAuth((user) => {
-      // Any account other than the store's admin account is signed straight out.
+      // Any account other than the store's admin account is signed straight out,
+      // with the same message as a wrong password (never reveal the admin email).
       if (user && !isAdminUser(user)) {
         void signOutAdmin();
         setAdminUser(null);
-        setLoginError(`${user.email || 'This account'} does not have admin access. Please sign in with ${ADMIN_EMAIL}.`);
+        setLoginError('Incorrect email or password.');
       } else {
         setAdminUser(user);
       }
