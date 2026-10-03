@@ -14,14 +14,24 @@ export const BackInStockModal: React.FC<BackInStockModalProps> = ({ product, isO
   const { registerBackInStock } = useShop();
   const [contact, setContact] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen || !product) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contact.trim()) return;
-    registerBackInStock(product.id, product.name, contact.trim());
-    setSubmitted(true);
+    if (!contact.trim() || isSaving) return;
+    setIsSaving(true);
+    setError('');
+    try {
+      await registerBackInStock(product.id, product.name, contact.trim());
+      setSubmitted(true);
+    } catch {
+      setError('Could not save your request. Please try again or message us on WhatsApp.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClose = () => {
@@ -105,9 +115,12 @@ export const BackInStockModal: React.FC<BackInStockModalProps> = ({ product, isO
                 </span>
               </div>
 
+              {error && <p className="text-red-600 text-[11px]">{error}</p>}
+
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-md"
+                disabled={isSaving}
+                className="w-full py-3.5 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-md disabled:opacity-60"
               >
                 <Bell className="w-3.5 h-3.5 text-[#F2B705]" />
                 <span>Notify Me First on Restock</span>

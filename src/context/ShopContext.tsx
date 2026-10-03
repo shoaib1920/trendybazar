@@ -11,7 +11,14 @@ import {
 import { INITIAL_PRODUCTS } from '../data/products';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { subscribeToProducts, saveProductRemote, deleteProductRemote, seedProductsIfEmpty } from '../lib/productsService';
-import { createOrderRemote, generateOrderId, updateOrderRemote } from '../lib/ordersService';
+import { createOrderRemote, generateOrderId, OrderLimitError, updateOrderRemote } from '../lib/ordersService';
+import { toPhoneKey } from '../lib/phone';
+import {
+  createBackInStockRemote,
+  getPointsRemote,
+  markCartConvertedRemote,
+  saveAbandonedCartRemote
+} from '../lib/customerService';
 import {
   DEFAULT_DISCOUNT,
   deleteDiscountRemote,
@@ -46,8 +53,46 @@ export interface ToastMessage {
 export type AppLanguage = 'en' | 'ur';
 type ActiveView = 'home' | 'shop' | 'earbuds' | 'watches' | 'product' | 'wishlist' | 'about' | 'contact' | 'track' | 'admin';
 
-const getViewFromPath = (): ActiveView =>
-  window.location.pathname.replace(/\/+$/, '') === '/admin' ? 'admin' : 'home';
+// Every page has its own address so links can be shared and the back button works:
+// /, /shop, /earbuds, /watches, /product/<slug>, /wishlist, /about, /contact,
+// /track, /track/<order id>, /admin
+const VIEW_PATHS: Record<Exclude<ActiveView, 'product'>, string> = {
+  home: '/',
+  shop: '/shop',
+  earbuds: '/earbuds',
+  watches: '/watches',
+  wishlist: '/wishlist',
+  about: '/about',
+  contact: '/contact',
+  track: '/track',
+  admin: '/admin'
+};
+
+interface Route {
+  view: ActiveView;
+  slug: string | null;
+  orderId: string | null;
+}
+
+const parseRoute = (pathname: string): Route => {
+  const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  const [first, second] = parts;
+  if (first === 'product' && second) return { view: 'product', slug: second, orderId: null };
+  if (first === 'track') return { view: 'track', slug: null, orderId: second ? second.toUpperCase() : null };
+  const view = (Object.keys(VIEW_PATHS) as (keyof typeof VIEW_PATHS)[]).find((v) => VIEW_PATHS[v] === `/${first || ''}`);
+  return { view: view || 'home', slug: null, orderId: null };
+};
+
+// The part of a product's address after /product/. Products that share a name
+// (and so a slug) get a short id suffix so every product has its own link.
+export const productKeyFor = (product: Product, all: Product[]) =>
+  all.some((p) => p.slug === product.slug && p.id !== product.id) ? `${product.slug}-${product.id.slice(-5).toLowerCase()}` : product.slug;
+
+export const findProductByKey = (key: string | null, all: Product[]) =>
+  key ? all.find((p) => productKeyFor(p, all) === key) || all.find((p) => p.slug === key) : undefined;
+
+export const productUrl = (slug: string) => `${window.location.origin}/product/${encodeURIComponent(slug)}`;
+export const trackUrl = (orderId: string) => `${window.location.origin}/track/${orderId}`;
 
 interface ShopContextType {
   // Language Toggle
@@ -61,6 +106,8 @@ interface ShopContextType {
   setActiveView: (view: ActiveView) => void;
   selectedProductSlug: string | null;
   navigateToProduct: (slug: string) => void;
+  // Order ID from a /track/<id> link.
+  trackOrderId: string | null;
   shopCategoryFilter: string;
   setShopCategoryFilter: (cat: string) => void;
   shopSubCategoryFilter: string;
@@ -117,15 +164,17 @@ interface ShopContextType {
   // Orders placed from this device (the full list for admins lives in Firestore).
   orders: PlacedOrder[];
 
-  // Loyalty Rewards
-  loyaltyPoints: number;
-  earnPoints: (pts: number) => void;
+  // Loyalty points are kept per phone number in Firestore.
+  getCustomerPoints: (phone: string) => Promise<number>;
+  // Saves checkout details so the admin can follow up if the order is not completed.
+  saveCheckoutDraft: (draft: { fullName: string; phone: string; city: string }) => void;
 
   // Recently Viewed & Back In Stock
   recentlyViewedSlugs: string[];
   addRecentlyViewed: (slug: string) => void;
+  // Browser-only requests, used when Firebase is not configured.
   backInStockRequests: BackInStockRequest[];
-  registerBackInStock: (productId: string, productName: string, contact: string) => void;
+  registerBackInStock: (productId: string, productName: string, contact: string) => Promise<void>;
 
   // WhatsApp Helpers
   brandWhatsAppNumber: string;
@@ -213,21 +262,36 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return DICTIONARY[language]?.[key] || DICTIONARY.en[key] || key;
   };
 
-  // Navigation
-  const [activeView, setActiveViewState] = useState<ActiveView>(getViewFromPath);
+  // Navigation (kept in sync with the address bar)
+  const initialRoute = parseRoute(window.location.pathname);
+  const [activeView, setActiveViewState] = useState<ActiveView>(initialRoute.view);
+  const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(initialRoute.slug);
+  const [trackOrderId, setTrackOrderId] = useState<string | null>(initialRoute.orderId);
+
+  const pushPath = (path: string) => {
+    if (window.location.pathname !== path) window.history.pushState({}, '', path);
+  };
+
   const setActiveView = (view: ActiveView) => {
     setActiveViewState(view);
-    const nextPath = view === 'admin' ? '/admin' : '/';
-    if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath);
+    if (view === 'product') {
+      if (selectedProductSlug) pushPath(`/product/${encodeURIComponent(selectedProductSlug)}`);
+    } else {
+      if (view === 'track') setTrackOrderId(null);
+      pushPath(VIEW_PATHS[view]);
+    }
   };
 
   useEffect(() => {
-    const syncViewWithPath = () => setActiveViewState(getViewFromPath());
-    window.addEventListener('popstate', syncViewWithPath);
-    return () => window.removeEventListener('popstate', syncViewWithPath);
+    const syncWithAddressBar = () => {
+      const route = parseRoute(window.location.pathname);
+      setActiveViewState(route.view);
+      if (route.slug) setSelectedProductSlug(route.slug);
+      setTrackOrderId(route.orderId);
+    };
+    window.addEventListener('popstate', syncWithAddressBar);
+    return () => window.removeEventListener('popstate', syncWithAddressBar);
   }, []);
-
-  const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [shopCategoryFilter, setShopCategoryFilter] = useState<string>('all');
   const [shopSubCategoryFilter, setShopSubCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -265,12 +329,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [wishlist, setWishlist] = useState<string[]>(() => {
     const saved = localStorage.getItem('tb_wishlist');
     return saved ? JSON.parse(saved) : [];
-  });
-
-  // Loyalty Points (default 180 points for welcoming back loyal shopper)
-  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(() => {
-    const saved = localStorage.getItem('tb_loyalty_points');
-    return saved !== null ? parseInt(saved, 10) : 180;
   });
 
   // Recently Viewed Slugs
@@ -413,16 +471,29 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    localStorage.setItem('tb_loyalty_points', loyaltyPoints.toString());
-  }, [loyaltyPoints]);
-
-  useEffect(() => {
     localStorage.setItem('tb_recently_viewed', JSON.stringify(recentlyViewedSlugs));
   }, [recentlyViewedSlugs]);
 
   useEffect(() => {
     localStorage.setItem('tb_back_in_stock', JSON.stringify(backInStockRequests));
   }, [backInStockRequests]);
+
+  useEffect(() => {
+    const base = 'Trendy Bazaar Pakistan';
+    const product = activeView === 'product' ? findProductByKey(selectedProductSlug, products) : undefined;
+    const titles: Partial<Record<ActiveView, string>> = {
+      shop: 'Shop',
+      earbuds: 'Earbuds',
+      watches: 'Watches',
+      wishlist: 'Wishlist',
+      about: 'Our Story',
+      contact: 'Help & FAQs',
+      track: 'Track Order',
+      admin: 'Admin'
+    };
+    const page = product ? `${product.name} — Rs. ${product.price.toLocaleString()}` : titles[activeView];
+    document.title = page ? `${page} | ${base}` : `${base} — Earbuds & Watches`;
+  }, [activeView, selectedProductSlug, products]);
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
@@ -437,8 +508,14 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const earnPoints = (pts: number) => {
-    setLoyaltyPoints((prev) => prev + pts);
+  const getCustomerPoints = async (phone: string) => {
+    const phoneKey = toPhoneKey(phone);
+    if (!phoneKey) return 0;
+    try {
+      return await getPointsRemote(phoneKey);
+    } catch {
+      return 0;
+    }
   };
 
   const addRecentlyViewed = (slug: string) => {
@@ -448,16 +525,22 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const registerBackInStock = (productId: string, productName: string, contact: string) => {
+  const registerBackInStock = async (productId: string, productName: string, contact: string) => {
     const newReq: BackInStockRequest = {
-      id: `bis-${Date.now()}`,
+      id: `bis-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       productId,
       productName,
-      phoneOrEmail: contact,
-      requestedAt: new Date().toISOString()
+      contact: contact.trim(),
+      phoneKey: toPhoneKey(contact) || undefined,
+      createdAt: new Date().toISOString(),
+      notified: false
     };
-    setBackInStockRequests((prev) => [newReq, ...prev]);
-    showToast(`✓ We'll notify ${contact} as soon as restocked!`, 'success');
+    if (isFirebaseConfigured) {
+      await createBackInStockRemote(newReq);
+    } else {
+      setBackInStockRequests((prev) => [newReq, ...prev]);
+    }
+    showToast(`✓ We'll notify ${contact} as soon as it's restocked!`, 'success');
   };
 
   // Cart calculations
@@ -478,7 +561,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigateToProduct = (slug: string) => {
     setSelectedProductSlug(slug);
     addRecentlyViewed(slug);
-    setActiveView('product');
+    setActiveViewState('product');
+    pushPath(`/product/${encodeURIComponent(slug)}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -615,7 +699,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${product.price}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trendybazar.pk/product/${product.slug}
+${details ? `✨ Details: ${details}\n` : ''}🔗 Link: ${productUrl(productKeyFor(product, products))}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
@@ -657,13 +741,16 @@ Please send me the order confirmation and COD dispatch details!`;
 
   // Saves an order online (Firestore) and on this device. Never throws:
   // if the online save fails the order is still kept locally.
+  // Throws OrderLimitError when the phone number has reached its daily order limit.
   const submitOrder = async (order: PlacedOrder): Promise<OrderSubmitResult> => {
+    order = { ...order, phoneKey: order.phoneKey || toPhoneKey(order.customer.phone) || undefined };
     let synced = !isFirebaseConfigured;
     if (isFirebaseConfigured) {
       try {
         await createOrderRemote(order);
         synced = true;
       } catch (err) {
+        if (err instanceof OrderLimitError) throw err;
         console.error('Failed to save order online:', err);
       }
     }
@@ -676,6 +763,27 @@ Please send me the order confirmation and COD dispatch details!`;
       await updateOrderRemote(orderId, patch);
     }
     setOrders((prev) => prev.map((o) => (o.orderId === orderId ? { ...o, ...patch } : o)));
+  };
+
+  // ---------- Abandoned carts ----------
+  const draftFor = (form: { fullName: string; phone: string; city: string }) => {
+    const phoneKey = toPhoneKey(form.phone);
+    if (!phoneKey || !form.fullName.trim() || cart.length === 0) return null;
+    return {
+      phoneKey,
+      name: form.fullName.trim().slice(0, 100),
+      phone: form.phone.trim(),
+      city: form.city,
+      items: cart.map((i) => ({ name: i.product.name, quantity: i.quantity, price: i.product.price })),
+      total: cartTotal,
+      converted: false
+    };
+  };
+
+  const saveCheckoutDraft = (form: { fullName: string; phone: string; city: string }) => {
+    const draft = draftFor(form);
+    if (!draft) return;
+    saveAbandonedCartRemote(draft).catch(() => {});
   };
 
   // Place Order (website checkout)
@@ -724,6 +832,12 @@ Please send me the order confirmation and COD dispatch details!`;
 
     const result = await submitOrder(order);
 
+    // The checkout was completed, so it is no longer an abandoned cart.
+    const cartDraft = draftFor(formData);
+    if (cartDraft && result.synced) {
+      markCartConvertedRemote(cartDraft, order.orderId).catch(() => {});
+    }
+
     if (order.discountCode && result.synced) {
       const usedCode = normalizeCode(order.discountCode);
       if (isFirebaseConfigured) {
@@ -733,8 +847,6 @@ Please send me the order confirmation and COD dispatch details!`;
       }
     }
 
-    const earnedPoints = Math.round(cartSubtotal * 0.05);
-    setLoyaltyPoints((prev) => Math.max(0, prev - extras.pointsDiscount) + earnedPoints);
     clearCart();
     setAppliedDiscount(null);
     return result;
@@ -751,6 +863,7 @@ Please send me the order confirmation and COD dispatch details!`;
         setActiveView,
         selectedProductSlug,
         navigateToProduct,
+        trackOrderId,
         shopCategoryFilter,
         setShopCategoryFilter,
         shopSubCategoryFilter,
@@ -791,8 +904,8 @@ Please send me the order confirmation and COD dispatch details!`;
         submitOrder,
         updateOrder,
         orders,
-        loyaltyPoints,
-        earnPoints,
+        getCustomerPoints,
+        saveCheckoutDraft,
         recentlyViewedSlugs,
         addRecentlyViewed,
         backInStockRequests,

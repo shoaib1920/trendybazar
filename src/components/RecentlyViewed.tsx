@@ -1,5 +1,5 @@
 import React from 'react';
-import { useShop } from '../context/ShopContext';
+import { useShop, findProductByKey } from '../context/ShopContext';
 import { ProductCard } from './ProductCard';
 import { History, Sparkles } from 'lucide-react';
 
@@ -7,7 +7,7 @@ export const RecentlyViewed: React.FC<{ currentProductId?: string }> = ({ curren
   const { recentlyViewedSlugs, products } = useShop();
 
   const viewedProducts = recentlyViewedSlugs
-    .map((slug) => products.find((p) => p.slug === slug))
+    .map((slug) => findProductByKey(slug, products))
     .filter((p): p is NonNullable<typeof p> => Boolean(p) && p.id !== currentProductId)
     .slice(0, 4);
 

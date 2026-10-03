@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bot, CheckCircle2, Loader2, MessageCircle, Printer, Send, Sparkles, X } from 'lucide-react';
-import { useShop, WHATSAPP_NUMBER } from '../context/ShopContext';
+import { useShop, WHATSAPP_NUMBER, trackUrl } from '../context/ShopContext';
+import { PHONE_HINT, toPhoneKey } from '../lib/phone';
+import { OrderLimitError } from '../lib/ordersService';
 import { generateOrderId } from '../lib/ordersService';
 import { PlacedOrder } from '../types';
 import { OrderReceipt, printReceipt, receiptText } from './OrderReceipt';
@@ -101,21 +103,32 @@ export const AiChatAssistant: React.FC = () => {
   // Saves the order to the store database, then opens WhatsApp with the receipt.
   const placeAndSendOrder = async (messageIndex: number, chatOrder: ChatOrder) => {
     const existing = messages[messageIndex]?.placedOrder;
+    if (!existing && !toPhoneKey(chatOrder.phone)) {
+      setError(`${PHONE_HINT}. Please send your correct number in the chat.`);
+      return;
+    }
     // Open the tab right away — browsers block pop-ups opened after an await.
     const waWindow = window.open('', '_blank');
     let placed = existing;
     if (!placed) {
       setIsPlacing(true);
+      setError('');
       try {
         placed = (await submitOrder(buildOrder(chatOrder))).order;
         setMessages((prev) => prev.map((m, i) => (i === messageIndex ? { ...m, placedOrder: placed } : m)));
+      } catch (err) {
+        waWindow?.close();
+        setError(err instanceof OrderLimitError ? err.message : 'Could not place the order. Please try again.');
+        return;
       } finally {
         setIsPlacing(false);
       }
     }
-    const msg = `Assalam-o-Alaikum! I placed this order via the website AI assistant.
+    const msg = `Assalam-o-Alaikum! ✅ I confirm this order placed via the website AI assistant.
 
-${receiptText(placed)}`;
+${receiptText(placed)}
+
+Track: ${trackUrl(placed.orderId)}`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     if (waWindow) {
       waWindow.opener = null;

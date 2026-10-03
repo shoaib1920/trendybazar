@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useShop, WHATSAPP_NUMBER } from '../context/ShopContext';
+import { useShop, WHATSAPP_NUMBER, trackUrl } from '../context/ShopContext';
 import { ORDER_STATUS_FLOW, OrderStatus, PlacedOrder } from '../types';
 import { getOrderRemote } from '../lib/ordersService';
 import { isFirebaseConfigured } from '../lib/firebase';
-import { OrderReceipt, formatOrderDate, printReceipt } from './OrderReceipt';
+import { OrderReceipt, formatOrderDate, printReceipt, receiptText } from './OrderReceipt';
 import {
   Package,
   Truck,
@@ -37,7 +37,7 @@ const normalizeId = (value: string) => {
 };
 
 export const OrderTrackModal: React.FC = () => {
-  const { orders: deviceOrders } = useShop();
+  const { orders: deviceOrders, trackOrderId } = useShop();
   const [searchTerm, setSearchTerm] = useState('');
   const [order, setOrder] = useState<PlacedOrder | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,12 @@ export const OrderTrackModal: React.FC = () => {
       const remote = isFirebaseConfigured ? await getOrderRemote(orderId) : null;
       const found = remote || deviceOrders.find((o) => o.orderId === orderId) || null;
       setOrder(found);
-      if (!found) setErrorMsg(`No order found with ID "${orderId}". Please check the ID on your receipt.`);
+      if (found) {
+        // Keep the address shareable: /track/<order id>
+        window.history.replaceState({}, '', `/track/${found.orderId}`);
+      } else {
+        setErrorMsg(`No order found with ID "${orderId}". Please check the ID on your receipt.`);
+      }
     } catch {
       const local = deviceOrders.find((o) => o.orderId === orderId) || null;
       setOrder(local);
@@ -63,11 +68,24 @@ export const OrderTrackModal: React.FC = () => {
     }
   };
 
-  // Show the customer's most recent order straight away.
+  // Open the order from a /track/<id> link, else the customer's most recent order.
   useEffect(() => {
-    if (deviceOrders[0]) void loadOrder(deviceOrders[0].orderId);
+    const initial = trackOrderId || deviceOrders[0]?.orderId;
+    if (initial) {
+      setSearchTerm(trackOrderId || '');
+      void loadOrder(initial);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [trackOrderId]);
+
+  const confirmOnWhatsApp = (o: PlacedOrder) => {
+    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 ✅ I confirm my order *${o.orderId}* (Rs. ${o.total.toLocaleString()}, ${o.paymentMethod}).
+
+${receiptText(o)}
+
+Track: ${trackUrl(o.orderId)}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,6 +212,24 @@ export const OrderTrackModal: React.FC = () => {
               <span className="text-[10px] text-gray-300 block">{order.paymentMethod}</span>
             </div>
           </div>
+
+          {order.status === 'Pending' && (
+            <div className="m-5 sm:m-6 mb-0 sm:mb-0 p-4 rounded-2xl border-2 border-[#25D366]/50 bg-[#25D366]/5 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div>
+                <p className="font-bold text-[#141414]">Waiting for your confirmation</p>
+                <p className="text-gray-600">
+                  We dispatch Cash on Delivery orders after you confirm on WhatsApp.
+                  <span className="block text-[#8A6D1F] font-semibold">Order confirm karne ke liye WhatsApp par message bhejein.</span>
+                </p>
+              </div>
+              <button
+                onClick={() => confirmOnWhatsApp(order)}
+                className="py-2.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold flex items-center gap-1.5"
+              >
+                <MessageCircle className="w-4 h-4 fill-white" /> Confirm on WhatsApp
+              </button>
+            </div>
+          )}
 
           {/* Delivery details */}
           <div className="p-5 sm:p-6 border-b border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">

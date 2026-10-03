@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../types';
-import { useShop } from '../context/ShopContext';
+import { useShop, productKeyFor } from '../context/ShopContext';
 import { Heart, Eye, ShoppingBag, MessageCircle, Star, Bell } from 'lucide-react';
 import { BackInStockModal } from './BackInStockModal';
 
@@ -22,7 +22,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     isInWishlist, 
     setQuickViewProduct,
     getWhatsAppProductLink,
-    t
+    t,
+    products
   } = useShop();
 
   const [isBackInStockOpen, setIsBackInStockOpen] = useState(false);
@@ -32,7 +33,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const secondaryImage = product.images[1] || product.images[0];
 
   const handleCardClick = () => {
-    navigateToProduct(product.slug);
+    navigateToProduct(productKeyFor(product, products));
   };
 
   const handleQuickAdd = (e: React.MouseEvent) => {

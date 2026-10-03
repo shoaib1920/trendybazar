@@ -148,12 +148,36 @@ export interface PlacedOrder {
   trackingNumber?: string;
   adminNotes?: string;
   stockDeducted?: boolean;
+  phoneKey?: string; // normalized customer mobile (923001234567)
+  // Loyalty points bookkeeping (done by the admin as the order progresses).
+  pointsDeducted?: number; // redeemed points actually taken from the balance on confirmation
+  pointsAwarded?: number; // points added to the balance on delivery
+  // When the store last asked the customer to confirm this COD order on WhatsApp.
+  confirmationRequestedAt?: string;
 }
 
+// Stored in Firestore `backInStock/{id}`.
 export interface BackInStockRequest {
   id: string;
   productId: string;
   productName: string;
-  phoneOrEmail: string;
-  requestedAt: string;
+  contact: string; // WhatsApp number (or email)
+  phoneKey?: string; // set when the contact is a valid Pakistani mobile
+  createdAt: string;
+  notified: boolean;
+}
+
+// Stored in Firestore `abandonedCarts/{phoneKey}` — checkout details saved
+// before the order was placed.
+export interface AbandonedCart {
+  phoneKey: string;
+  name: string;
+  phone: string;
+  city: string;
+  items: { name: string; quantity: number; price: number }[];
+  total: number;
+  updatedAt: string;
+  converted: boolean;
+  orderId?: string;
+  contacted?: boolean;
 }

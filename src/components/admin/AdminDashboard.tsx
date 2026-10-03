@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { PlacedOrder, Product } from '../../types';
 import { formatOrderDate } from '../OrderReceipt';
-import { STATUS_STYLES, formatRs, isCountedSale, isLowStock, isOutOfStock } from './adminUtils';
+import { STATUS_STYLES, formatRs, isCountedSale, isLowStock, isOutOfStock, isStaleUnconfirmed } from './adminUtils';
 import { AlertTriangle, Banknote, Clock, PackageX, ShoppingBag, TrendingUp } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -61,6 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ orders, products
       monthCount: monthSales.length,
       avgOrder: sales.length ? sales.reduce((s, o) => s + o.total, 0) / sales.length : 0,
       pending,
+      stale: pending.filter(isStaleUnconfirmed).length,
       toShip,
       codToCollect,
       days,
@@ -75,7 +76,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ orders, products
   const cards = [
     { label: "Today's orders", value: String(stats.todayCount), sub: formatRs(stats.todayRevenue), icon: ShoppingBag },
     { label: 'This month', value: formatRs(stats.monthRevenue), sub: `${stats.monthCount} orders`, icon: TrendingUp },
-    { label: 'Need confirming', value: String(stats.pending.length), sub: `${stats.toShip.length} ready to ship`, icon: Clock, alert: stats.pending.length > 0 },
+    {
+      label: 'Need confirming',
+      value: String(stats.pending.length),
+      sub: stats.stale > 0 ? `⚠ ${stats.stale} waiting 24h+ • ${stats.toShip.length} to ship` : `${stats.toShip.length} ready to ship`,
+      icon: Clock,
+      alert: stats.pending.length > 0
+    },
     { label: 'COD to collect', value: formatRs(stats.codToCollect), sub: `Avg order ${formatRs(stats.avgOrder)}`, icon: Banknote }
   ];
 

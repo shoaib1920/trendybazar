@@ -4,11 +4,15 @@ import { OrderReceipt, formatOrderDate, printReceipt } from '../OrderReceipt';
 import {
   COURIERS,
   STATUS_STYLES,
+  UNCONFIRMED_ALERT_HOURS,
   customerWhatsAppLink,
   downloadCsv,
   formatRs,
+  isStaleUnconfirmed,
   statusMessage
 } from './adminUtils';
+import { POINTS_EARN_RATE, adjustPointsRemote, getPointsRemote } from '../../lib/customerService';
+import { toPhoneKey } from '../../lib/phone';
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,7 +25,9 @@ import {
   Printer,
   Search,
   ShoppingBag,
-  XCircle
+  XCircle,
+  AlertTriangle,
+  Award
 } from 'lucide-react';
 
 interface AdminOrdersProps {
@@ -173,7 +179,14 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
                   )}
                   {o.orderId}
                 </span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLES[o.status]}`}>{o.status}</span>
+                <span className="flex items-center gap-1">
+                  {isStaleUnconfirmed(o) && (
+                    <span title={`Not confirmed for over ${UNCONFIRMED_ALERT_HOURS} hours`}>
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLES[o.status]}`}>{o.status}</span>
+                </span>
               </div>
               <div className="flex items-center justify-between gap-2 mt-1.5 text-xs">
                 <span className="text-gray-700 truncate">
@@ -249,21 +262,61 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
 
   const changeStatus = async (status: OrderStatus) => {
     if (status === order.status) return;
-    if ((status === 'Cancelled' || status === 'Returned') && !confirm(`Mark order ${order.orderId} as ${status}?`)) return;
+    const isActive = status !== 'Pending' && status !== 'Cancelled' && status !== 'Returned';
+    const isClosed = status === 'Cancelled' || status === 'Returned';
+    if (isClosed && !confirm(`Mark order ${order.orderId} as ${status}?`)) return;
     setBusy(true);
     try {
+      const phoneKey = order.phoneKey || toPhoneKey(order.customer.phone);
+
+      // Check redeemed points before changing anything, so a "no" leaves the order untouched.
+      let pointsToDeduct = 0;
+      if (phoneKey && isActive && order.pointsDiscount > 0 && !order.pointsDeducted) {
+        const balance = await getPointsRemote(phoneKey);
+        if (balance < order.pointsDiscount &&
+          !confirm(`This customer only has ${balance} points but used ${order.pointsDiscount}. Confirm anyway?`)) {
+          return;
+        }
+        pointsToDeduct = Math.min(balance, order.pointsDiscount);
+      }
+
       const patch: Partial<PlacedOrder> = {
         status,
         statusHistory: [...(order.statusHistory || []), { status, at: new Date().toISOString() }]
       };
-      const isActive = status !== 'Pending' && status !== 'Cancelled' && status !== 'Returned';
+
+      // Stock: out on confirmation, back on cancel/return.
       if (isActive && !order.stockDeducted) {
         await adjustStock(-1);
         patch.stockDeducted = true;
-      } else if ((status === 'Cancelled' || status === 'Returned') && order.stockDeducted) {
+      } else if (isClosed && order.stockDeducted) {
         await adjustStock(1);
         patch.stockDeducted = false;
       }
+
+      // Loyalty points (kept per phone number).
+      if (phoneKey) {
+        if (isActive && order.pointsDiscount > 0 && !order.pointsDeducted) {
+          await adjustPointsRemote(phoneKey, -pointsToDeduct);
+          patch.pointsDeducted = pointsToDeduct;
+        }
+        if (status === 'Delivered' && !order.pointsAwarded) {
+          const earned = Math.round(order.subtotal * POINTS_EARN_RATE);
+          await adjustPointsRemote(phoneKey, earned);
+          patch.pointsAwarded = earned;
+        }
+        if (isClosed) {
+          if (order.pointsDeducted) {
+            await adjustPointsRemote(phoneKey, order.pointsDeducted);
+            patch.pointsDeducted = 0;
+          }
+          if (order.pointsAwarded) {
+            await adjustPointsRemote(phoneKey, -order.pointsAwarded);
+            patch.pointsAwarded = 0;
+          }
+        }
+      }
+
       await updateOrder(order.orderId, patch);
       showToast(`Order ${order.orderId} → ${status}`, 'success');
     } catch (err: any) {
@@ -354,15 +407,42 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
             href={customerWhatsAppLink(order, statusMessage(order))}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              if (order.status === 'Pending') {
+                void updateOrder(order.orderId, { confirmationRequestedAt: new Date().toISOString() });
+              }
+            }}
             className="ml-auto py-2 px-3 rounded-xl bg-[#25D366] text-white font-bold flex items-center gap-1.5"
-            title="Send the customer a message about the current status"
+            title={order.status === 'Pending' ? 'Ask the customer to confirm this COD order' : 'Send the customer a message about the current status'}
           >
-            <MessageCircle className="w-3.5 h-3.5" /> Notify customer
+            <MessageCircle className="w-3.5 h-3.5" /> {order.status === 'Pending' ? 'Ask to confirm' : 'Notify customer'}
           </a>
         </div>
+        {order.status === 'Pending' && (
+          <div
+            className={`-mt-1 p-3 rounded-xl text-[11px] flex items-start gap-2 ${
+              isStaleUnconfirmed(order) ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-blue-50 border border-blue-100 text-blue-900'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>
+              {isStaleUnconfirmed(order)
+                ? `Not confirmed for over ${UNCONFIRMED_ALERT_HOURS} hours. Ask again, or cancel if the customer doesn't reply.`
+                : 'Cash on Delivery: dispatch only after the customer confirms on WhatsApp.'}
+              {order.confirmationRequestedAt && ` Last asked ${formatOrderDate(order.confirmationRequestedAt)}.`}
+            </span>
+          </div>
+        )}
         <p className="text-[10px] text-gray-400 -mt-2">
-          Stock is reduced automatically when an order is confirmed, and restored if it is cancelled or returned.
+          Confirming takes the items out of stock and uses any redeemed points; delivery adds the customer&apos;s reward points. Cancel/return reverses both.
         </p>
+        {(order.pointsDiscount > 0 || !!order.pointsAwarded) && (
+          <p className="flex items-center gap-1.5 text-[11px] text-[#8A6D1F]">
+            <Award className="w-3.5 h-3.5" />
+            {order.pointsDiscount > 0 && `${order.pointsDiscount} points redeemed${order.pointsDeducted ? ` (${order.pointsDeducted} deducted)` : ' (deducted on confirmation)'}. `}
+            {!!order.pointsAwarded && `${order.pointsAwarded} points awarded on delivery.`}
+          </p>
+        )}
 
         {/* Customer */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

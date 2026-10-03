@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { initializeFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,6 +29,13 @@ if (isFirebaseConfigured) {
   // as `undefined` rather than omitted — Firestore rejects that by default.
   db = initializeFirestore(app, { ignoreUndefinedProperties: true });
   auth = getAuth(app);
+
+  // Optional bot protection: set VITE_RECAPTCHA_SITE_KEY (reCAPTCHA v3) and
+  // turn on App Check enforcement for Firestore in the Firebase console.
+  const recaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  if (recaptchaKey) {
+    initializeAppCheck(app, { provider: new ReCaptchaV3Provider(recaptchaKey), isTokenAutoRefreshEnabled: true });
+  }
 }
 
 export { app, db, auth };

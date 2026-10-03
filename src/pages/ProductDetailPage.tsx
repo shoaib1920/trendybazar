@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useShop } from '../context/ShopContext';
+import { useShop, productUrl, productKeyFor, findProductByKey } from '../context/ShopContext';
+import { Product } from '../types';
 import { ProductCard } from '../components/ProductCard';
 import { CityDeliveryChecker } from '../components/CityDeliveryChecker';
 import { CompleteTheLook } from '../components/CompleteTheLook';
@@ -18,14 +19,49 @@ import {
   ChevronRight,
   ChevronLeft,
   ZoomIn,
-  Bell
+  Bell,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+// Waits for the catalog to load (product links can be opened directly),
+// then shows the product or a friendly "not found" message.
 export const ProductDetailPage: React.FC = () => {
+  const { products, selectedProductSlug, setActiveView } = useShop();
+  const product = findProductByKey(selectedProductSlug, products);
+  const [waitedLong, setWaitedLong] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setWaitedLong(true), 8000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (product) return <ProductDetailView key={product.id} product={product} />;
+
+  const stillLoading = products.length === 0 && !waitedLong;
+  return (
+    <div className="max-w-md mx-auto px-4 py-24 text-center space-y-4">
+      {stillLoading ? (
+        <Loader2 className="w-7 h-7 animate-spin text-[#8A6D1F] mx-auto" />
+      ) : (
+        <>
+          <h1 className="font-serif font-black text-2xl text-[#141414]">Product not found</h1>
+          <p className="text-sm text-gray-500">This product may have been removed or the link is incorrect.</p>
+          <button
+            onClick={() => setActiveView('shop')}
+            className="py-3 px-6 rounded-full bg-[#141414] text-white text-xs font-bold"
+          >
+            Browse all products
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
   const {
     products,
-    selectedProductSlug,
     addToCart,
     toggleWishlist,
     isInWishlist,
@@ -33,8 +69,6 @@ export const ProductDetailPage: React.FC = () => {
     setActiveView,
     showToast
   } = useShop();
-
-  const product = products.find((p) => p.slug === selectedProductSlug) || products[0];
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>(product.colors ? product.colors[0].name : '');
@@ -96,7 +130,7 @@ export const ProductDetailPage: React.FC = () => {
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${product.price}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: https://trendybazar.pk/product/${product.slug}
+${details ? `✨ Details: ${details}\n` : ''}🔗 Link: ${productUrl(productKeyFor(product, products))}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     window.open(`https://wa.me/923364300592?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');

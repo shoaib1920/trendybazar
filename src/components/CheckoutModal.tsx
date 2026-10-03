@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { useShop, WHATSAPP_NUMBER } from '../context/ShopContext';
+import React, { useEffect, useState } from 'react';
+import { useShop, WHATSAPP_NUMBER, trackUrl } from '../context/ShopContext';
+import { PHONE_HINT, toPhoneKey } from '../lib/phone';
+import { OrderLimitError } from '../lib/ordersService';
+import { POINTS_EARN_RATE, POINTS_MAX_SHARE } from '../lib/customerService';
 import { OrderReceipt, printReceipt, receiptText } from './OrderReceipt';
 import { CheckoutFormData, PlacedOrder } from '../types';
 import { 
@@ -53,7 +56,8 @@ export const CheckoutModal: React.FC = () => {
     placeOrder, 
     brandWhatsAppNumber,
     setActiveView,
-    loyaltyPoints,
+    getCustomerPoints,
+    saveCheckoutDraft,
     showToast,
     t
   } = useShop();
@@ -75,11 +79,48 @@ export const CheckoutModal: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<PlacedOrder | null>(null);
   const [orderSynced, setOrderSynced] = useState(true);
+  const [customerPoints, setCustomerPoints] = useState(0);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  const phoneKey = toPhoneKey(formData.phone);
+
+  // Loyalty points belong to the phone number; look them up once it is valid.
+  useEffect(() => {
+    setRedeemPoints(false);
+    if (!phoneKey) {
+      setCustomerPoints(0);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      getCustomerPoints(phoneKey).then((points) => !cancelled && setCustomerPoints(points));
+    }, 500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneKey]);
+
+  // Save name + phone as soon as they are filled in, so the store can follow up
+  // if the order is never completed.
+  useEffect(() => {
+    if (!isCheckoutOpen || completedOrder || !phoneKey || !formData.fullName.trim()) return;
+    const timer = window.setTimeout(
+      () => saveCheckoutDraft({ fullName: formData.fullName, phone: formData.phone, city: formData.city }),
+      1500
+    );
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCheckoutOpen, completedOrder, phoneKey, formData.fullName, formData.city, cart.length]);
 
   if (!isCheckoutOpen) return null;
 
   const giftWrapFee = isGiftWrapSelected ? 250 : 0;
-  const loyaltyDiscount = redeemPoints ? Math.min(loyaltyPoints, Math.floor(cartTotal * 0.2)) : 0;
+  const maxPointsUsable = Math.min(customerPoints, Math.floor(cartTotal * POINTS_MAX_SHARE));
+  const loyaltyDiscount = redeemPoints ? maxPointsUsable : 0;
+  const pointsToEarn = Math.round(cartSubtotal * POINTS_EARN_RATE);
   const finalPayableTotal = Math.max(0, cartTotal + giftWrapFee - loyaltyDiscount);
 
   const handleClose = () => {
@@ -97,8 +138,14 @@ export const CheckoutModal: React.FC = () => {
       showToast('Your bag is empty.', 'warning');
       return;
     }
+    if (!phoneKey) {
+      setPhoneTouched(true);
+      showToast(PHONE_HINT, 'warning');
+      return;
+    }
 
     setIsSubmitting(true);
+    setSubmitError('');
     try {
       const { order, synced } = await placeOrder(formData, {
         giftWrapFee,
@@ -111,6 +158,10 @@ export const CheckoutModal: React.FC = () => {
       setGiftMessage('');
       setRedeemPoints(false);
       showToast(`🎉 Order ${order.orderId} placed!`, 'success');
+    } catch (err) {
+      const message = err instanceof OrderLimitError ? err.message : 'Could not place the order. Please try again.';
+      setSubmitError(message);
+      showToast(message, 'warning');
     } finally {
       setIsSubmitting(false);
     }
@@ -118,9 +169,11 @@ export const CheckoutModal: React.FC = () => {
 
   const handleNotifyWhatsApp = () => {
     if (!completedOrder) return;
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 I just placed an order on your website.
+    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 ✅ I confirm my order *${completedOrder.orderId}* (Rs. ${completedOrder.total.toLocaleString()}, ${completedOrder.paymentMethod}).
 
-${receiptText(completedOrder)}`;
+${receiptText(completedOrder)}
+
+Track: ${trackUrl(completedOrder.orderId)}`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -167,10 +220,29 @@ ${receiptText(completedOrder)}`;
               <div className="max-w-md mx-auto flex items-start gap-2 text-left text-xs p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
-                  We couldn&apos;t reach our server. Please tap <strong>Send on WhatsApp</strong> below so we receive your order.
+                  We couldn&apos;t reach our server. Please confirm on WhatsApp below so we receive your order.
                 </span>
               </div>
             )}
+
+            {/* Step 2: COD orders are only dispatched after the customer confirms on WhatsApp */}
+            <div className="max-w-md mx-auto text-left p-4 rounded-2xl border-2 border-[#25D366]/50 bg-[#25D366]/5 space-y-2.5">
+              <p className="text-xs font-bold text-[#141414] flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-[#25D366] text-white text-[11px] flex items-center justify-center">2</span>
+                One last step: confirm your order on WhatsApp
+              </p>
+              <p className="text-[11px] text-gray-600 leading-relaxed">
+                We dispatch Cash on Delivery orders after you confirm. Tap below and press <strong>Send</strong> in WhatsApp.
+                <span className="block text-[#8A6D1F] font-semibold mt-0.5">Order confirm karne ke liye neeche button dabayein aur WhatsApp par Send karein.</span>
+              </p>
+              <button
+                onClick={handleNotifyWhatsApp}
+                className="w-full py-3 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4 fill-white" />
+                <span>Confirm Order on WhatsApp</span>
+              </button>
+            </div>
 
             {/* Receipt */}
             <div className="max-w-md mx-auto">
@@ -178,21 +250,13 @@ ${receiptText(completedOrder)}`;
             </div>
 
             {/* CTAs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 max-w-md mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 max-w-md mx-auto">
               <button
                 onClick={printReceipt}
                 className="py-3 px-4 bg-white border border-gold-hairline hover:bg-[#F9F6F0] text-[#141414] font-bold text-xs rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95"
               >
                 <Printer className="w-4 h-4 text-[#8A6D1F]" />
                 <span>Print / Save PDF</span>
-              </button>
-
-              <button
-                onClick={handleNotifyWhatsApp}
-                className="py-3 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-95"
-              >
-                <MessageCircle className="w-4 h-4 fill-white" />
-                <span>Send on WhatsApp</span>
               </button>
 
               <button
@@ -246,10 +310,13 @@ ${receiptText(completedOrder)}`;
                     placeholder="0333 1234567"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#8A6D1F] focus:bg-white rounded-xl py-2.5 px-3 text-xs outline-none transition-all"
+                    onBlur={() => setPhoneTouched(true)}
+                    className={`w-full bg-[#F9F6F0] border focus:bg-white rounded-xl py-2.5 px-3 text-xs outline-none transition-all ${
+                      phoneTouched && !phoneKey ? 'border-red-400' : 'border-gold-hairline focus:border-[#8A6D1F]'
+                    }`}
                   />
-                  <span className="text-[10px] text-gray-400 mt-0.5 block">
-                    Our courier will send SMS / WhatsApp before delivery
+                  <span className={`text-[10px] mt-0.5 block ${phoneTouched && !phoneKey ? 'text-red-600' : 'text-gray-400'}`}>
+                    {phoneTouched && !phoneKey ? PHONE_HINT : 'We will confirm your order on this WhatsApp number'}
                   </span>
                 </div>
               </div>
@@ -327,32 +394,40 @@ ${receiptText(completedOrder)}`;
                 )}
               </div>
 
-              {/* Loyalty Points Redemption */}
-              {loyaltyPoints > 0 && (
-                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+              {/* Loyalty Points (linked to the phone number) */}
+              {customerPoints > 0 ? (
+                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-[#8A6D1F]" />
+                    <Award className="w-4 h-4 text-[#8A6D1F] shrink-0" />
                     <div>
-                      <div className="font-serif font-bold text-xs text-[#141414]">
-                        Redeem Loyalty Reward Points
-                      </div>
+                      <div className="font-serif font-bold text-xs text-[#141414]">You have {customerPoints} reward points</div>
                       <div className="text-[10px] text-gray-500">
-                        You have {loyaltyPoints} points (Worth up to Rs. {Math.min(loyaltyPoints, Math.floor(cartTotal * 0.2))} discount)
+                        Use up to Rs. {maxPointsUsable} on this order • checked when we confirm your order
                       </div>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setRedeemPoints(!redeemPoints)}
-                    className={`py-1.5 px-3 rounded-full font-serif font-bold text-xs transition-all ${
-                      redeemPoints 
-                        ? 'bg-[#141414] text-white' 
+                    disabled={maxPointsUsable <= 0}
+                    className={`py-1.5 px-3 rounded-full font-serif font-bold text-xs transition-all shrink-0 disabled:opacity-40 ${
+                      redeemPoints
+                        ? 'bg-[#141414] text-white'
                         : 'bg-white border border-gold-hairline text-[#8A6D1F] hover:bg-amber-100'
                     }`}
                   >
-                    {redeemPoints ? 'Applied (-Rs. ' + loyaltyDiscount + ')' : 'Redeem Points'}
+                    {redeemPoints ? 'Applied (-Rs. ' + loyaltyDiscount + ')' : 'Use Points'}
                   </button>
                 </div>
+              ) : (
+                pointsToEarn > 0 && (
+                  <p className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                    <Award className="w-3.5 h-3.5 text-[#8A6D1F]" />
+                    <span>
+                      Earn <strong>{pointsToEarn} reward points</strong> (Rs. {pointsToEarn}) on your next order once this one is delivered.
+                    </span>
+                  </p>
+                )
               )}
 
               {/* Payment Methods */}
@@ -440,6 +515,17 @@ ${receiptText(completedOrder)}`;
                   <span className="text-base text-[#141414]">Rs. {finalPayableTotal.toLocaleString()}</span>
                 </div>
               </div>
+
+              {submitError && (
+                <div className="flex items-start gap-2 text-xs p-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{submitError}</span>
+                </div>
+              )}
+
+              <p className="text-[10px] text-gray-400 text-center">
+                Your name and number are saved as you type so we can help if your order doesn&apos;t go through.
+              </p>
 
               {/* Submit CTA */}
               <button

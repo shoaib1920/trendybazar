@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useShop } from '../context/ShopContext';
+import { useShop, productKeyFor } from '../context/ShopContext';
 import { X, ShoppingBag, MessageCircle, Star, Truck, ArrowRight } from 'lucide-react';
 
 export const QuickViewModal: React.FC = () => {
@@ -8,7 +8,8 @@ export const QuickViewModal: React.FC = () => {
     setQuickViewProduct, 
     addToCart, 
     navigateToProduct, 
-    getWhatsAppProductLink 
+    getWhatsAppProductLink,
+    products
   } = useShop();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -36,7 +37,7 @@ export const QuickViewModal: React.FC = () => {
 
   const handleFullDetails = () => {
     handleClose();
-    navigateToProduct(product.slug);
+    navigateToProduct(productKeyFor(product, products));
   };
 
   return (

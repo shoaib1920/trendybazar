@@ -1,4 +1,15 @@
-import { collection, doc, getDoc, onSnapshot, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  Timestamp,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  writeBatch
+} from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { PlacedOrder } from '../types';
 
@@ -16,9 +27,42 @@ export const generateOrderId = () => {
 // documents stay clean.
 const clean = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
+// Orders allowed per phone number in any 24 hours (also enforced by firestore.rules).
+export const MAX_ORDERS_PER_PHONE_PER_DAY = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export class OrderLimitError extends Error {
+  constructor() {
+    super(`This number has already placed ${MAX_ORDERS_PER_PHONE_PER_DAY} orders today. Please message us on WhatsApp to order more.`);
+    this.name = 'OrderLimitError';
+  }
+}
+
+// Saves the order together with that phone number's daily order counter in one
+// batch; the security rules reject the order if the counter is not updated.
 export const createOrderRemote = async (order: PlacedOrder) => {
   if (!isFirebaseConfigured || !db) return;
-  await setDoc(doc(db, COLLECTION, order.orderId), clean(order));
+  if (!order.phoneKey) throw new Error('A valid Pakistani mobile number is required.');
+
+  const limitRef = doc(db, 'phoneLimits', order.phoneKey);
+  const limitSnap = await getDoc(limitRef);
+  const batch = writeBatch(db);
+  batch.set(doc(db, COLLECTION, order.orderId), clean(order));
+
+  if (!limitSnap.exists()) {
+    batch.set(limitRef, { count: 1, windowStart: serverTimestamp(), lastOrderId: order.orderId });
+  } else {
+    const data = limitSnap.data() as { count: number; windowStart: Timestamp };
+    const windowOpen = Date.now() - data.windowStart.toMillis() < DAY_MS;
+    if (windowOpen && data.count >= MAX_ORDERS_PER_PHONE_PER_DAY) throw new OrderLimitError();
+    batch.update(
+      limitRef,
+      windowOpen
+        ? { count: data.count + 1, lastOrderId: order.orderId }
+        : { count: 1, windowStart: serverTimestamp(), lastOrderId: order.orderId }
+    );
+  }
+  await batch.commit();
 };
 
 export const getOrderRemote = async (orderId: string): Promise<PlacedOrder | null> => {

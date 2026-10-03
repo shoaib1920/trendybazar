@@ -1,4 +1,5 @@
 import { OrderStatus, PlacedOrder, Product } from '../../types';
+import { trackUrl } from '../../context/ShopContext';
 
 export const formatRs = (amount: number) => `Rs. ${Math.round(amount).toLocaleString()}`;
 
@@ -32,12 +33,25 @@ export const customerWhatsAppLink = (order: PlacedOrder, text: string) =>
   `https://wa.me/${toWhatsAppNumber(order.customer.phone)}?text=${encodeURIComponent(text)}`;
 
 // Ready-made message to the customer for the order's current status.
-export const statusMessage = (order: PlacedOrder) => {
+export const statusMessage = (order: PlacedOrder) => `${statusMessageBody(order)}
+
+Track your order: ${trackUrl(order.orderId)}`;
+
+// COD orders are only dispatched once the customer confirms.
+export const UNCONFIRMED_ALERT_HOURS = 24;
+export const isStaleUnconfirmed = (order: PlacedOrder) =>
+  order.status === 'Pending' && Date.now() - new Date(order.createdAt).getTime() > UNCONFIRMED_ALERT_HOURS * 3600e3;
+
+const statusMessageBody = (order: PlacedOrder) => {
   const name = order.customer.fullName.split(' ')[0] || order.customer.fullName;
   const id = order.orderId;
   const total = formatRs(order.total);
+  const items = order.items.map((i) => `${i.name} × ${i.quantity}`).join(', ');
   switch (order.status) {
     case 'Pending':
+      return `Assalam-o-Alaikum ${name}! 👋 Trendy Bazaar here. We received your order ${id}: ${items} — total ${total} (Cash on Delivery) to ${order.customer.address}, ${order.customer.city}.
+
+Please reply *YES* to confirm so we can dispatch it. Order confirm karne ke liye *YES* likh kar reply karein. Shukriya!`;
     case 'Confirmed':
       return `Assalam-o-Alaikum ${name}! ✅ Your Trendy Bazaar order ${id} (${total}) is confirmed. We will dispatch it soon. Shukriya!`;
     case 'Packed':
