@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all"
-                title="Follow Trendy Bazar on Instagram"
+                title="Follow Trendy Bazaar on Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all font-bold text-xs"
-                title="Follow Trendy Bazar on TikTok"
+                title="Follow Trendy Bazaar on TikTok"
               >
                 TK
               </a>
@@ -85,7 +85,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#F2B705] hover:text-[#1A1A1A] flex items-center justify-center transition-all"
-                title="Follow Trendy Bazar on Facebook"
+                title="Follow Trendy Bazaar on Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
@@ -94,7 +94,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-[#25D366] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                title="Chat with Trendy Bazar on WhatsApp"
+                title="Chat with Trendy Bazaar on WhatsApp"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
               </a>
@@ -169,7 +169,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleViewClick('about')}
                   className="hover:text-[#F2B705] transition-colors"
                 >
-                  About Trendy Bazar
+                  About Trendy Bazaar
                 </button>
               </li>
             </ul>
@@ -212,7 +212,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & payment trust */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© 2026 Trendy Bazar Pakistan. All rights reserved.</p>
+          <p>© 2026 Trendy Bazaar Pakistan. All rights reserved.</p>
           <div className="flex items-center gap-3 text-[11px]">
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">Cash on Delivery</span>
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">JazzCash</span>

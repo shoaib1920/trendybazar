@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
 import { WATCH_STYLES } from '../data/categories';
@@ -80,7 +81,7 @@ export const HomePage: React.FC = () => {
                 <span>Shop Now</span>
               </button>
               <button
-                onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazar!')}
+                onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar!')}
                 className="w-full sm:w-auto px-7 py-3.5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
@@ -94,7 +95,7 @@ export const HomePage: React.FC = () => {
               {heroSlide === 0 ? (
                 <motion.img
                   key="hero-image"
-                  src={heroProduct?.images[0]}
+                  src={optimizeImage(heroProduct?.images[0], 900)}
                   alt={heroProduct?.name || 'Trendy Bazaar'}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -202,7 +203,7 @@ export const HomePage: React.FC = () => {
             className="group relative rounded-3xl overflow-hidden border border-gold-hairline cursor-pointer aspect-[16/10] bg-[#141414]"
           >
             <img
-              src={earbudProduct?.images[0]}
+              src={optimizeImage(earbudProduct?.images[0], 800)}
               alt="Shop Earbuds"
               className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
             />
@@ -228,7 +229,7 @@ export const HomePage: React.FC = () => {
             className="group relative rounded-3xl overflow-hidden border border-gold-hairline cursor-pointer aspect-[16/10] bg-[#141414]"
           >
             <img
-              src={watchProducts[0]?.images[0]}
+              src={optimizeImage(watchProducts[0]?.images[0], 800)}
               alt="Shop Watches"
               className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
             />
@@ -301,6 +302,39 @@ export const HomePage: React.FC = () => {
             <span>View All Products</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
+        </div>
+      </section>
+
+      {/* ABOUT / SEO CONTENT — real links so search engines can follow them */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-gold-hairline bg-[#F9F6F0] p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+          <div className="lg:col-span-2 space-y-3">
+            <h2 className="font-serif font-black text-xl sm:text-2xl text-[#141414]">
+              Why shop at Trendy Bazaar?
+            </h2>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Trendy Bazaar is an online store in Pakistan for{' '}
+              <a href="/earbuds" onClick={(e) => { e.preventDefault(); handleCategoryTile('electronics'); }} className="font-semibold text-[#8A6D1F] hover:underline">
+                wireless earbuds
+              </a>{' '}
+              and{' '}
+              <a href="/watches" onClick={(e) => { e.preventDefault(); handleCategoryTile('accessories'); }} className="font-semibold text-[#8A6D1F] hover:underline">
+                stylish watches
+              </a>{' '}
+              at fair prices. Every product is quality checked before dispatch, and you pay only when your parcel arrives with Cash on Delivery — anywhere in Pakistan.
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Order in a few taps on our website, chat with our AI assistant in Roman Urdu or English, or message us on WhatsApp. Delivery takes 2–4 working days
+              to Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar and every other city, with a 7-day easy exchange.
+            </p>
+          </div>
+          <ul className="space-y-2.5 text-sm text-[#141414]">
+            <li>✓ Cash on Delivery all over Pakistan</li>
+            <li>✓ 2–4 day nationwide delivery</li>
+            <li>✓ Free delivery on orders over Rs. 3,500</li>
+            <li>✓ 7-day easy exchange</li>
+            <li>✓ WhatsApp support: +92 336 4300592</li>
+          </ul>
         </div>
       </section>
     </div>

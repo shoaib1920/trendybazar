@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { Product } from '../types';
 import { useShop } from '../context/ShopContext';
 import { Plus, Check, ShoppingBag, Sparkles } from 'lucide-react';
@@ -81,7 +82,7 @@ export const CompleteTheLook: React.FC<CompleteTheLookProps> = ({ currentProduct
                 >
                   <div className="relative aspect-4/5 rounded-xl overflow-hidden bg-gray-50 mb-2">
                     <img
-                      src={item.images[0]}
+                      src={optimizeImage(item.images[0], 300)}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />

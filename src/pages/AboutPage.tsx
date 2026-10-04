@@ -95,7 +95,7 @@ export const AboutPage: React.FC = () => {
             Shop Now
           </button>
           <button
-            onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazar!')}
+            onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar!')}
             className="py-3 px-6 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center gap-2 shadow-xs transition-all active:scale-95"
           >
             <MessageCircle className="w-4 h-4 fill-white" />

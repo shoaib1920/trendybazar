@@ -13,6 +13,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import { subscribeToProducts, saveProductRemote, deleteProductRemote, seedProductsIfEmpty } from '../lib/productsService';
 import { createOrderRemote, generateOrderId, OrderLimitError, updateOrderRemote } from '../lib/ordersService';
 import { toPhoneKey } from '../lib/phone';
+import { applyPageSeo, SITE_URL } from '../lib/seo';
 import {
   createBackInStockRemote,
   getPointsRemote,
@@ -478,21 +479,74 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('tb_back_in_stock', JSON.stringify(backInStockRequests));
   }, [backInStockRequests]);
 
+  // SEO tags per page (titles match the server-rendered ones in api/render.ts).
   useEffect(() => {
-    const base = 'Trendy Bazaar Pakistan';
+    // Products still loading: keep the server-rendered tags for now.
+    if (activeView === 'product' && products.length === 0) return;
     const product = activeView === 'product' ? findProductByKey(selectedProductSlug, products) : undefined;
-    const titles: Partial<Record<ActiveView, string>> = {
-      shop: 'Shop',
-      earbuds: 'Earbuds',
-      watches: 'Watches',
-      wishlist: 'Wishlist',
-      about: 'Our Story',
-      contact: 'Help & FAQs',
-      track: 'Track Order',
-      admin: 'Admin'
+    if (product) {
+      const key = productKeyFor(product, products);
+      const path = `/product/${encodeURIComponent(key)}`;
+      applyPageSeo({
+        title: `${product.name} Price in Pakistan – Rs. ${product.price.toLocaleString()} | Trendy Bazaar`,
+        description: `${product.name} – Rs. ${product.price.toLocaleString()}. ${product.tagline || product.description} Cash on Delivery all over Pakistan from Trendy Bazaar.`.slice(0, 160),
+        path,
+        image: product.images[0],
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.name,
+          description: product.description || product.tagline,
+          image: product.images.slice(0, 5),
+          sku: product.id,
+          brand: { '@type': 'Brand', name: 'Trendy Bazaar' },
+          url: `${SITE_URL}${path}`,
+          offers: {
+            '@type': 'Offer',
+            url: `${SITE_URL}${path}`,
+            priceCurrency: 'PKR',
+            price: product.price,
+            availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition'
+          }
+        }
+      });
+      return;
+    }
+
+    const pages: Partial<Record<ActiveView, { title: string; description: string; noindex?: boolean }>> = {
+      home: {
+        title: 'Trendy Bazaar Pakistan – Earbuds & Watches Online | Cash on Delivery',
+        description: 'Trendy Bazaar – shop wireless earbuds and stylish watches online in Pakistan at fair prices. Cash on Delivery nationwide, 2–4 day delivery and 7-day easy exchange.'
+      },
+      shop: {
+        title: 'Shop Earbuds & Watches Online in Pakistan | Trendy Bazaar',
+        description: 'Browse all wireless earbuds and watches at Trendy Bazaar. Fair prices, Cash on Delivery all over Pakistan and 7-day easy exchange.'
+      },
+      earbuds: {
+        title: 'Wireless Earbuds in Pakistan – Best Prices | Trendy Bazaar',
+        description: 'Buy wireless earbuds online in Pakistan at Trendy Bazaar. Great sound and battery life, Cash on Delivery nationwide and fast 2–4 day delivery.'
+      },
+      watches: {
+        title: 'Watches for Men in Pakistan – Stylish & Affordable | Trendy Bazaar',
+        description: 'Shop stylish watches online in Pakistan at Trendy Bazaar – chronograph, leather strap, steel and minimalist styles. Cash on Delivery nationwide.'
+      },
+      about: {
+        title: 'About Trendy Bazaar – Earbuds & Watches Store in Pakistan',
+        description: 'Trendy Bazaar is a Pakistani online store for wireless earbuds and watches with fair prices, Cash on Delivery and friendly WhatsApp support.'
+      },
+      contact: {
+        title: 'Help & FAQs – Delivery, Exchange & Orders | Trendy Bazaar',
+        description: 'Questions about delivery, Cash on Delivery, exchanges or your order? Contact Trendy Bazaar on WhatsApp at +92 336 4300592.'
+      },
+      wishlist: { title: 'Wishlist | Trendy Bazaar', description: 'Your saved products at Trendy Bazaar.', noindex: true },
+      track: { title: 'Track Your Order | Trendy Bazaar', description: 'Track your Trendy Bazaar order with your Order ID.', noindex: true },
+      admin: { title: 'Admin | Trendy Bazaar', description: 'Store admin.', noindex: true },
+      product: { title: 'Product not found | Trendy Bazaar', description: 'This product is no longer available.', noindex: true }
     };
-    const page = product ? `${product.name} — Rs. ${product.price.toLocaleString()}` : titles[activeView];
-    document.title = page ? `${page} | ${base}` : `${base} — Earbuds & Watches`;
+    const page = pages[activeView] || pages.home!;
+    const path = activeView === 'home' || activeView === 'product' ? '/' : VIEW_PATHS[activeView as keyof typeof VIEW_PATHS];
+    applyPageSeo({ ...page, path, jsonLd: null });
   }, [activeView, selectedProductSlug, products]);
 
   // Toast helper
@@ -695,7 +749,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // WhatsApp Helpers
   const getWhatsAppProductLink = (product: Product, color?: string) => {
     const details = color ? `Color: ${color}` : '';
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${product.price}
@@ -707,7 +761,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
 
   const getWhatsAppCartLink = (customNote?: string) => {
     if (cart.length === 0) {
-      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Assalam-o-Alaikum Trendy Bazar! I have a question about your products.')}`;
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Assalam-o-Alaikum Trendy Bazaar! I have a question about your products.')}`;
     }
 
     let itemsList = cart
@@ -718,7 +772,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
       })
       .join('\n');
 
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 🛍️
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! 🛍️
 I want to place an order directly via WhatsApp:
 
 📦 *ORDER ITEMS:*
@@ -735,7 +789,7 @@ Please send me the order confirmation and COD dispatch details!`;
   };
 
   const openWhatsAppGeneral = (msg?: string) => {
-    const defaultMsg = msg || 'Assalam-o-Alaikum Trendy Bazar! Need assistance with an order.';
+    const defaultMsg = msg || 'Assalam-o-Alaikum Trendy Bazaar! Need assistance with an order.';
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(defaultMsg)}`, '_blank', 'noopener,noreferrer');
   };
 

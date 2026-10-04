@@ -79,7 +79,7 @@ export const OrderTrackModal: React.FC = () => {
   }, [trackOrderId]);
 
   const confirmOnWhatsApp = (o: PlacedOrder) => {
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 ✅ I confirm my order *${o.orderId}* (Rs. ${o.total.toLocaleString()}, ${o.paymentMethod}).
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋 ✅ I confirm my order *${o.orderId}* (Rs. ${o.total.toLocaleString()}, ${o.paymentMethod}).
 
 ${receiptText(o)}
 

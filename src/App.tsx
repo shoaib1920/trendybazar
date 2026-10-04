@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -9,7 +9,8 @@ import { WishlistPage } from './pages/WishlistPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { OrderTrackModal } from './components/OrderTrackModal';
-import { AdminManagerModal } from './components/AdminManagerModal';
+// The admin panel is loaded only when /admin is opened, keeping the store fast for customers.
+const AdminManagerModal = lazy(() => import('./components/AdminManagerModal').then((m) => ({ default: m.AdminManagerModal })));
 import { AiChatAssistant } from './components/AiChatAssistant';
 import { GuidedTour } from './components/GuidedTour';
 import { QuickViewModal } from './components/QuickViewModal';
@@ -52,7 +53,11 @@ const AppContent: React.FC = () => {
       case 'track':
         return <OrderTrackModal />;
       case 'admin':
-        return <AdminManagerModal />;
+        return (
+          <Suspense fallback={<div className="py-24 text-center text-xs text-gray-400">Loading admin…</div>}>
+            <AdminManagerModal />
+          </Suspense>
+        );
       default:
         return <HomePage />;
     }

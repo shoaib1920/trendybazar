@@ -1,5 +1,8 @@
 {
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/product/:key", "destination": "/api/render?page=product&key=:key" },
+    { "source": "/:page(shop|earbuds|watches|about|contact)", "destination": "/api/render?page=:page" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { Product } from '../types';
 import { useShop, productKeyFor } from '../context/ShopContext';
 import { Heart, Eye, ShoppingBag, MessageCircle, Star, Bell } from 'lucide-react';
@@ -70,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
           {/* Main Product Image */}
           <img
-            src={primaryImage}
+            src={optimizeImage(primaryImage, 600)}
             alt={product.name}
             loading="lazy"
             onError={(e) => {
@@ -83,7 +84,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Hover Secondary Image */}
           {product.images[1] && (
             <img
-              src={secondaryImage}
+              src={optimizeImage(secondaryImage, 600)}
               alt={`${product.name} alternate view`}
               loading="lazy"
               onError={(e) => {
@@ -168,7 +169,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               className="font-serif font-bold text-xs sm:text-[14px] text-[#141414] line-clamp-2 leading-snug cursor-pointer hover:text-[#8A6D1F] transition-colors mb-1 min-h-[32px] sm:min-h-[38px]"
               title={product.name}
             >
-              {product.name}
+              <a
+                href={`/product/${encodeURIComponent(productKeyFor(product, products))}`}
+                onClick={(e) => e.preventDefault()}
+              >
+                {product.name}
+              </a>
             </h3>
 
             {/* Micro specs */}

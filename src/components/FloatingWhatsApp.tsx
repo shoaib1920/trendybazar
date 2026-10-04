@@ -46,7 +46,7 @@ export const FloatingWhatsApp: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-heading font-bold text-sm leading-tight text-white flex items-center gap-1.5">
-                  <span>Trendy Bazar Support</span>
+                  <span>Trendy Bazaar Support</span>
                 </h4>
                 <p className="text-[11px] text-[#F2B705] font-medium">Online • Typical reply &lt; 5 mins</p>
               </div>
@@ -66,7 +66,7 @@ export const FloatingWhatsApp: React.FC = () => {
                 <span>Assalam-o-Alaikum!</span> 👋
               </p>
               <p className="text-gray-600 text-[11.5px]">
-                Welcome to Trendy Bazar! We love taking orders on WhatsApp. How can we help you today?
+                Welcome to Trendy Bazaar! We love taking orders on WhatsApp. How can we help you today?
               </p>
               <span className="text-[9px] text-gray-400 block text-right mt-1">Official WhatsApp: {brandWhatsAppNumber}</span>
             </div>

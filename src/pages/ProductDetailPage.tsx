@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { useShop, productUrl, productKeyFor, findProductByKey } from '../context/ShopContext';
 import { Product } from '../types';
 import { ProductCard } from '../components/ProductCard';
@@ -126,7 +127,7 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
 
   const handleWhatsAppOrder = () => {
     const details = selectedColor ? `Color: ${selectedColor}` : '';
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
 I would like to order:
 🛍️ *${product.name}*
 💰 Price: Rs. ${product.price}
@@ -140,7 +141,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Check out ${product.name} on Trendy Bazar Pakistan!`,
+        text: `Check out ${product.name} on Trendy Bazaar Pakistan!`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -175,7 +176,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
             className="relative aspect-4/5 sm:aspect-square w-full rounded-3xl overflow-hidden bg-[#F9F6F0] border border-gold-hairline shadow-xs"
           >
             <img
-              src={product.images[activeImageIndex] || product.images[0]}
+              src={optimizeImage(product.images[activeImageIndex] || product.images[0], 1200)}
               alt={product.name}
               onClick={() => { setHoverZoomOrigin(null); setIsZoomViewerOpen(true); }}
               onPointerMove={handleImagePointerMove}
@@ -268,7 +269,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
                     activeImageIndex === idx ? 'border-[#9C7A28] shadow-xs' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={optimizeImage(img, 200)} alt={`${product.name} view ${idx + 1}`} loading="lazy" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -523,7 +524,7 @@ Please confirm availability and delivery time for Cash on Delivery!`;
       {relatedProducts.length > 0 && (
         <div className="pt-8 border-t border-gold-hairline">
           <h3 className="font-serif font-black text-xl sm:text-2xl text-[#141414] mb-6">
-            More from Trendy Bazar
+            More from Trendy Bazaar
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {relatedProducts.map((p) => (

@@ -93,7 +93,7 @@ export const ContactPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazar! I have a question about an order / products.')}
+          onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar! I have a question about an order / products.')}
           className="w-full md:w-auto py-3.5 px-8 bg-[#25D366] hover:bg-[#20ba5a] text-white font-heading font-bold text-sm rounded-full shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
         >
           <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />

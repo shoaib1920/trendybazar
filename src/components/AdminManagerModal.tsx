@@ -412,7 +412,7 @@ export const AdminManagerModal: React.FC = () => {
             <Settings2 className="w-4 h-4" />
             <span>Admin Sign In</span>
           </div>
-          <h1 className="font-heading font-black text-xl text-[#1A1A1A] mb-1">Trendy Bazar Admin</h1>
+          <h1 className="font-heading font-black text-xl text-[#1A1A1A] mb-1">Trendy Bazaar Admin</h1>
           <p className="text-xs text-gray-500 mb-5">Sign in with your Firebase admin account to manage the live catalog.</p>
 
           <form onSubmit={handleLogin} className="space-y-3">
@@ -463,7 +463,7 @@ export const AdminManagerModal: React.FC = () => {
             <span>Store Operations Panel</span>
           </div>
           <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A]">
-            Trendy Bazar Admin Manager
+            Trendy Bazaar Admin Manager
           </h1>
           <p className="text-xs text-gray-500">
             Orders, inventory, customers and products — everything to run the store in one place.

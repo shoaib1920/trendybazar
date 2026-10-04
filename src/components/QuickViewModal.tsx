@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { useShop, productKeyFor } from '../context/ShopContext';
 import { X, ShoppingBag, MessageCircle, Star, Truck, ArrowRight } from 'lucide-react';
 
@@ -60,7 +61,7 @@ export const QuickViewModal: React.FC = () => {
           <div className="space-y-3">
             <div className="relative aspect-square sm:aspect-4/5 rounded-2xl overflow-hidden bg-[#F7F3EC] border border-gray-100">
               <img
-                src={product.images[selectedImageIndex] || product.images[0]}
+                src={optimizeImage(product.images[selectedImageIndex] || product.images[0], 900)}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -82,7 +83,7 @@ export const QuickViewModal: React.FC = () => {
                       selectedImageIndex === idx ? 'border-[#F2B705] scale-105' : 'border-transparent opacity-70'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={optimizeImage(img, 160)} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

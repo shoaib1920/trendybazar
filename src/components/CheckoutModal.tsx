@@ -169,7 +169,7 @@ export const CheckoutModal: React.FC = () => {
 
   const handleNotifyWhatsApp = () => {
     if (!completedOrder) return;
-    const msg = `Assalam-o-Alaikum Trendy Bazar! 👋 ✅ I confirm my order *${completedOrder.orderId}* (Rs. ${completedOrder.total.toLocaleString()}, ${completedOrder.paymentMethod}).
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋 ✅ I confirm my order *${completedOrder.orderId}* (Rs. ${completedOrder.total.toLocaleString()}, ${completedOrder.paymentMethod}).
 
 ${receiptText(completedOrder)}
 

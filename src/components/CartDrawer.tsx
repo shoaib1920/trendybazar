@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { optimizeImage } from '../lib/images';
 import { useShop } from '../context/ShopContext';
 import { discountAmountText } from '../lib/discountsService';
 import { 
@@ -142,7 +143,7 @@ Add earbuds or a watch to get started.
                 className="flex gap-3 bg-gray-50/60 p-2.5 rounded-2xl border border-gray-100"
               >
                 <img
-                  src={item.product.images[0]}
+                  src={optimizeImage(item.product.images[0], 160)}
                   alt={item.product.name}
                   className="w-20 h-24 object-cover rounded-xl bg-gray-200 shrink-0"
                 />
