@@ -17,7 +17,7 @@ export const Logo: React.FC<LogoProps> = ({
 
   const imgSizes = {
     sm: 'h-11',
-    md: 'h-12 sm:h-14',
+    md: 'h-9 sm:h-12',
     lg: 'h-20 md:h-24'
   };
 

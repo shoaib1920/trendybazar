@@ -190,13 +190,13 @@ Track: ${trackUrl(placed.orderId)}`;
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`fixed ${mobileBottom} md:bottom-24 right-4 md:right-6 z-40 flex items-center gap-2 pl-3 pr-4 h-12 rounded-full bg-[#141414] text-white shadow-2xl border border-[#F2B705]/40 hover:scale-105 active:scale-95 transition-transform`}
+          className={`fixed ${mobileBottom} md:bottom-24 right-4 md:right-6 z-40 flex items-center justify-center gap-2 w-11 h-11 md:w-auto md:h-12 md:pl-3 md:pr-4 rounded-full bg-[#141414] text-white shadow-2xl border border-[#F2B705]/40 hover:scale-105 active:scale-95 transition-transform`}
           aria-label="Open AI shopping assistant"
           id="ai-chat-button"
           data-tour="ai-chat"
         >
           <Sparkles className="w-5 h-5 text-[#F2B705]" />
-          <span className="text-xs font-bold">Order with AI</span>
+          <span className="text-xs font-bold hidden md:inline">Order with AI</span>
         </button>
       )}
 

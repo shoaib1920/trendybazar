@@ -164,12 +164,11 @@ export const GuidedTour: React.FC = () => {
       <button
         onClick={() => startTour(currentTour())}
         data-tour="help"
-        className={`fixed ${mobileBottom} md:bottom-6 left-4 md:left-6 z-40 flex items-center gap-1.5 h-10 pl-2.5 pr-3 md:pr-3.5 rounded-full bg-white text-[#141414] border border-gold-hairline shadow-lg hover:bg-[#F9F6F0] active:scale-95 transition-transform`}
+        className={`fixed ${mobileBottom} md:bottom-6 left-4 md:left-6 z-40 flex items-center justify-center gap-1.5 w-11 h-11 md:w-auto md:h-10 md:pl-2.5 md:pr-3.5 rounded-full bg-white text-[#141414] border border-gold-hairline shadow-lg hover:bg-[#F9F6F0] active:scale-95 transition-transform`}
         aria-label="How to order"
       >
         <HelpCircle className="w-5 h-5 text-[#8A6D1F]" />
-        <span className="text-xs font-bold hidden sm:inline">How to order?</span>
-        <span className="text-xs font-bold sm:hidden">Help</span>
+        <span className="text-xs font-bold hidden md:inline">How to order?</span>
       </button>
 
       {/* First-visit offer */}

@@ -287,7 +287,7 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Search Dropdown */}
         {isSearchOpen && (
-          <div className="py-2.5 px-1 border-t border-gold-hairline md:hidden">
+          <div className="py-3 border-t border-gold-hairline md:hidden">
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
@@ -295,9 +295,9 @@ export const Navbar: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#9C7A28] text-xs rounded-full py-2.5 pl-10 pr-4 outline-none"
+                className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#9C7A28] text-base rounded-full py-3 pl-12 pr-4 outline-none"
               />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
+              <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </form>
           </div>
         )}
