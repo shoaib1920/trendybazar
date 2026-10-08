@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv, type Plugin} from 'vite';
 import {handleChat} from './api/chat';
+import {handleTrack} from './api/track';
 
 // Serves the /api/chat Vercel function during `npm run dev`.
 const devChatApi = (env: Record<string, string>): Plugin => ({
@@ -27,10 +28,24 @@ const devChatApi = (env: Record<string, string>): Plugin => ({
   },
 });
 
+// Serves the /api/track Vercel function during `npm run dev`.
+const devTrackApi = (env: Record<string, string>): Plugin => ({
+  name: 'dev-track-api',
+  configureServer(server) {
+    server.middlewares.use('/api/track', async (req, res) => {
+      const cn = new URL(req.url || '', 'http://localhost').searchParams.get('cn');
+      const result = await handleTrack(cn, env.LEOPARDS_API_KEY, env.LEOPARDS_API_PASSWORD);
+      res.statusCode = result.status;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(result.body));
+    });
+  },
+});
+
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react(), tailwindcss(), devChatApi(env)],
+    plugins: [react(), tailwindcss(), devChatApi(env), devTrackApi(env)],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

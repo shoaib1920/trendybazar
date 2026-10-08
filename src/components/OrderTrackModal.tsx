@@ -30,6 +30,76 @@ const STEP_INFO: Record<OrderStatus, { title: string; desc: string }> = {
   Returned: { title: 'Returned', desc: 'This order was returned.' }
 };
 
+// Live parcel progress from the courier (see api/track.ts).
+interface CourierTracking {
+  courier: string;
+  trackingNumber: string;
+  status: string;
+  origin: string;
+  destination: string;
+  bookedOn: string;
+  events: { status: string; at: string; reason?: string; receiver?: string }[];
+}
+
+const LIVE_TRACKED_COURIER = 'Leopards Courier';
+
+// Resolves to null when the courier has no parcel with that number.
+const fetchCourierTracking = async (trackingNumber: string): Promise<CourierTracking | null> => {
+  const response = await fetch(`/api/track?cn=${encodeURIComponent(trackingNumber)}`);
+  if (response.status === 404 || response.status === 400) return null;
+  if (!response.ok) throw new Error('Courier tracking unavailable');
+  return (await response.json()) as CourierTracking;
+};
+
+const CourierTimeline: React.FC<{ tracking: CourierTracking }> = ({ tracking }) => (
+  <div>
+    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <h3 className="font-heading font-bold text-sm text-[#1A1A1A]">Live Courier Updates</h3>
+      <span
+        className={`text-white text-[11px] font-bold px-2 py-0.5 rounded-full ${
+          /deliver/i.test(tracking.status) && !/out for/i.test(tracking.status) ? 'bg-emerald-600' : 'bg-[#8A6D1F]'
+        }`}
+      >
+        {tracking.status}
+      </span>
+    </div>
+    <p className="text-[11px] text-gray-500 mb-5">
+      {tracking.courier} • Tracking # <strong className="text-gray-700">{tracking.trackingNumber}</strong>
+      {tracking.origin && tracking.destination && ` • ${tracking.origin} → ${tracking.destination}`}
+      {tracking.bookedOn && ` • Booked ${tracking.bookedOn}`}
+    </p>
+
+    {tracking.events.length === 0 ? (
+      <p className="text-xs text-gray-500">The courier has booked this parcel. Movement updates will appear here soon.</p>
+    ) : (
+      <div className="space-y-5 relative before:absolute before:top-2 before:bottom-2 before:left-3.5 before:w-0.5 before:bg-gray-200">
+        {tracking.events.map((event, idx) => (
+          <div key={idx} className="relative flex items-start gap-4">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 ${
+                idx === 0 ? 'bg-[#F2B705] text-[#1A1A1A] ring-4 ring-[#F2B705]/30' : 'bg-gray-200 text-gray-500'
+              }`}
+            >
+              {idx === 0 ? <Truck className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-4 h-4" />}
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-1">
+                <h4 className={`text-xs font-bold ${idx === 0 ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{event.status}</h4>
+                {event.at && <span className="text-[10px] text-gray-400 font-medium">{event.at}</span>}
+              </div>
+              {(event.reason || event.receiver) && (
+                <p className="text-[11px] mt-0.5 text-gray-500">
+                  {[event.reason, event.receiver && `Received by ${event.receiver}`].filter(Boolean).join(' • ')}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 const normalizeId = (value: string) => {
   const v = value.trim().toUpperCase().replace(/\s+/g, '');
   if (!v) return '';
@@ -43,12 +113,14 @@ export const OrderTrackModal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showReceipt, setShowReceipt] = useState(false);
+  const [courierTracking, setCourierTracking] = useState<CourierTracking | null>(null);
 
   // Fetch the latest copy from the server (status is updated by the store there).
   const loadOrder = async (orderId: string) => {
     setIsLoading(true);
     setErrorMsg('');
     setShowReceipt(false);
+    setCourierTracking(null);
     try {
       const remote = isFirebaseConfigured ? await getOrderRemote(orderId) : null;
       const found = remote || deviceOrders.find((o) => o.orderId === orderId) || null;
@@ -56,6 +128,12 @@ export const OrderTrackModal: React.FC = () => {
       if (found) {
         // Keep the address shareable: /track/<order id>
         window.history.replaceState({}, '', `/track/${found.orderId}`);
+        // Add the courier's own scan history once the parcel is booked with them.
+        if (found.courier === LIVE_TRACKED_COURIER && found.trackingNumber) {
+          fetchCourierTracking(found.trackingNumber)
+            .then(setCourierTracking)
+            .catch(() => undefined);
+        }
       } else {
         setErrorMsg(`No order found with ID "${orderId}". Please check the ID on your receipt.`);
       }
@@ -87,10 +165,32 @@ Track: ${trackUrl(o.orderId)}`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Look the number up with the courier; returns false when they have no such parcel.
+  const loadCourierTracking = async (trackingNumber: string) => {
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      const tracking = await fetchCourierTracking(trackingNumber);
+      if (!tracking) return false;
+      setOrder(null);
+      setShowReceipt(false);
+      setCourierTracking(tracking);
+      return true;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const raw = searchTerm.trim();
     if (!raw) return;
+    const compact = raw.toUpperCase().replace(/[\s-]+/g, '');
+
+    if (compact.startsWith('TB')) {
+      void loadOrder(normalizeId(raw));
+      return;
+    }
 
     // A phone number can only match orders placed from this device.
     const digits = raw.replace(/\D/g, '');
@@ -98,13 +198,29 @@ Track: ${trackUrl(o.orderId)}`;
       const match = deviceOrders.find((o) => o.customer.phone.replace(/\D/g, '').endsWith(digits.slice(-10)));
       if (match) {
         void loadOrder(match.orderId);
-      } else {
-        setOrder(null);
-        setErrorMsg('Please enter your Order ID (e.g. TB-7K3M9QX) — it is on your receipt and WhatsApp message.');
+        return;
       }
-      return;
     }
-    void loadOrder(normalizeId(raw));
+
+    // Anything else is tried as a courier tracking number first, then as an Order ID.
+    try {
+      if (await loadCourierTracking(compact)) return;
+    } catch {
+      // Courier unreachable: an Order ID typed without "TB-" must still work.
+      if (!/[A-Z]/.test(compact)) {
+        setOrder(null);
+        setCourierTracking(null);
+        setErrorMsg('Could not check the courier right now. Please try again in a moment.');
+        return;
+      }
+    }
+    if (/[A-Z]/.test(compact)) {
+      void loadOrder(normalizeId(raw));
+    } else {
+      setOrder(null);
+      setCourierTracking(null);
+      setErrorMsg(`Nothing found for "${raw}". Please check your Order ID (e.g. TB-7K3M9QX) or courier tracking number.`);
+    }
   };
 
   const isClosed = order?.status === 'Cancelled' || order?.status === 'Returned';
@@ -121,7 +237,7 @@ Track: ${trackUrl(o.orderId)}`;
         </div>
         <h1 className="font-heading font-black text-2xl sm:text-3xl text-[#1A1A1A] mb-2">Track Your Order</h1>
         <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
-          Enter the Order ID from your receipt or WhatsApp message (e.g. <strong>TB-7K3M9QX</strong>).
+          Enter the Order ID from your receipt (e.g. <strong>TB-7K3M9QX</strong>) or your courier tracking number.
         </p>
       </div>
 
@@ -130,7 +246,7 @@ Track: ${trackUrl(o.orderId)}`;
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Order ID (TB-XXXXXXX)"
+            placeholder="Order ID or tracking number"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-white border border-gray-300 focus:border-[#F2B705] rounded-full py-3 pl-10 pr-4 text-xs sm:text-sm outline-none shadow-sm uppercase placeholder:normal-case"
@@ -174,10 +290,17 @@ Track: ${trackUrl(o.orderId)}`;
         </div>
       )}
 
-      {!order && !errorMsg && !isLoading && deviceOrders.length === 0 && (
+      {!order && !courierTracking && !errorMsg && !isLoading && deviceOrders.length === 0 && (
         <div className="max-w-lg mx-auto text-center text-xs text-gray-500 py-6">
           <Package className="w-8 h-8 mx-auto mb-2 text-gray-300" />
           Orders you place on this website will appear here automatically.
+        </div>
+      )}
+
+      {/* Looked up by courier tracking number only */}
+      {!order && courierTracking && (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-5 sm:p-6 animate-in fade-in duration-300">
+          <CourierTimeline tracking={courierTracking} />
         </div>
       )}
 
@@ -304,6 +427,12 @@ Track: ${trackUrl(o.orderId)}`;
               </div>
             )}
           </div>
+
+          {courierTracking && (
+            <div className="p-5 sm:p-6 border-t border-gray-100">
+              <CourierTimeline tracking={courierTracking} />
+            </div>
+          )}
 
           {/* Receipt */}
           <div className="px-5 sm:px-6 pb-5 space-y-3">
