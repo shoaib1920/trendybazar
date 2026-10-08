@@ -72,17 +72,17 @@ export const HomePage: React.FC = () => {
               Earbuds & Watches, <span className="text-[#8A6D1F]">Fair Prices.</span>
             </h1>
             <p className="text-sm text-gray-500">Cash on Delivery • Rs. 150 Nationwide</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+            <div className="flex flex-row items-center justify-center lg:justify-start gap-2 sm:gap-3">
               <button
                 onClick={handleShopNow}
-                className="w-full sm:w-auto px-7 py-3.5 bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                className="flex-1 sm:flex-none px-3 sm:px-7 py-3 sm:py-3.5 whitespace-nowrap bg-[#141414] hover:bg-black text-white font-serif font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
               >
                 <ShoppingBag className="w-4 h-4 text-[#F2B705]" />
                 <span>Shop Now</span>
               </button>
               <button
                 onClick={() => openWhatsAppGeneral('Assalam-o-Alaikum Trendy Bazaar!')}
-                className="w-full sm:w-auto px-7 py-3.5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                className="flex-1 sm:flex-none px-3 sm:px-7 py-3 sm:py-3.5 whitespace-nowrap bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
                 <span>{t('orderOnWhatsApp')}</span>
