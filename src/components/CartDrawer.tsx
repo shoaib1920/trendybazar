@@ -295,23 +295,23 @@ Add earbuds or a watch to get started.
             </div>
 
             {/* Dual CTAs: Standard Checkout & WhatsApp Checkout */}
-            <div className="space-y-2 pt-1">
+            <div className="flex gap-2 pt-1">
               <button
                 onClick={handleProceedCheckout}
                 id="drawer-checkout-btn"
-                className="w-full py-3 px-4 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs sm:text-sm rounded-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                className="flex-1 py-3 px-3 bg-[#1A1A1A] hover:bg-black text-white font-bold text-xs whitespace-nowrap rounded-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
               >
-                <span>Proceed to Checkout (COD & Online)</span>
+                <span>Checkout</span>
                 <ArrowRight className="w-4 h-4 text-[#F2B705]" />
               </button>
 
               <button
                 onClick={handleOrderWhatsApp}
                 id="drawer-whatsapp-btn"
-                className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                className="flex-1 py-3 px-3 whitespace-nowrap bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
-                <span>Order Bag on WhatsApp</span>
+                <span>Order on WhatsApp</span>
               </button>
             </div>
           </div>

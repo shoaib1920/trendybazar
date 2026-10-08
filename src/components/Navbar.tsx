@@ -38,7 +38,6 @@ export const Navbar: React.FC = () => {
   } = useShop();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [isWatchesMenuOpen, setIsWatchesMenuOpen] = useState(false);
   const [isMobileWatchesOpen, setIsMobileWatchesOpen] = useState(false);
@@ -67,7 +66,6 @@ export const Navbar: React.FC = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       setActiveView('shop');
-      setIsSearchOpen(false);
       setIsMobileMenuOpen(false);
     }
   };
@@ -243,16 +241,6 @@ export const Navbar: React.FC = () => {
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 pointer-events-none" />
             </form>
 
-            {/* Mobile Search Trigger */}
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              data-tour="search"
-              className="p-2 text-[#141414] hover:bg-[#F9F6F0] rounded-full md:hidden"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
             {/* Wishlist Button */}
             <button
               onClick={() => handleNavClick('wishlist' as any)}
@@ -285,22 +273,19 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Search Dropdown */}
-        {isSearchOpen && (
-          <div className="py-3 border-t border-gold-hairline md:hidden">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <input
-                type="text"
-                placeholder="Search earbuds, accessories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#9C7A28] text-base rounded-full py-3 pl-12 pr-4 outline-none"
-              />
-              <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            </form>
-          </div>
-        )}
+        {/* Mobile Search Bar */}
+        <div className="pb-3 md:hidden">
+          <form onSubmit={handleSearchSubmit} data-tour="search" className="relative">
+            <input
+              type="text"
+              placeholder="Search earbuds, watches..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#F9F6F0] border border-gold-hairline focus:border-[#9C7A28] focus:bg-white text-base rounded-full py-2.5 pl-12 pr-4 outline-none transition-all placeholder:text-gray-400"
+            />
+            <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </form>
+        </div>
       </div>
 
       {/* 3. MOBILE SLIDE-OUT DRAWER */}
