@@ -266,9 +266,15 @@ export const Navbar: React.FC = () => {
             >
               <ShoppingBag className="w-4 h-4 text-[#F2B705]" />
               <span className="text-xs font-serif font-bold hidden sm:inline">{t('cart')}</span>
-              <span className="bg-[#F2B705] text-[#141414] font-serif font-bold text-xs px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+              {/* Re-keyed on every change so the badge bounces when an item is added */}
+              <motion.span
+                key={cartCount}
+                animate={{ scale: [1, 1.7, 0.85, 1.2, 1] }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="inline-block bg-[#F2B705] text-[#141414] font-serif font-bold text-xs px-1.5 py-0.2 rounded-full min-w-[18px] text-center"
+              >
                 {cartCount}
-              </span>
+              </motion.span>
             </button>
           </div>
         </div>

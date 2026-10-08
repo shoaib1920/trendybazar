@@ -122,9 +122,11 @@ export const MobileBottomNav: React.FC = () => {
           <div className="relative">
             <ShoppingBag className="w-5 h-5 text-[#141414]" />
             {cartCount > 0 && (
-              <motion.span 
+              <motion.span
+                key={cartCount}
                 initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                animate={{ scale: [0, 1.7, 0.85, 1.2, 1] }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
                 className="absolute -top-1 -right-2 bg-[#F2B705] text-[#141414] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
               >
                 {cartCount}
