@@ -121,7 +121,7 @@ export const ContactPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-heading font-bold text-sm text-[#1A1A1A]">Email Us</h4>
-              <p className="text-xs text-gray-600 mt-0.5">orders@trendybazar.pk</p>
+              <p className="text-xs text-gray-600 mt-0.5">trendybazaar.pk44@gmail.com</p>
             </div>
           </div>
 
