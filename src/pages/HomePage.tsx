@@ -20,11 +20,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const HERO_SLIDES = [
-  { type: 'image' as const },
-  { type: 'video' as const, src: '/hero-video-2.mp4' }
-];
-
 export const HomePage: React.FC = () => {
   const { products, setActiveView, setShopCategoryFilter, setShopSubCategoryFilter, openWhatsAppGeneral, t } = useShop();
 
@@ -32,11 +27,35 @@ export const HomePage: React.FC = () => {
   const watchProducts = products.filter((p) => p.category === 'accessories');
   const earbudProduct = products.find((p) => p.category === 'electronics') || heroProduct;
 
+  const heroSlides = useMemo(() => {
+    const seenImages = new Set<string>();
+    const imageSlides = products
+      .flatMap((product) =>
+        product.images
+          .filter(Boolean)
+          .map((src) => ({ type: 'image' as const, src, alt: product.name }))
+      )
+      .filter(({ src }) => {
+        if (seenImages.has(src)) return false;
+        seenImages.add(src);
+        return true;
+      });
+
+    return [
+      ...(imageSlides.length
+        ? imageSlides
+        : [{ type: 'image' as const, src: '/hero-watch.jpg', alt: 'Trendy Bazaar' }]),
+      { type: 'video' as const, src: '/hero-video-2.mp4' }
+    ];
+  }, [products]);
+
   const [heroSlide, setHeroSlide] = useState(0);
   const [isHeroMuted, setIsHeroMuted] = useState(true);
+  const activeHeroSlideIndex = heroSlide % heroSlides.length;
+  const activeHeroSlide = heroSlides[activeHeroSlideIndex];
 
   const goToSlide = (index: number) => {
-    setHeroSlide((index + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setHeroSlide((index + heroSlides.length) % heroSlides.length);
   };
 
   const [activeTab, setActiveTab] = useState<'all' | 'electronics' | 'accessories'>('all');
@@ -90,13 +109,13 @@ export const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <div className="relative rounded-3xl overflow-hidden shadow-xl border border-gold-hairline aspect-4/3 lg:aspect-square max-w-md mx-auto w-full bg-black">
+          <div className="relative rounded-3xl overflow-hidden aspect-4/3 lg:aspect-square max-w-md mx-auto w-full">
             <AnimatePresence mode="wait">
-              {heroSlide === 0 ? (
+              {activeHeroSlide.type === 'image' ? (
                 <motion.img
-                  key="hero-image"
-                  src={optimizeImage(heroProduct?.images[0], 900)}
-                  alt={heroProduct?.name || 'Trendy Bazaar'}
+                  key={`hero-image-${activeHeroSlide.src}`}
+                  src={optimizeImage(activeHeroSlide.src, 900)}
+                  alt={activeHeroSlide.alt}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -106,7 +125,7 @@ export const HomePage: React.FC = () => {
               ) : (
                 <motion.video
                   key="hero-video"
-                  src={HERO_SLIDES[1].src}
+                  src={activeHeroSlide.src}
                   autoPlay
                   muted={isHeroMuted}
                   loop
@@ -122,14 +141,14 @@ export const HomePage: React.FC = () => {
 
             {/* Slide Arrows */}
             <button
-              onClick={() => goToSlide(heroSlide - 1)}
+              onClick={() => goToSlide(activeHeroSlideIndex - 1)}
               aria-label="Previous slide"
               className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white backdrop-blur-sm flex items-center justify-center shadow-md transition-all active:scale-90 z-10"
             >
               <ChevronLeft className="w-5 h-5 text-[#141414]" />
             </button>
             <button
-              onClick={() => goToSlide(heroSlide + 1)}
+              onClick={() => goToSlide(activeHeroSlideIndex + 1)}
               aria-label="Next slide"
               className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white backdrop-blur-sm flex items-center justify-center shadow-md transition-all active:scale-90 z-10"
             >
@@ -137,7 +156,7 @@ export const HomePage: React.FC = () => {
             </button>
 
             {/* Mute Toggle — video slide only */}
-            {heroSlide === 1 && (
+            {activeHeroSlide.type === 'video' && (
               <button
                 onClick={() => setIsHeroMuted((m) => !m)}
                 aria-label={isHeroMuted ? 'Unmute video' : 'Mute video'}
@@ -153,13 +172,13 @@ export const HomePage: React.FC = () => {
 
             {/* Slide Dots */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-              {HERO_SLIDES.map((_, i) => (
+              {heroSlides.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goToSlide(i)}
                   aria-label={`Go to slide ${i + 1}`}
                   className={`h-1.5 rounded-full transition-all ${
-                    heroSlide === i ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
+                    activeHeroSlideIndex === i ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
                   }`}
                 />
               ))}
