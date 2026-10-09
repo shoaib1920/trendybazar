@@ -192,11 +192,11 @@ export const Footer: React.FC = () => {
               </a>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#F2B705] shrink-0" />
-                <span>orders@trendybazar.pk</span>
+                <span>trendybazaar.pk44@gmail.com</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#F2B705] shrink-0 mt-0.5" />
-                <span>Fulfillment Hub: Block D, Gulberg III, Lahore, Pakistan</span>
+                <span>Nankana Sahib , Punjab , Pakistan </span>
               </div>
             </div>
 
