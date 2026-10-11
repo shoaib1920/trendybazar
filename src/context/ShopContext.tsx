@@ -159,6 +159,10 @@ interface ShopContextType {
   // Checkout Modal
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
+  // True when checkout was started from "Order on WhatsApp": the order is saved
+  // first, then WhatsApp opens with the confirmation message.
+  checkoutViaWhatsApp: boolean;
+  setCheckoutViaWhatsApp: (via: boolean) => void;
   placeOrder: (formData: CheckoutFormData, extras: CheckoutExtras) => Promise<OrderSubmitResult>;
   submitOrder: (order: PlacedOrder) => Promise<OrderSubmitResult>;
   updateOrder: (orderId: string, patch: Partial<PlacedOrder>) => Promise<void>;
@@ -401,6 +405,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Modals
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutViaWhatsApp, setCheckoutViaWhatsApp] = useState(false);
 
   // Orders
   const [orders, setOrders] = useState<PlacedOrder[]>(() => {
@@ -749,11 +754,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // WhatsApp Helpers
   const getWhatsAppProductLink = (product: Product, color?: string) => {
     const details = color ? `Color: ${color}` : '';
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
+    const msg = `Assalam-o-Alaikum Trendy Bazaar!
+
 I would like to order:
-🛍️ *${product.name}*
-💰 Price: Rs. ${product.price}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: ${productUrl(productKeyFor(product, products))}
+
+Product: ${product.name}
+Price: Rs. ${product.price}
+${details ? `${details}\n` : ''}Link:${productUrl(productKeyFor(product, products))}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
@@ -768,22 +775,22 @@ Please confirm availability and delivery time for Cash on Delivery!`;
       .map((item, idx) => {
         const details = item.selectedColor ? ` [${item.selectedColor}]` : '';
         const itemTotal = item.product.price * item.quantity;
-        return `${idx + 1}. *${item.product.name}* (Qty: ${item.quantity}) - Rs. ${itemTotal}${details}`;
+        return `${idx + 1}. ${item.product.name} (Qty: ${item.quantity}) - Rs. ${itemTotal}${details}`;
       })
       .join('\n');
 
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 🛍️
+    const msg = `Assalam-o-Alaikum Trendy Bazaar!
+
 I want to place an order directly via WhatsApp:
 
-📦 *ORDER ITEMS:*
+Order items:
 ${itemsList}
 
-💰 *Subtotal:* Rs. ${cartSubtotal}
-${cartDiscount > 0 ? `🎟️ *Discount (${appliedDiscount?.code}):* -Rs. ${cartDiscount}\n` : ''}🚚 *Delivery:* ${cartShipping === 0 ? 'FREE' : `Rs. ${cartShipping}`}
-🏷️ *Grand Total:* Rs. ${cartTotal}
+Subtotal: Rs. ${cartSubtotal}
+${cartDiscount > 0 ? `Discount (${appliedDiscount?.code}): -Rs. ${cartDiscount}\n` : ''}Delivery: ${cartShipping === 0 ? 'FREE' : `Rs. ${cartShipping}`}
+Grand Total: Rs. ${cartTotal}
 
-${customNote ? `📝 *Note:* ${customNote}\n` : ''}
-Please send me the order confirmation and COD dispatch details!`;
+${customNote ? `Note: ${customNote}\n\n` : ''}Please send me the order confirmation and COD dispatch details!`;
 
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   };
@@ -954,6 +961,8 @@ Please send me the order confirmation and COD dispatch details!`;
         setQuickViewProduct,
         isCheckoutOpen,
         setIsCheckoutOpen,
+        checkoutViaWhatsApp,
+        setCheckoutViaWhatsApp,
         placeOrder,
         submitOrder,
         updateOrder,

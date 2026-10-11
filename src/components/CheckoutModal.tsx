@@ -46,8 +46,10 @@ const PAKISTAN_CITIES = [
 export const CheckoutModal: React.FC = () => {
   const { 
     isCheckoutOpen, 
-    setIsCheckoutOpen, 
-    cart, 
+    setIsCheckoutOpen,
+    checkoutViaWhatsApp,
+    setCheckoutViaWhatsApp,
+    cart,
     cartSubtotal, 
     cartDiscount, 
     cartShipping, 
@@ -125,7 +127,17 @@ export const CheckoutModal: React.FC = () => {
 
   const handleClose = () => {
     setIsCheckoutOpen(false);
+    setCheckoutViaWhatsApp(false);
     setCompletedOrder(null);
+  };
+
+  const confirmationLink = (order: PlacedOrder) => {
+    const msg = `Assalam-o-Alaikum Trendy Bazaar! I confirm my order ${order.orderId} (Rs. ${order.total.toLocaleString()}, ${order.paymentMethod}).
+
+${receiptText(order)}
+
+Track: ${trackUrl(order.orderId)}`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,6 +156,9 @@ export const CheckoutModal: React.FC = () => {
       return;
     }
 
+    // Open the tab right away — browsers block pop-ups opened after an await.
+    const waWindow = checkoutViaWhatsApp ? window.open('', '_blank') : null;
+
     setIsSubmitting(true);
     setSubmitError('');
     try {
@@ -152,6 +167,10 @@ export const CheckoutModal: React.FC = () => {
         giftNote: isGiftWrapSelected ? giftMessage || 'For someone special' : undefined,
         pointsDiscount: loyaltyDiscount
       });
+      if (waWindow) {
+        waWindow.opener = null;
+        waWindow.location.href = confirmationLink(order);
+      }
       setCompletedOrder(order);
       setOrderSynced(synced);
       setIsGiftWrapSelected(false);
@@ -159,6 +178,7 @@ export const CheckoutModal: React.FC = () => {
       setRedeemPoints(false);
       showToast(`🎉 Order ${order.orderId} placed!`, 'success');
     } catch (err) {
+      waWindow?.close();
       const message = err instanceof OrderLimitError ? err.message : 'Could not place the order. Please try again.';
       setSubmitError(message);
       showToast(message, 'warning');
@@ -169,12 +189,7 @@ export const CheckoutModal: React.FC = () => {
 
   const handleNotifyWhatsApp = () => {
     if (!completedOrder) return;
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋 ✅ I confirm my order *${completedOrder.orderId}* (Rs. ${completedOrder.total.toLocaleString()}, ${completedOrder.paymentMethod}).
-
-${receiptText(completedOrder)}
-
-Track: ${trackUrl(completedOrder.orderId)}`;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+    window.open(confirmationLink(completedOrder), '_blank', 'noopener,noreferrer');
   };
 
   const handleTrackPlacedOrder = () => {
@@ -538,7 +553,9 @@ Track: ${trackUrl(completedOrder.orderId)}`;
                   <span>Placing your order...</span>
                 ) : (
                   <>
-                    <span>Confirm Order • Rs. {finalPayableTotal.toLocaleString()}</span>
+                    <span>
+                      {checkoutViaWhatsApp ? 'Confirm & Send on WhatsApp' : 'Confirm Order'} • Rs. {finalPayableTotal.toLocaleString()}
+                    </span>
                     <ArrowRight className="w-4 h-4 text-[#F2B705]" />
                   </>
                 )}

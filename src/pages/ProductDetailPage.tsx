@@ -127,11 +127,13 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
 
   const handleWhatsAppOrder = () => {
     const details = selectedColor ? `Color: ${selectedColor}` : '';
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! 👋
+    const msg = `Assalam-o-Alaikum Trendy Bazaar!
+
 I would like to order:
-🛍️ *${product.name}*
-💰 Price: Rs. ${product.price}
-${details ? `✨ Details: ${details}\n` : ''}🔗 Link: ${productUrl(productKeyFor(product, products))}
+
+Product: ${product.name}
+Price: Rs. ${product.price}
+${details ? `${details}\n` : ''}Link:${productUrl(productKeyFor(product, products))}
 
 Please confirm availability and delivery time for Cash on Delivery!`;
     window.open(`https://wa.me/923364300592?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');

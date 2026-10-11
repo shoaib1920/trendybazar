@@ -32,7 +32,7 @@ export const CartDrawer: React.FC = () => {
     discountError,
     featuredDiscount,
     setIsCheckoutOpen,
-    getWhatsAppCartLink,
+    setCheckoutViaWhatsApp,
     setActiveView
   } = useShop();
 
@@ -58,12 +58,16 @@ export const CartDrawer: React.FC = () => {
   };
 
   const handleProceedCheckout = () => {
+    setCheckoutViaWhatsApp(false);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
   };
 
+  // Goes through checkout so the order is saved before WhatsApp opens.
   const handleOrderWhatsApp = () => {
-    window.open(getWhatsAppCartLink(), '_blank', 'noopener,noreferrer');
+    setCheckoutViaWhatsApp(true);
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
   };
 
   const handleShopNow = () => {

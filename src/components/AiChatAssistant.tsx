@@ -124,7 +124,7 @@ export const AiChatAssistant: React.FC = () => {
         setIsPlacing(false);
       }
     }
-    const msg = `Assalam-o-Alaikum! ✅ I confirm this order placed via the website AI assistant.
+    const msg = `Assalam-o-Alaikum! I confirm this order placed via the website AI assistant.
 
 ${receiptText(placed)}
 

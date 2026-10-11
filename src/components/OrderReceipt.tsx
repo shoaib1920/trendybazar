@@ -18,22 +18,22 @@ export const printReceipt = () => window.print();
 
 // Plain-text version for sharing on WhatsApp.
 export const receiptText = (order: PlacedOrder) =>
-  `🧾 *Trendy Bazaar — Receipt*
-Order: *${order.orderId}*
+  `Trendy Bazaar - Receipt
+Order: ${order.orderId}
 Date: ${formatOrderDate(order.createdAt)}
 
 ${order.items
-  .map((i) => `• ${i.name}${i.color ? ` (${i.color})` : ''} × ${i.quantity} — ${formatRs(i.price * i.quantity)}`)
+  .map((i) => `- ${i.name}${i.color ? ` (${i.color})` : ''} x ${i.quantity} - ${formatRs(i.price * i.quantity)}`)
   .join('\n')}
 
 Subtotal: ${formatRs(order.subtotal)}${order.discount > 0 ? `\nDiscount${order.discountCode ? ` (${order.discountCode})` : ''}: -${formatRs(order.discount)}` : ''}${order.giftWrapFee > 0 ? `\nGift wrap: ${formatRs(order.giftWrapFee)}` : ''}${order.pointsDiscount > 0 ? `\nPoints discount: -${formatRs(order.pointsDiscount)}` : ''}
 Delivery: ${order.shipping === 0 ? 'FREE' : formatRs(order.shipping)}
-*Total: ${formatRs(order.total)}*
+Total: ${formatRs(order.total)}
 Payment: ${order.paymentMethod}
 
-👤 ${order.customer.fullName}
-📞 ${order.customer.phone}
-🏠 ${order.customer.address}, ${order.customer.city}`;
+Name: ${order.customer.fullName}
+Phone: ${order.customer.phone}
+Address: ${order.customer.address}, ${order.customer.city}`;
 
 interface OrderReceiptProps {
   order: PlacedOrder;
