@@ -180,5 +180,16 @@ export default async function handler(req: any, res: any) {
     emailTo: process.env.ORDER_EMAIL_TO
   });
   res.setHeader('Cache-Control', 'no-store');
-  res.status(result.status).json(result.body);
+  // When misconfigured, say which deployment answered and which email
+  // variable names it can see (names only, never values).
+  const body =
+    result.status === 500
+      ? {
+          ...result.body,
+          deployment: process.env.VERCEL_URL,
+          environment: process.env.VERCEL_ENV,
+          emailVariables: Object.keys(process.env).filter((key) => /order|email/i.test(key))
+        }
+      : result.body;
+  res.status(result.status).json(body);
 }
