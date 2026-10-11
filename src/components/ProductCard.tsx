@@ -22,7 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toggleWishlist, 
     isInWishlist, 
     setQuickViewProduct,
-    getWhatsAppProductLink,
+    orderOnWhatsApp,
     t,
     products
   } = useShop();
@@ -54,7 +54,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(getWhatsAppProductLink(product), '_blank', 'noopener,noreferrer');
+    orderOnWhatsApp(product);
   };
 
   return (

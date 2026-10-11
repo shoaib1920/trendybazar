@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { optimizeImage } from '../lib/images';
-import { useShop, productUrl, productKeyFor, findProductByKey } from '../context/ShopContext';
+import { useShop, productKeyFor, findProductByKey } from '../context/ShopContext';
 import { Product } from '../types';
 import { ProductCard } from '../components/ProductCard';
 import { CityDeliveryChecker } from '../components/CityDeliveryChecker';
@@ -66,7 +66,7 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
     addToCart,
     toggleWishlist,
     isInWishlist,
-    getWhatsAppProductLink,
+    orderOnWhatsApp,
     setActiveView,
     showToast
   } = useShop();
@@ -126,17 +126,7 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   const handleWhatsAppOrder = () => {
-    const details = selectedColor ? `Color: ${selectedColor}` : '';
-    const msg = `Assalam-o-Alaikum Trendy Bazaar!
-
-I would like to order:
-
-Product: ${product.name}
-Price: Rs. ${product.price}
-${details ? `${details}\n` : ''}Link:${productUrl(productKeyFor(product, products))}
-
-Please confirm availability and delivery time for Cash on Delivery!`;
-    window.open(`https://wa.me/923364300592?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+    orderOnWhatsApp(product, quantity, selectedColor);
   };
 
   const handleShare = () => {

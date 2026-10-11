@@ -9,7 +9,7 @@ export const QuickViewModal: React.FC = () => {
     setQuickViewProduct, 
     addToCart, 
     navigateToProduct, 
-    getWhatsAppProductLink,
+    orderOnWhatsApp,
     products
   } = useShop();
 
@@ -32,8 +32,8 @@ export const QuickViewModal: React.FC = () => {
   };
 
   const handleOrderOnWhatsApp = () => {
-    const link = getWhatsAppProductLink(product, currentColor);
-    window.open(link, '_blank', 'noopener,noreferrer');
+    orderOnWhatsApp(product, quantity, currentColor);
+    handleClose();
   };
 
   const handleFullDetails = () => {
