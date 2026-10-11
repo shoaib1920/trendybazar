@@ -12,7 +12,7 @@ import {
   statusMessage
 } from './adminUtils';
 import { POINTS_EARN_RATE, adjustPointsRemote, getPointsRemote } from '../../lib/customerService';
-import { toPhoneKey } from '../../lib/phone';
+import { PHONE_HINT, toPhoneKey } from '../../lib/phone';
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,9 +22,11 @@ import {
   Globe,
   Loader2,
   MessageCircle,
+  Pencil,
   Printer,
   Search,
   ShoppingBag,
+  Trash2,
   XCircle,
   AlertTriangle,
   Award
@@ -34,6 +36,7 @@ interface AdminOrdersProps {
   orders: PlacedOrder[];
   products: Product[];
   updateOrder: (orderId: string, patch: Partial<PlacedOrder>) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
   saveProduct: (product: Product) => Promise<void>;
   showToast: (message: string, type?: 'success' | 'info' | 'warning') => void;
   selectedOrderId: string | null;
@@ -49,6 +52,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
   orders,
   products,
   updateOrder,
+  deleteOrder,
   saveProduct,
   showToast,
   selectedOrderId,
@@ -210,6 +214,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
             order={selected}
             products={products}
             updateOrder={updateOrder}
+            deleteOrder={deleteOrder}
             saveProduct={saveProduct}
             showToast={showToast}
             onBack={() => onSelectOrder(null)}
@@ -228,16 +233,18 @@ interface OrderDetailsProps {
   order: PlacedOrder;
   products: Product[];
   updateOrder: AdminOrdersProps['updateOrder'];
+  deleteOrder: AdminOrdersProps['deleteOrder'];
   saveProduct: AdminOrdersProps['saveProduct'];
   showToast: AdminOrdersProps['showToast'];
   onBack: () => void;
 }
 
-const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrder, saveProduct, showToast, onBack }) => {
+const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrder, deleteOrder, saveProduct, showToast, onBack }) => {
   const [courier, setCourier] = useState(order.courier || '');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber || '');
   const [adminNotes, setAdminNotes] = useState(order.adminNotes || '');
   const [busy, setBusy] = useState(false);
+  const [customerDraft, setCustomerDraft] = useState<PlacedOrder['customer'] | null>(null);
 
   useEffect(() => {
     setCourier(order.courier || '');
@@ -338,6 +345,58 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
     }
   };
 
+  // Stock and points are tied to the order (and its phone number), so they must
+  // be returned by cancelling before the order can be deleted or its phone changed.
+  const hasBookkeeping = !!order.stockDeducted || !!order.pointsDeducted || !!order.pointsAwarded;
+
+  const saveCustomer = async () => {
+    if (!customerDraft) return;
+    const customer = {
+      ...customerDraft,
+      fullName: customerDraft.fullName.trim(),
+      phone: customerDraft.phone.trim(),
+      city: customerDraft.city.trim(),
+      address: customerDraft.address.trim(),
+      nearestLandmark: customerDraft.nearestLandmark?.trim() || undefined
+    };
+    if (!customer.fullName || !customer.city || !customer.address) {
+      showToast('Name, city and address are required.', 'warning');
+      return;
+    }
+    const phoneKey = toPhoneKey(customer.phone);
+    if (!phoneKey) {
+      showToast(PHONE_HINT, 'warning');
+      return;
+    }
+    setBusy(true);
+    try {
+      await updateOrder(order.orderId, { customer, phoneKey });
+      setCustomerDraft(null);
+      showToast('Customer details updated', 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Could not save', 'warning');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const removeOrder = async () => {
+    if (hasBookkeeping) {
+      showToast('Cancel this order first so its stock and points are returned, then delete it.', 'warning');
+      return;
+    }
+    if (!confirm(`Delete order ${order.orderId} permanently? This cannot be undone.`)) return;
+    setBusy(true);
+    try {
+      await deleteOrder(order.orderId);
+      showToast(`Order ${order.orderId} deleted`, 'success');
+      onBack();
+    } catch (err: any) {
+      showToast(err?.message || 'Could not delete the order', 'warning');
+      setBusy(false);
+    }
+  };
+
   const copyAddress = () => {
     const text = `${order.customer.fullName}\n${order.customer.phone}\n${order.customer.address}${order.customer.nearestLandmark ? `, ${order.customer.nearestLandmark}` : ''}\n${order.customer.city}\nCOD: ${formatRs(order.total)}`;
     void navigator.clipboard.writeText(text);
@@ -403,6 +462,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
               <XCircle className="w-3.5 h-3.5" /> Cancel
             </button>
           )}
+          <button
+            onClick={() => void removeOrder()}
+            disabled={busy}
+            className="py-2 px-3 rounded-xl text-red-600 hover:bg-red-50 font-bold flex items-center gap-1"
+            title="Delete this order permanently"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Delete
+          </button>
           <a
             href={customerWhatsAppLink(order, statusMessage(order))}
             target="_blank"
@@ -445,8 +512,69 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
         )}
 
         {/* Customer */}
+        {customerDraft ? (
+          <div className="p-3 rounded-xl border border-[#8A6D1F]/40 bg-[#F7F3EC]/40 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="space-y-1">
+              <span className="font-semibold text-gray-700">Full name</span>
+              <input
+                value={customerDraft.fullName}
+                onChange={(e) => setCustomerDraft({ ...customerDraft, fullName: e.target.value })}
+                className="w-full bg-white border border-gray-200 rounded-xl p-2 outline-none disabled:opacity-50"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="font-semibold text-gray-700">Phone</span>
+              <input
+                value={customerDraft.phone}
+                disabled={hasBookkeeping}
+                title={hasBookkeeping ? 'Stock or points are already linked to this number' : undefined}
+                onChange={(e) => setCustomerDraft({ ...customerDraft, phone: e.target.value })}
+                className="w-full bg-white border border-gray-200 rounded-xl p-2 outline-none disabled:opacity-50"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="font-semibold text-gray-700">City</span>
+              <input
+                value={customerDraft.city}
+                onChange={(e) => setCustomerDraft({ ...customerDraft, city: e.target.value })}
+                className="w-full bg-white border border-gray-200 rounded-xl p-2 outline-none disabled:opacity-50"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="font-semibold text-gray-700">Landmark</span>
+              <input
+                value={customerDraft.nearestLandmark || ''}
+                onChange={(e) => setCustomerDraft({ ...customerDraft, nearestLandmark: e.target.value })}
+                className="w-full bg-white border border-gray-200 rounded-xl p-2 outline-none disabled:opacity-50"
+              />
+            </label>
+            <label className="space-y-1 sm:col-span-2">
+              <span className="font-semibold text-gray-700">Delivery address</span>
+              <input
+                value={customerDraft.address}
+                onChange={(e) => setCustomerDraft({ ...customerDraft, address: e.target.value })}
+                className="w-full bg-white border border-gray-200 rounded-xl p-2 outline-none disabled:opacity-50"
+              />
+            </label>
+            <div className="sm:col-span-2 flex justify-end gap-2">
+              <button onClick={() => setCustomerDraft(null)} disabled={busy} className="py-2 px-4 rounded-xl border border-gray-200 bg-white font-bold">
+                Cancel
+              </button>
+              <button onClick={() => void saveCustomer()} disabled={busy} className="py-2 px-4 rounded-xl bg-[#1A1A1A] text-white font-bold disabled:opacity-40">
+                Save customer
+              </button>
+            </div>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl border border-gray-100">
+          <div className="p-3 rounded-xl border border-gray-100 relative">
+            <button
+              onClick={() => setCustomerDraft({ ...order.customer })}
+              className="absolute top-2.5 right-2.5 text-gray-400 hover:text-[#8A6D1F]"
+              title="Edit customer details"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
             <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Customer</p>
             <p className="font-bold">{order.customer.fullName}</p>
             <p>{order.customer.phone}</p>
@@ -463,6 +591,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
             </button>
           </div>
         </div>
+        )}
         {(order.customer.orderNotes || order.giftNote) && (
           <div className="p-3 rounded-xl bg-amber-50 border border-amber-100 text-amber-900 space-y-0.5">
             {order.customer.orderNotes && <p><strong>Customer note:</strong> {order.customer.orderNotes}</p>}

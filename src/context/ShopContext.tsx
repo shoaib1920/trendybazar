@@ -11,7 +11,7 @@ import {
 import { INITIAL_PRODUCTS } from '../data/products';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { subscribeToProducts, saveProductRemote, deleteProductRemote, seedProductsIfEmpty } from '../lib/productsService';
-import { createOrderRemote, generateOrderId, OrderLimitError, updateOrderRemote } from '../lib/ordersService';
+import { createOrderRemote, deleteOrderRemote, generateOrderId, OrderLimitError, updateOrderRemote } from '../lib/ordersService';
 import { toPhoneKey } from '../lib/phone';
 import { applyPageSeo, SITE_URL } from '../lib/seo';
 import {
@@ -166,6 +166,7 @@ interface ShopContextType {
   placeOrder: (formData: CheckoutFormData, extras: CheckoutExtras) => Promise<OrderSubmitResult>;
   submitOrder: (order: PlacedOrder) => Promise<OrderSubmitResult>;
   updateOrder: (orderId: string, patch: Partial<PlacedOrder>) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
   // Orders placed from this device (the full list for admins lives in Firestore).
   orders: PlacedOrder[];
 
@@ -781,6 +782,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await createOrderRemote(order);
         synced = true;
+        // Email the store about the new order (best effort, never blocks checkout).
+        fetch('/api/notify-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: order.orderId }),
+          keepalive: true
+        }).catch(() => {});
       } catch (err) {
         if (err instanceof OrderLimitError) throw err;
         console.error('Failed to save order online:', err);
@@ -795,6 +803,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await updateOrderRemote(orderId, patch);
     }
     setOrders((prev) => prev.map((o) => (o.orderId === orderId ? { ...o, ...patch } : o)));
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    if (isFirebaseConfigured) {
+      await deleteOrderRemote(orderId);
+    }
+    setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
   };
 
   // ---------- Abandoned carts ----------
@@ -937,6 +952,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         placeOrder,
         submitOrder,
         updateOrder,
+        deleteOrder,
         orders,
         getCustomerPoints,
         saveCheckoutDraft,

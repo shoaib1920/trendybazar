@@ -77,6 +77,7 @@ export const AdminManagerModal: React.FC = () => {
     isCloudBackendConfigured,
     orders: deviceOrders,
     updateOrder,
+    deleteOrder,
     showToast,
     setActiveView,
     localDiscounts,
@@ -929,6 +930,7 @@ export const AdminManagerModal: React.FC = () => {
           orders={orders}
           products={products}
           updateOrder={updateOrder}
+          deleteOrder={deleteOrder}
           saveProduct={saveProduct}
           showToast={showToast}
           selectedOrderId={selectedOrderId}

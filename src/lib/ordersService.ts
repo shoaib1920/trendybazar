@@ -1,6 +1,7 @@
 import {
   Timestamp,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -87,4 +88,10 @@ export const subscribeToOrders = (
 export const updateOrderRemote = async (orderId: string, patch: Partial<PlacedOrder>) => {
   if (!isFirebaseConfigured || !db) return;
   await updateDoc(doc(db, COLLECTION, orderId), clean(patch) as Record<string, unknown>);
+};
+
+// Admin only (see firestore.rules).
+export const deleteOrderRemote = async (orderId: string) => {
+  if (!isFirebaseConfigured || !db) return;
+  await deleteDoc(doc(db, COLLECTION, orderId));
 };

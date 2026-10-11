@@ -4,6 +4,7 @@ import path from 'path';
 import {defineConfig, loadEnv, type Plugin} from 'vite';
 import {handleChat} from './api/chat';
 import {handleTrack} from './api/track';
+import {handleNotifyOrder} from './api/notify-order';
 
 // Serves the /api/chat Vercel function during `npm run dev`.
 const devChatApi = (env: Record<string, string>): Plugin => ({
@@ -42,10 +43,39 @@ const devTrackApi = (env: Record<string, string>): Plugin => ({
   },
 });
 
+// Serves the /api/notify-order Vercel function during `npm run dev`.
+const devNotifyOrderApi = (env: Record<string, string>): Plugin => ({
+  name: 'dev-notify-order-api',
+  configureServer(server) {
+    server.middlewares.use('/api/notify-order', (req, res) => {
+      let raw = '';
+      req.on('data', (chunk) => (raw += chunk));
+      req.on('end', async () => {
+        let body: unknown = {};
+        try {
+          body = JSON.parse(raw || '{}');
+        } catch {
+          // fall through with an empty body; handleNotifyOrder rejects it
+        }
+        const result = await handleNotifyOrder(body, {
+          projectId: env.VITE_FIREBASE_PROJECT_ID,
+          apiKey: env.VITE_FIREBASE_API_KEY,
+          emailUser: env.ORDER_EMAIL_USER,
+          emailPassword: env.ORDER_EMAIL_APP_PASSWORD,
+          emailTo: env.ORDER_EMAIL_TO,
+        });
+        res.statusCode = result.status;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(result.body));
+      });
+    });
+  },
+});
+
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react(), tailwindcss(), devChatApi(env), devTrackApi(env)],
+    plugins: [react(), tailwindcss(), devChatApi(env), devTrackApi(env), devNotifyOrderApi(env)],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
