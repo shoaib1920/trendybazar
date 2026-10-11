@@ -212,7 +212,21 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & payment trust */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© 2026 Trendy Bazaar Pakistan. All rights reserved.</p>
+          <p>
+            © 2026 Trendy Bazaar Pakistan. All rights reserved.{' '}
+            <span className="text-gray-400">
+              A product of{' '}
+              <a
+                href="https://www.devtimize.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-gray-300 hover:text-[#F2B705] transition-colors"
+              >
+                Devtimize
+              </a>
+              .
+            </span>
+          </p>
           <div className="flex items-center gap-3 text-[11px]">
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">Cash on Delivery</span>
             <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono">JazzCash</span>
