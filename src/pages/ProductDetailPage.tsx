@@ -450,7 +450,7 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
               <div className="bg-[#F9F6F0] p-4 rounded-2xl space-y-2 border border-gold-hairline text-xs">
                 <div>• <strong>Delivery Fee:</strong> Flat Rs. 150 (FREE on cart Rs. 3,500+)</div>
                 <div>• <strong>Delivery Timeline:</strong> 2 to 4 working days via Trax Logistics & Leopards Courier with SMS tracking</div>
-                <div>• <strong>Payment Methods:</strong> Cash on Delivery (COD), JazzCash, Easypaisa, Card</div>
+                <div>• <strong>Payment Methods:</strong> Cash on Delivery (COD), JazzCash, Easypaisa</div>
                 <div>• <strong>7-Day Exchange:</strong> Send a WhatsApp message to +92 336 4300592 with your order ID if the unit is faulty.</div>
               </div>
             </div>

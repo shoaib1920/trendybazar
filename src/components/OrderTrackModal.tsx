@@ -4,6 +4,8 @@ import { ORDER_STATUS_FLOW, OrderStatus, PlacedOrder } from '../types';
 import { getOrderRemote } from '../lib/ordersService';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { OrderReceipt, formatOrderDate, printReceipt, receiptText } from './OrderReceipt';
+import { WalletPaymentDetails } from './WalletPaymentDetails';
+import { isPrepaid, isWalletOrder, orderConfirmIntro } from '../lib/payment';
 import {
   Package,
   Truck,
@@ -157,7 +159,7 @@ export const OrderTrackModal: React.FC = () => {
   }, [trackOrderId]);
 
   const confirmOnWhatsApp = (o: PlacedOrder) => {
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! I confirm my order ${o.orderId} (Rs. ${o.total.toLocaleString()}, ${o.paymentMethod}).
+    const msg = `${orderConfirmIntro(o)}
 
 ${receiptText(o)}
 
@@ -336,20 +338,37 @@ Track: ${trackUrl(o.orderId)}`;
             </div>
           </div>
 
-          {order.status === 'Pending' && (
+          {order.status === 'Pending' && isPrepaid(order) && (
+            <div className="m-5 sm:m-6 mb-0 sm:mb-0 p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 text-xs">
+              <p className="font-bold text-emerald-800">Payment received</p>
+              <p className="text-emerald-700">Shukriya! We will dispatch your order soon.</p>
+            </div>
+          )}
+          {order.status === 'Pending' && !isPrepaid(order) && (
             <div className="m-5 sm:m-6 mb-0 sm:mb-0 p-4 rounded-2xl border-2 border-[#25D366]/50 bg-[#25D366]/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div>
-                <p className="font-bold text-[#141414]">Waiting for your confirmation</p>
-                <p className="text-gray-600">
-                  We dispatch Cash on Delivery orders after you confirm on WhatsApp.
-                  <span className="block text-[#8A6D1F] font-semibold">Order confirm karne ke liye WhatsApp par message bhejein.</span>
-                </p>
-              </div>
+              {isWalletOrder(order) ? (
+                <div className="space-y-2">
+                  <p className="font-bold text-[#141414]">Waiting for your payment</p>
+                  <WalletPaymentDetails amount={order.total} />
+                  <p className="text-gray-600">
+                    Then send us the payment screenshot on WhatsApp.
+                    <span className="block text-[#8A6D1F] font-semibold">Payment bhej kar screenshot WhatsApp par send karein.</span>
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-bold text-[#141414]">Waiting for your confirmation</p>
+                  <p className="text-gray-600">
+                    We dispatch Cash on Delivery orders after you confirm on WhatsApp.
+                    <span className="block text-[#8A6D1F] font-semibold">Order confirm karne ke liye WhatsApp par message bhejein.</span>
+                  </p>
+                </div>
+              )}
               <button
                 onClick={() => confirmOnWhatsApp(order)}
                 className="py-2.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold flex items-center gap-1.5"
               >
-                <MessageCircle className="w-4 h-4 fill-white" /> Confirm on WhatsApp
+                <MessageCircle className="w-4 h-4 fill-white" /> {isWalletOrder(order) ? 'Send screenshot' : 'Confirm on WhatsApp'}
               </button>
             </div>
           )}

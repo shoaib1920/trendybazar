@@ -4,6 +4,8 @@ import { PHONE_HINT, toPhoneKey } from '../lib/phone';
 import { OrderLimitError } from '../lib/ordersService';
 import { POINTS_EARN_RATE, POINTS_MAX_SHARE } from '../lib/customerService';
 import { OrderReceipt, printReceipt, receiptText } from './OrderReceipt';
+import { WalletPaymentDetails } from './WalletPaymentDetails';
+import { isWalletOrder, orderConfirmIntro } from '../lib/payment';
 import { CheckoutFormData, PlacedOrder } from '../types';
 import { 
   X, 
@@ -132,7 +134,7 @@ export const CheckoutModal: React.FC = () => {
   };
 
   const confirmationLink = (order: PlacedOrder) => {
-    const msg = `Assalam-o-Alaikum Trendy Bazaar! I confirm my order ${order.orderId} (Rs. ${order.total.toLocaleString()}, ${order.paymentMethod}).
+    const msg = `${orderConfirmIntro(order)}
 
 ${receiptText(order)}
 
@@ -240,22 +242,32 @@ Track: ${trackUrl(order.orderId)}`;
               </div>
             )}
 
-            {/* Step 2: COD orders are only dispatched after the customer confirms on WhatsApp */}
+            {/* Step 2: orders are only dispatched after the customer confirms (COD) or pays (wallet) */}
             <div className="max-w-md mx-auto text-left p-4 rounded-2xl border-2 border-[#25D366]/50 bg-[#25D366]/5 space-y-2.5">
               <p className="text-xs font-bold text-[#141414] flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-[#25D366] text-white text-[11px] flex items-center justify-center">2</span>
-                One last step: confirm your order on WhatsApp
+                {isWalletOrder(completedOrder) ? 'One last step: send your payment' : 'One last step: confirm your order on WhatsApp'}
               </p>
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                We dispatch Cash on Delivery orders after you confirm. Tap below and press <strong>Send</strong> in WhatsApp.
-                <span className="block text-[#8A6D1F] font-semibold mt-0.5">Order confirm karne ke liye neeche button dabayein aur WhatsApp par Send karein.</span>
-              </p>
+              {isWalletOrder(completedOrder) ? (
+                <>
+                  <WalletPaymentDetails amount={completedOrder.total} />
+                  <p className="text-[11px] text-gray-600 leading-relaxed">
+                    Then send us the payment screenshot on WhatsApp. We dispatch your order once the payment is received.
+                    <span className="block text-[#8A6D1F] font-semibold mt-0.5">Payment bhej kar screenshot WhatsApp par send karein.</span>
+                  </p>
+                </>
+              ) : (
+                <p className="text-[11px] text-gray-600 leading-relaxed">
+                  We dispatch Cash on Delivery orders after you confirm. Tap below and press <strong>Send</strong> in WhatsApp.
+                  <span className="block text-[#8A6D1F] font-semibold mt-0.5">Order confirm karne ke liye neeche button dabayein aur WhatsApp par Send karein.</span>
+                </p>
+              )}
               <button
                 onClick={handleNotifyWhatsApp}
                 className="w-full py-3 px-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
-                <span>Confirm Order on WhatsApp</span>
+                <span>{isWalletOrder(completedOrder) ? 'Send Screenshot on WhatsApp' : 'Confirm Order on WhatsApp'}</span>
               </button>
             </div>
 

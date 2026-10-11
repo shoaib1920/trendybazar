@@ -1,5 +1,6 @@
 import { OrderStatus, PlacedOrder, Product } from '../../types';
 import { trackUrl } from '../../context/ShopContext';
+import { WALLET_ACCOUNTS, isPrepaid, isWalletOrder, walletAccountsText } from '../../lib/payment';
 
 export const formatRs = (amount: number) => `Rs. ${Math.round(amount).toLocaleString()}`;
 
@@ -47,8 +48,17 @@ const statusMessageBody = (order: PlacedOrder) => {
   const id = order.orderId;
   const total = formatRs(order.total);
   const items = order.items.map((i) => `${i.name} × ${i.quantity}`).join(', ');
+  const prepaid = isPrepaid(order);
   switch (order.status) {
     case 'Pending':
+      if (prepaid) {
+        return `Assalam-o-Alaikum ${name}! Trendy Bazaar here. We have received your payment of ${total} for order ${id}. We will dispatch it soon. Shukriya!`;
+      }
+      if (isWalletOrder(order)) {
+        return `Assalam-o-Alaikum ${name}! Trendy Bazaar here. We received your order ${id}: ${items} — total ${total} (${order.paymentMethod}) to ${order.customer.address}, ${order.customer.city}.
+
+Please send ${total}${WALLET_ACCOUNTS.length > 0 ? ` to:\n${walletAccountsText()}\n\nThen` : ' and'} share the payment screenshot here so we can dispatch it. Payment bhej kar screenshot yahan send karein. Shukriya!`;
+      }
       return `Assalam-o-Alaikum ${name}! 👋 Trendy Bazaar here. We received your order ${id}: ${items} — total ${total} (Cash on Delivery) to ${order.customer.address}, ${order.customer.city}.
 
 Please reply *YES* to confirm so we can dispatch it. Order confirm karne ke liye *YES* likh kar reply karein. Shukriya!`;
@@ -57,9 +67,9 @@ Please reply *YES* to confirm so we can dispatch it. Order confirm karne ke liye
     case 'Packed':
       return `Assalam-o-Alaikum ${name}! 📦 Your order ${id} is packed and will be handed to the courier shortly.`;
     case 'Shipped':
-      return `Assalam-o-Alaikum ${name}! 🚚 Your order ${id} has been shipped${order.courier ? ` with ${order.courier}` : ''}${order.trackingNumber ? ` (tracking # ${order.trackingNumber})` : ''}. Please keep ${total} ready for Cash on Delivery.`;
+      return `Assalam-o-Alaikum ${name}! 🚚 Your order ${id} has been shipped${order.courier ? ` with ${order.courier}` : ''}${order.trackingNumber ? ` (tracking # ${order.trackingNumber})` : ''}.${prepaid ? ' It is already paid, nothing to pay on delivery.' : ` Please keep ${total} ready for Cash on Delivery.`}`;
     case 'Out for Delivery':
-      return `Assalam-o-Alaikum ${name}! 🛵 Your order ${id} is out for delivery today. Please keep ${total} ready. The rider will call you.`;
+      return `Assalam-o-Alaikum ${name}! 🛵 Your order ${id} is out for delivery today.${prepaid ? ' It is already paid.' : ` Please keep ${total} ready.`} The rider will call you.`;
     case 'Delivered':
       return `Assalam-o-Alaikum ${name}! 🎉 Your order ${id} has been delivered. Shukriya for shopping with Trendy Bazaar! We'd love your feedback.`;
     case 'Cancelled':

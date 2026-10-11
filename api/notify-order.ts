@@ -124,8 +124,13 @@ export const handleNotifyOrder = async (
   body: unknown,
   env: NotifyEnv
 ): Promise<{ status: number; body: { ok: true } | { error: string } }> => {
-  if (!env.emailUser || !env.emailPassword || !env.projectId) {
-    return { status: 500, body: { error: 'Order emails are not configured (missing ORDER_EMAIL_USER / ORDER_EMAIL_APP_PASSWORD).' } };
+  const missing = [
+    !env.emailUser && 'ORDER_EMAIL_USER',
+    !env.emailPassword && 'ORDER_EMAIL_APP_PASSWORD',
+    !env.projectId && 'VITE_FIREBASE_PROJECT_ID'
+  ].filter(Boolean);
+  if (missing.length > 0) {
+    return { status: 500, body: { error: `Order emails are not configured (missing ${missing.join(', ')}).` } };
   }
 
   const orderId = String((body as any)?.orderId || '').trim().toUpperCase();

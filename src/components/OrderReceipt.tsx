@@ -29,7 +29,7 @@ ${order.items
 Subtotal: ${formatRs(order.subtotal)}${order.discount > 0 ? `\nDiscount${order.discountCode ? ` (${order.discountCode})` : ''}: -${formatRs(order.discount)}` : ''}${order.giftWrapFee > 0 ? `\nGift wrap: ${formatRs(order.giftWrapFee)}` : ''}${order.pointsDiscount > 0 ? `\nPoints discount: -${formatRs(order.pointsDiscount)}` : ''}
 Delivery: ${order.shipping === 0 ? 'FREE' : formatRs(order.shipping)}
 Total: ${formatRs(order.total)}
-Payment: ${order.paymentMethod}
+Payment: ${order.paymentMethod}${order.paymentReceivedAt ? ' (Paid)' : ''}
 
 Name: ${order.customer.fullName}
 Phone: ${order.customer.phone}
@@ -129,7 +129,10 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, printable = t
         </div>
         <div className="flex justify-between text-gray-500 pt-1">
           <span>Payment</span>
-          <span>{order.paymentMethod}</span>
+          <span>
+            {order.paymentMethod}
+            {order.paymentReceivedAt && ' (Paid)'}
+          </span>
         </div>
       </div>
 

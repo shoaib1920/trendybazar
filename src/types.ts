@@ -152,6 +152,8 @@ export interface PlacedOrder {
   // Loyalty points bookkeeping (done by the admin as the order progresses).
   pointsDeducted?: number; // redeemed points actually taken from the balance on confirmation
   pointsAwarded?: number; // points added to the balance on delivery
+  // When the admin marked a JazzCash / Easypaisa transfer as received.
+  paymentReceivedAt?: string;
   // When the store last asked the customer to confirm this COD order on WhatsApp.
   confirmationRequestedAt?: string;
 }

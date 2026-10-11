@@ -13,6 +13,7 @@ import {
 } from './adminUtils';
 import { POINTS_EARN_RATE, adjustPointsRemote, getPointsRemote } from '../../lib/customerService';
 import { PHONE_HINT, toPhoneKey } from '../../lib/phone';
+import { isPrepaid, isWalletOrder } from '../../lib/payment';
 import {
   ArrowLeft,
   ArrowRight,
@@ -29,7 +30,8 @@ import {
   Trash2,
   XCircle,
   AlertTriangle,
-  Award
+  Award,
+  BadgeCheck
 } from 'lucide-react';
 
 interface AdminOrdersProps {
@@ -397,8 +399,22 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
     }
   };
 
+  const togglePayment = async () => {
+    if (order.paymentReceivedAt && !confirm('Mark this payment as NOT received?')) return;
+    setBusy(true);
+    try {
+      // Firestore drops `undefined`, so an empty string clears the date.
+      await updateOrder(order.orderId, { paymentReceivedAt: order.paymentReceivedAt ? '' : new Date().toISOString() });
+      showToast(order.paymentReceivedAt ? 'Payment marked as not received' : 'Payment marked as received', 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Could not save', 'warning');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const copyAddress = () => {
-    const text = `${order.customer.fullName}\n${order.customer.phone}\n${order.customer.address}${order.customer.nearestLandmark ? `, ${order.customer.nearestLandmark}` : ''}\n${order.customer.city}\nCOD: ${formatRs(order.total)}`;
+    const text = `${order.customer.fullName}\n${order.customer.phone}\n${order.customer.address}${order.customer.nearestLandmark ? `, ${order.customer.nearestLandmark}` : ''}\n${order.customer.city}\n${isPrepaid(order) ? 'PAID (collect Rs. 0)' : `COD: ${formatRs(order.total)}`}`;
     void navigator.clipboard.writeText(text);
     showToast('Address copied for courier booking', 'success');
   };
@@ -425,6 +441,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
           <div className="text-right">
             <p className="font-black text-lg">{formatRs(order.total)}</p>
             <p className="text-gray-500">{order.paymentMethod}</p>
+            {isWalletOrder(order) && (
+              <p className={`font-bold ${isPrepaid(order) ? 'text-emerald-700' : 'text-red-600'}`}>
+                {isPrepaid(order) ? `Paid ${formatOrderDate(order.paymentReceivedAt!)}` : 'Payment not received'}
+              </p>
+            )}
           </div>
         </div>
 
@@ -462,6 +483,18 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
               <XCircle className="w-3.5 h-3.5" /> Cancel
             </button>
           )}
+          {isWalletOrder(order) && (
+            <button
+              onClick={() => void togglePayment()}
+              disabled={busy}
+              className={`py-2 px-3 rounded-xl font-bold flex items-center gap-1 ${
+                isPrepaid(order) ? 'text-emerald-700 hover:bg-emerald-50' : 'bg-emerald-600 text-white hover:bg-emerald-700'
+              }`}
+              title={isPrepaid(order) ? 'Click to mark as not received' : 'Mark the JazzCash / Easypaisa payment as received'}
+            >
+              <BadgeCheck className="w-3.5 h-3.5" /> {isPrepaid(order) ? 'Paid' : 'Mark payment received'}
+            </button>
+          )}
           <button
             onClick={() => void removeOrder()}
             disabled={busy}
@@ -482,7 +515,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
             className="ml-auto py-2 px-3 rounded-xl bg-[#25D366] text-white font-bold flex items-center gap-1.5"
             title={order.status === 'Pending' ? 'Ask the customer to confirm this COD order' : 'Send the customer a message about the current status'}
           >
-            <MessageCircle className="w-3.5 h-3.5" /> {order.status === 'Pending' ? 'Ask to confirm' : 'Notify customer'}
+            <MessageCircle className="w-3.5 h-3.5" />{' '}
+            {order.status !== 'Pending' || isPrepaid(order) ? 'Notify customer' : isWalletOrder(order) ? 'Ask for payment' : 'Ask to confirm'}
           </a>
         </div>
         {order.status === 'Pending' && (
@@ -495,7 +529,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, products, updateOrde
             <span>
               {isStaleUnconfirmed(order)
                 ? `Not confirmed for over ${UNCONFIRMED_ALERT_HOURS} hours. Ask again, or cancel if the customer doesn't reply.`
-                : 'Cash on Delivery: dispatch only after the customer confirms on WhatsApp.'}
+                : isPrepaid(order)
+                  ? 'Payment received. This order is ready to confirm and dispatch.'
+                  : isWalletOrder(order)
+                    ? 'JazzCash / Easypaisa: dispatch only after the payment is received.'
+                    : 'Cash on Delivery: dispatch only after the customer confirms on WhatsApp.'}
               {order.confirmationRequestedAt && ` Last asked ${formatOrderDate(order.confirmationRequestedAt)}.`}
             </span>
           </div>
