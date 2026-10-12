@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { optimizeImage } from '../lib/images';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
+import { CustomerScreenshots } from '../components/CustomerScreenshots';
 import { WATCH_STYLES } from '../data/categories';
 import {
   ShoppingBag,
@@ -323,6 +324,9 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
       </section>
+
+      {/* CUSTOMER MESSAGE SCREENSHOTS (hidden until some are uploaded in the admin panel) */}
+      <CustomerScreenshots />
 
       {/* ABOUT / SEO CONTENT — real links so search engines can follow them */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,6 +1,6 @@
 import { collection, deleteDoc, doc, onSnapshot, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
-import { CustomerReview } from '../types';
+import { CustomerReview, FeedbackScreenshot } from '../types';
 
 const COLLECTION = 'reviews';
 
@@ -43,4 +43,26 @@ export const updateReviewRemote = async (id: string, patch: Partial<CustomerRevi
 export const deleteReviewRemote = async (id: string) => {
   if (!isFirebaseConfigured || !db) return;
   await deleteDoc(doc(db, COLLECTION, id));
+};
+
+// ---------- Customer message screenshots (feedbackScreenshots/{id}) ----------
+
+export const subscribeFeedbackScreenshots = (onChange: (list: FeedbackScreenshot[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  return onSnapshot(
+    collection(db, 'feedbackScreenshots'),
+    (snap) => onChange(snap.docs.map((d) => d.data() as FeedbackScreenshot).sort((a, b) => b.createdAt.localeCompare(a.createdAt))),
+    (e) => console.error('Could not load customer screenshots:', e)
+  );
+};
+
+// Admin only.
+export const saveFeedbackScreenshotRemote = async (screenshot: FeedbackScreenshot) => {
+  if (!isFirebaseConfigured || !db) return;
+  await setDoc(doc(db, 'feedbackScreenshots', screenshot.id), screenshot);
+};
+
+export const deleteFeedbackScreenshotRemote = async (id: string) => {
+  if (!isFirebaseConfigured || !db) return;
+  await deleteDoc(doc(db, 'feedbackScreenshots', id));
 };

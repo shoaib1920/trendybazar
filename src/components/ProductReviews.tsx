@@ -10,7 +10,7 @@ export const averageRating = (reviews: { rating: number }[]) =>
 
 interface ProductReviewsProps {
   product: Product;
-  reviews: Pick<CustomerReview, 'id' | 'userName' | 'userCity' | 'rating' | 'comment'>[];
+  reviews: Pick<CustomerReview, 'id' | 'userName' | 'userCity' | 'rating' | 'comment' | 'source'>[];
   // Order ID from a "review your order" link (/product/<slug>?review=<order id>).
   initialOrderId?: string;
 }
@@ -75,7 +75,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product, reviews
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
         <div>
           <h4 className="font-serif font-bold text-sm text-[#141414]">Customer Reviews</h4>
-          <p className="text-xs text-gray-500">Only customers with a delivered order can leave a review</p>
+          <p className="text-xs text-gray-500">From customers who ordered from Trendy Bazaar</p>
         </div>
         {reviews.length > 0 && (
           <div className="text-right">
@@ -97,6 +97,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product, reviews
                 <div className="flex items-center gap-2">
                   <span className="font-serif font-bold text-[#141414] text-xs">{rev.userName}</span>
                   <span className="text-[10px] text-[#8A6D1F] font-semibold">{rev.userCity}</span>
+                  {rev.source && <span className="text-[10px] text-gray-400">via {rev.source}</span>}
                 </div>
                 <div className="flex gap-0.5 text-[#F2B705]">
                   {[...Array(rev.rating)].map((_, i) => (

@@ -171,6 +171,8 @@ export interface BackInStockRequest {
 
 // Stored in Firestore `reviews/{orderId}_{productId}` — one review per product
 // per delivered order. Shown on the product page once the admin approves it.
+// Feedback a customer sent elsewhere (WhatsApp, Instagram…) can be added by the
+// admin: those have no orderId and say where they came from in `source`.
 export interface CustomerReview {
   id: string;
   productId: string;
@@ -182,6 +184,15 @@ export interface CustomerReview {
   comment: string;
   createdAt: string;
   approved: boolean;
+  source?: string;
+}
+
+// Stored in Firestore `feedbackScreenshots/{id}` — screenshots of real customer
+// messages, shown in "What our customers say" on the home page.
+export interface FeedbackScreenshot {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
 }
 
 // Stored in Firestore `abandonedCarts/{phoneKey}` — checkout details saved

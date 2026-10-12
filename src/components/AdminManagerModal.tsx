@@ -14,7 +14,7 @@ import { AdminDiscounts } from './admin/AdminDiscounts';
 import { AdminAbandonedCarts } from './admin/AdminAbandonedCarts';
 import { AdminRestockRequests } from './admin/AdminRestockRequests';
 import { AdminReviews } from './admin/AdminReviews';
-import { deleteReviewRemote, subscribeAllReviews, updateReviewRemote } from '../lib/reviewsService';
+import { createReviewRemote, deleteReviewRemote, subscribeAllReviews, updateReviewRemote } from '../lib/reviewsService';
 import {
   deleteAbandonedCartRemote,
   deleteBackInStockRemote,
@@ -579,9 +579,11 @@ export const AdminManagerModal: React.FC = () => {
           reviews={reviews}
           orders={orders}
           products={products}
+          createReview={createReviewRemote}
           updateReview={updateReviewRemote}
           deleteReview={deleteReviewRemote}
           onOpenOrder={openOrder}
+          showToast={showToast}
         />
       )}
 
