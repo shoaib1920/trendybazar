@@ -169,6 +169,21 @@ export interface BackInStockRequest {
   notified: boolean;
 }
 
+// Stored in Firestore `reviews/{orderId}_{productId}` — one review per product
+// per delivered order. Shown on the product page once the admin approves it.
+export interface CustomerReview {
+  id: string;
+  productId: string;
+  productName: string;
+  orderId: string;
+  userName: string;
+  userCity: string;
+  rating: number; // 1-5
+  comment: string;
+  createdAt: string;
+  approved: boolean;
+}
+
 // Stored in Firestore `abandonedCarts/{phoneKey}` — checkout details saved
 // before the order was placed.
 export interface AbandonedCart {

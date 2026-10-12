@@ -91,6 +91,29 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Product reviews: only for an order that has been delivered, one per
+    // product per order, and hidden until the admin approves it.
+    match /reviews/{reviewId} {
+      allow create: if request.resource.data.keys().hasOnly(['id', 'productId', 'productName', 'orderId', 'userName', 'userCity', 'rating', 'comment', 'createdAt', 'approved'])
+        && request.resource.data.id == reviewId
+        && reviewId == request.resource.data.orderId + '_' + request.resource.data.productId
+        && request.resource.data.approved == false
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() <= 1000
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() <= 60
+        && request.resource.data.userCity is string
+        && request.resource.data.userCity.size() <= 60
+        && request.resource.data.productName is string
+        && request.resource.data.productName.size() <= 200
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'Delivered';
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow update, delete: if isAdmin();
+    }
+
     // Discount codes: customers can check the exact code they typed, and
     // list only the featured (advertised) code. Using a code may only add 1
     // to its usage count. Everything else is admin only.

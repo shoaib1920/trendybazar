@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { optimizeImage } from '../lib/images';
 import { useShop, productKeyFor, findProductByKey } from '../context/ShopContext';
-import { Product } from '../types';
+import { CustomerReview, Product } from '../types';
+import { subscribeProductReviews } from '../lib/reviewsService';
 import { ProductCard } from '../components/ProductCard';
+import { ProductReviews, averageRating } from '../components/ProductReviews';
 import { CityDeliveryChecker } from '../components/CityDeliveryChecker';
 import { CompleteTheLook } from '../components/CompleteTheLook';
 import { RecentlyViewed } from '../components/RecentlyViewed';
@@ -74,8 +76,21 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>(product.colors ? product.colors[0].name : '');
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'details' | 'shipping' | 'reviews'>('details');
+  // "Review your order" links open the reviews tab: /product/<slug>?review=<order id>
+  const reviewOrderId = new URLSearchParams(window.location.search).get('review') || undefined;
+  const [activeTab, setActiveTab] = useState<'details' | 'shipping' | 'reviews'>(reviewOrderId ? 'reviews' : 'details');
   const [isBackInStockOpen, setIsBackInStockOpen] = useState(false);
+
+  // Approved customer reviews, plus any reviews saved on the product itself.
+  const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
+  useEffect(() => subscribeProductReviews(product.id, setCustomerReviews), [product.id]);
+  const reviews = [...customerReviews, ...(product.reviews || [])];
+
+  const tabsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (reviewOrderId) tabsRef.current?.scrollIntoView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const touchStartX = useRef<number | null>(null);
   const [isZoomViewerOpen, setIsZoomViewerOpen] = useState(false);
@@ -277,8 +292,8 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
               </span>
               <div className="flex items-center gap-1 text-xs text-gray-600">
                 <Star className="w-3.5 h-3.5 fill-[#F2B705] text-[#F2B705]" />
-                <span className="font-bold">{product.rating}</span>
-                <span className="text-gray-400">({product.reviewCount} reviews)</span>
+                <span className="font-bold">{reviews.length > 0 ? averageRating(reviews) : product.rating}</span>
+                <span className="text-gray-400">({reviews.length > 0 ? reviews.length : product.reviewCount} reviews)</span>
               </div>
             </div>
 
@@ -409,12 +424,12 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
       <CompleteTheLook currentProduct={product} />
 
       {/* Product Details Tabs */}
-      <div className="pt-8 border-t border-gold-hairline">
+      <div ref={tabsRef} className="pt-8 border-t border-gold-hairline">
         <div className="flex gap-2 border-b border-gold-hairline overflow-x-auto pb-3 scrollbar-none">
           {[
             { id: 'details', label: 'Specifications' },
             { id: 'shipping', label: 'Delivery & Returns' },
-            { id: 'reviews', label: `Customer Reviews (${product.reviews?.length || product.reviewCount})` }
+            { id: 'reviews', label: `Customer Reviews (${reviews.length})` }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -457,49 +472,7 @@ const ProductDetailView: React.FC<{ product: Product }> = ({ product }) => {
           )}
 
           {activeTab === 'reviews' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                <div>
-                  <h4 className="font-serif font-bold text-sm text-[#141414]">
-                    Verified Customer Reviews
-                  </h4>
-                  <p className="text-xs text-gray-500">Orders verified via WhatsApp & Website COD</p>
-                </div>
-                <div className="text-right">
-                  <span className="font-serif font-black text-xl text-[#141414]">{product.rating}</span>
-                  <div className="flex text-[#F2B705]">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-[#F2B705]" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {product.reviews && product.reviews.length > 0 ? (
-                  product.reviews.map((rev) => (
-                    <div key={rev.id} className="p-4 bg-[#F9F6F0] rounded-2xl space-y-1.5 border border-gold-hairline">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-serif font-bold text-[#141414] text-xs">{rev.userName}</span>
-                          <span className="text-[10px] text-[#8A6D1F] font-semibold">{rev.userCity}</span>
-                        </div>
-                        <div className="flex gap-0.5 text-[#F2B705]">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-[#F2B705]" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-600">"{rev.comment}"</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-4 bg-gray-50 rounded-2xl text-xs text-gray-500 text-center">
-                    All reviews verified from buyers across Lahore, Karachi & Islamabad.
-                  </div>
-                )}
-              </div>
-            </div>
+            <ProductReviews product={product} reviews={reviews} initialOrderId={reviewOrderId} />
           )}
         </div>
       </div>

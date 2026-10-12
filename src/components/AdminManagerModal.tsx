@@ -13,6 +13,8 @@ import { AdminCustomers } from './admin/AdminCustomers';
 import { AdminDiscounts } from './admin/AdminDiscounts';
 import { AdminAbandonedCarts } from './admin/AdminAbandonedCarts';
 import { AdminRestockRequests } from './admin/AdminRestockRequests';
+import { AdminReviews } from './admin/AdminReviews';
+import { deleteReviewRemote, subscribeAllReviews, updateReviewRemote } from '../lib/reviewsService';
 import {
   deleteAbandonedCartRemote,
   deleteBackInStockRemote,
@@ -22,7 +24,7 @@ import {
   updateBackInStockRemote
 } from '../lib/customerService';
 import { DEFAULT_DISCOUNT, subscribeAllDiscounts } from '../lib/discountsService';
-import { AbandonedCart, BackInStockRequest, DiscountCode, PlacedOrder } from '../types';
+import { AbandonedCart, BackInStockRequest, CustomerReview, DiscountCode, PlacedOrder } from '../types';
 import type { User } from 'firebase/auth';
 import {
   Plus,
@@ -46,7 +48,8 @@ import {
   Boxes,
   Users,
   ShoppingCart,
-  Bell
+  Bell,
+  Star
 } from 'lucide-react';
 
 const emptyForm = () => ({
@@ -86,7 +89,7 @@ export const AdminManagerModal: React.FC = () => {
     backInStockRequests: localRestockRequests
   } = useShop();
 
-  type AdminTab = 'dashboard' | 'orders' | 'products' | 'inventory' | 'customers' | 'carts' | 'restock' | 'discounts';
+  type AdminTab = 'dashboard' | 'orders' | 'products' | 'inventory' | 'customers' | 'carts' | 'restock' | 'reviews' | 'discounts';
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
@@ -177,14 +180,17 @@ export const AdminManagerModal: React.FC = () => {
   // --- Abandoned carts & restock requests (live from Firestore) ---
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>([]);
   const [remoteRestock, setRemoteRestock] = useState<BackInStockRequest[] | null>(null);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
 
   useEffect(() => {
     if (!isCloudBackendConfigured || !adminUser) return;
     const stopCarts = subscribeAbandonedCarts(setAbandonedCarts, (err) => console.error('Could not load abandoned carts:', err));
     const stopRestock = subscribeBackInStock(setRemoteRestock, (err) => console.error('Could not load restock requests:', err));
+    const stopReviews = subscribeAllReviews(setReviews, (err) => console.error('Could not load reviews:', err));
     return () => {
       stopCarts();
       stopRestock();
+      stopReviews();
     };
   }, [isCloudBackendConfigured, adminUser]);
 
@@ -512,6 +518,7 @@ export const AdminManagerModal: React.FC = () => {
             { id: 'customers', label: 'Customers', icon: Users },
             { id: 'carts', label: 'Abandoned Carts', icon: ShoppingCart },
             { id: 'restock', label: 'Restock Requests', icon: Bell, badge: openRestockCount },
+            { id: 'reviews', label: 'Reviews', icon: Star, badge: reviews.filter((r) => !r.approved).length },
             { id: 'discounts', label: `Discounts (${discounts.length})`, icon: Tag }
           ] as { id: AdminTab; label: string; icon: React.FC<{ className?: string }>; badge?: number }[]
         ).map((tab) => (
@@ -564,6 +571,17 @@ export const AdminManagerModal: React.FC = () => {
           products={products}
           updateRequest={updateBackInStockRemote}
           deleteRequest={deleteBackInStockRemote}
+        />
+      )}
+
+      {activeTab === 'reviews' && (
+        <AdminReviews
+          reviews={reviews}
+          orders={orders}
+          products={products}
+          updateReview={updateReviewRemote}
+          deleteReview={deleteReviewRemote}
+          onOpenOrder={openOrder}
         />
       )}
 
